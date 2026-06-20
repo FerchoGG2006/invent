@@ -1872,7 +1872,10 @@ class InventarioApp:
                 
                 self._generar_pdf_ticket(lineas, ruta_pdf)
                 messagebox.showinfo("PDF Guardado", f"La factura PDF se guardó en:\n{ruta_pdf}", parent=win)
-                os.startfile(ruta_pdf)
+                try:
+                    os.startfile(ruta_pdf)
+                except Exception:
+                    pass
             except Exception as e:
                 messagebox.showerror("Error", f"No se pudo generar el PDF: {str(e)}", parent=win)
         
