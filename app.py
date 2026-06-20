@@ -6,7 +6,14 @@ import os
 import sys
 import shutil
 import ctypes
+import socket
+import threading
+import urllib.parse
+import urllib.request
+import uuid
+import datetime
 from PIL import Image, ImageTk
+
 
 
 class InventarioApp:
@@ -104,11 +111,24 @@ class InventarioApp:
             direccion = inputs["direccion"].get().strip()
             mensaje = inputs["mensaje_ticket"].get().strip() or "¡Gracias por su compra!"
             
+        def guardar():
+            nombre = inputs["nombre_empresa"].get().strip()
+            if not nombre:
+                messagebox.showwarning("Falta información", "El Nombre del Negocio es obligatorio.", parent=setup_win)
+                return
+            
+            propietario = inputs["propietario"].get().strip()
+            telefono = inputs["telefono"].get().strip()
+            direccion = inputs["direccion"].get().strip()
+            mensaje = inputs["mensaje_ticket"].get().strip() or "¡Gracias por su compra!"
+            
             impresora = combo_printer.get()
             if impresora == "Ninguna (Solo PDF/Guardar)":
                 impresora = ""
                 
-            database.guardar_configuracion(nombre, propietario, telefono, direccion, mensaje, impresora)
+            pais = combo_pais.get()
+            
+            database.guardar_configuracion(nombre, propietario, telefono, direccion, mensaje, impresora, pais)
             
             self.config = {
                 "nombre_empresa": nombre,
@@ -116,13 +136,24 @@ class InventarioApp:
                 "telefono": telefono,
                 "direccion": direccion,
                 "mensaje_ticket": mensaje,
-                "impresora_ticket": impresora
+                "impresora_ticket": impresora,
+                "pais_operacion": pais
             }
             
             # Update title
             self.root.title(f"Control de Inventario y Ventas - {nombre}")
             setup_win.destroy()
             self.mostrar_registro_administrador()
+            
+        # País de Operación Combobox
+        tk.Label(frame_form, text="País de Operación (Facturación)", font=("Segoe UI", 9, "bold"), bg="#FFFFFF", fg="#475569").pack(anchor=tk.W, padx=20, pady=(6, 1))
+        border_pais = tk.Frame(frame_form, bg="#E2E8F0")
+        border_pais.pack(fill=tk.X, padx=20, pady=1)
+        
+        paises_list = ["Chile", "Colombia", "México", "Argentina", "Otro / Ninguno (Solo local)"]
+        combo_pais = ttk.Combobox(border_pais, values=paises_list, state="readonly", font=("Segoe UI", 9))
+        combo_pais.pack(fill=tk.X, padx=1, pady=1)
+        combo_pais.set("Otro / Ninguno (Solo local)")
             
         # Impresora Combobox
         tk.Label(frame_form, text="Impresora de Tickets", font=("Segoe UI", 9, "bold"), bg="#FFFFFF", fg="#475569").pack(anchor=tk.W, padx=20, pady=(6, 1))
@@ -138,6 +169,7 @@ class InventarioApp:
         btn_guardar.pack(fill=tk.X, padx=20, pady=15, ipady=8)
         btn_guardar.bind("<Enter>", lambda e: btn_guardar.config(bg="#059669"))
         btn_guardar.bind("<Leave>", lambda e: btn_guardar.config(bg="#10B981"))
+
 
 
     def mostrar_registro_administrador(self):
@@ -295,7 +327,7 @@ class InventarioApp:
     def mostrar_editar_configuracion(self):
         edit_win = tk.Toplevel(self.root)
         edit_win.title("Editar Configuración del Negocio")
-        edit_win.geometry("450x690")
+        edit_win.geometry("450x740")
         edit_win.configure(bg="#F8FAFC")
         edit_win.resizable(False, False)
         edit_win.grab_set()
@@ -339,15 +371,27 @@ class InventarioApp:
         }
         
         for label_text, key in campos_setup:
-            tk.Label(frame_form, text=label_text, font=("Segoe UI", 9, "bold"), bg="#FFFFFF", fg="#475569").pack(anchor=tk.W, padx=20, pady=(10, 2))
+            tk.Label(frame_form, text=label_text, font=("Segoe UI", 9, "bold"), bg="#FFFFFF", fg="#475569").pack(anchor=tk.W, padx=20, pady=(6, 1))
             border_frame = tk.Frame(frame_form, bg="#E2E8F0")
-            border_frame.pack(fill=tk.X, padx=20, pady=2)
+            border_frame.pack(fill=tk.X, padx=20, pady=1)
             entry = tk.Entry(border_frame, font=("Segoe UI", 10), bg="#F8FAFC", fg="#0F172A", relief=tk.FLAT, bd=0, insertbackground="#0F172A")
             entry.pack(fill=tk.X, padx=1, pady=1, ipady=4)
             inputs[key] = entry
             
             # Load current value
             entry.insert(0, current_config.get(key, ""))
+            
+        # País de Operación Combobox
+        tk.Label(frame_form, text="País de Operación (Facturación)", font=("Segoe UI", 9, "bold"), bg="#FFFFFF", fg="#475569").pack(anchor=tk.W, padx=20, pady=(6, 1))
+        border_pais = tk.Frame(frame_form, bg="#E2E8F0")
+        border_pais.pack(fill=tk.X, padx=20, pady=1)
+        
+        paises_list = ["Chile", "Colombia", "México", "Argentina", "Otro / Ninguno (Solo local)"]
+        combo_pais = ttk.Combobox(border_pais, values=paises_list, state="readonly", font=("Segoe UI", 9))
+        combo_pais.pack(fill=tk.X, padx=1, pady=1)
+        
+        curr_pais = current_config.get("pais_operacion", "Otro / Ninguno (Solo local)")
+        combo_pais.set(curr_pais)
             
         # Impresora Combobox
         tk.Label(frame_form, text="Impresora de Tickets", font=("Segoe UI", 9, "bold"), bg="#FFFFFF", fg="#475569").pack(anchor=tk.W, padx=20, pady=(6, 1))
@@ -410,15 +454,19 @@ class InventarioApp:
             if impresora == "Ninguna (Solo PDF/Guardar)":
                 impresora = ""
                 
-            database.guardar_configuracion(nombre, propietario, telefono, direccion, mensaje, impresora)
+            pais = combo_pais.get()
+            
+            database.guardar_configuracion(nombre, propietario, telefono, direccion, mensaje, impresora, pais)
             self.config = {
                 "nombre_empresa": nombre,
                 "propietario": propietario,
                 "telefono": telefono,
                 "direccion": direccion,
                 "mensaje_ticket": mensaje,
-                "impresora_ticket": impresora
+                "impresora_ticket": impresora,
+                "pais_operacion": pais
             }
+            self.actualizar_labels_facturacion()
             
             # Update title and close
             self.root.title(f"Control de Inventario y Ventas - {nombre}")
@@ -577,6 +625,41 @@ class InventarioApp:
             return True, "Ticket enviado correctamente."
         except Exception as e:
             return False, str(e)
+
+
+    def verificar_conexion_internet(self):
+        try:
+            socket.setdefaulttimeout(1.2)
+            socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect(("8.8.8.8", 53))
+            return True
+        except Exception:
+            return False
+
+    def verificar_conexion_async(self):
+        def task():
+            conn = self.verificar_conexion_internet()
+            self.root.after(0, lambda: self.actualizar_indicador_conexion(conn))
+        threading.Thread(target=task, daemon=True).start()
+
+    def actualizar_indicador_conexion(self, conectado):
+        if hasattr(self, "lbl_conexion_pos"):
+            if conectado:
+                self.lbl_conexion_pos.config(text="🟢 En línea", fg="#10B981")
+            else:
+                self.lbl_conexion_pos.config(text="🔴 Sin conexión", fg="#EF4444")
+
+    def actualizar_labels_facturacion(self):
+        if hasattr(self, "lbl_cliente_identificacion"):
+            pais = self.config.get("pais_operacion", "Otro / Ninguno (Solo local)") if self.config else "Otro"
+            id_labels = {
+                "Chile": "RUT del Cliente",
+                "Colombia": "NIT del Cliente",
+                "México": "RFC del Cliente",
+                "Argentina": "CUIT del Cliente"
+            }
+            lbl_id_text = id_labels.get(pais, "Identificación Fiscal")
+            self.lbl_cliente_identificacion.config(text=lbl_id_text)
+
 
 
     def crear_interfaz(self):
@@ -831,10 +914,13 @@ class InventarioApp:
     # ==========================================
     def construir_tab_pos(self):
         # Panel Izquierdo (Búsqueda de Productos para venta)
-        frame_pos_left = tk.Frame(self.tab_pos, bg="#FFFFFF", width=460, highlightbackground="#E2E8F0", highlightthickness=1)
-        frame_pos_left.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=20, pady=20)
-        
-        tk.Label(frame_pos_left, text="SELECCIONAR PRODUCTO", font=("Segoe UI", 12, "bold"), bg="#FFFFFF", fg="#0F172A").pack(pady=15)
+        frame_pos_header = tk.Frame(frame_pos_left, bg="#FFFFFF")
+        frame_pos_header.pack(fill=tk.X, pady=10, padx=15)
+        tk.Label(frame_pos_header, text="SELECCIONAR PRODUCTO", font=("Segoe UI", 12, "bold"), bg="#FFFFFF", fg="#0F172A").pack(side=tk.LEFT)
+        self.lbl_conexion_pos = tk.Label(frame_pos_header, text="🔍 Verificando red...", font=("Segoe UI", 9, "bold"), bg="#FFFFFF", fg="#64748B")
+        self.lbl_conexion_pos.pack(side=tk.RIGHT)
+        self.verificar_conexion_async()
+
         
         # Entrada de Búsqueda POS
         frame_busca_pos = tk.Frame(frame_pos_left, bg="#FFFFFF")
@@ -906,6 +992,48 @@ class InventarioApp:
             self.tabla_carro.heading(col, text=texto)
             self.tabla_carro.column(col, width=ancho, anchor=tk.CENTER if col not in ["nombre"] else tk.W)
         self.tabla_carro.pack(fill=tk.BOTH, expand=True, padx=15, pady=10)
+        
+        # Panel de Datos del Cliente
+        frame_cliente = tk.LabelFrame(frame_pos_right, text=" Datos del Cliente / Facturación (Opcional) ", font=("Segoe UI", 9, "bold"), bg="#FFFFFF", fg="#4F46E5", labelanchor="nw", highlightbackground="#E2E8F0", highlightthickness=1, bd=0, padx=10, pady=5)
+        frame_cliente.pack(fill=tk.X, padx=15, pady=(5, 5))
+        
+        # Grid layout for 2 inputs side by side
+        frame_cliente_grid = tk.Frame(frame_cliente, bg="#FFFFFF")
+        frame_cliente_grid.pack(fill=tk.X, pady=3)
+        frame_cliente_grid.columnconfigure(0, weight=1)
+        frame_cliente_grid.columnconfigure(1, weight=1)
+        
+        # Client Name input
+        cell_name = tk.Frame(frame_cliente_grid, bg="#FFFFFF")
+        cell_name.grid(row=0, column=0, padx=5, sticky="ew")
+        tk.Label(cell_name, text="Nombre / Razón Social", font=("Segoe UI", 8, "bold"), bg="#FFFFFF", fg="#64748B").pack(anchor=tk.W)
+        border_c_name = tk.Frame(cell_name, bg="#E2E8F0")
+        border_c_name.pack(fill=tk.X, pady=1)
+        self.entry_cliente_nombre = tk.Entry(border_c_name, font=("Segoe UI", 9), bg="#F8FAFC", fg="#0F172A", relief=tk.FLAT, bd=0)
+        self.entry_cliente_nombre.pack(fill=tk.X, padx=1, pady=1, ipady=3)
+        
+        # Client Tax ID input (Label depends on country)
+        cell_id = tk.Frame(frame_cliente_grid, bg="#FFFFFF")
+        cell_id.grid(row=0, column=1, padx=5, sticky="ew")
+        
+        # Label resolver
+        pais = self.config.get("pais_operacion", "Otro / Ninguno (Solo local)") if self.config else "Otro"
+        id_labels = {
+            "Chile": "RUT del Cliente",
+            "Colombia": "NIT del Cliente",
+            "México": "RFC del Cliente",
+            "Argentina": "CUIT del Cliente"
+        }
+        lbl_id_text = id_labels.get(pais, "Identificación Fiscal")
+        
+        self.lbl_cliente_identificacion = tk.Label(cell_id, text=lbl_id_text, font=("Segoe UI", 8, "bold"), bg="#FFFFFF", fg="#64748B")
+        self.lbl_cliente_identificacion.pack(anchor=tk.W)
+        
+        border_c_id = tk.Frame(cell_id, bg="#E2E8F0")
+        border_c_id.pack(fill=tk.X, pady=1)
+        self.entry_cliente_identificacion = tk.Entry(border_c_id, font=("Segoe UI", 9), bg="#F8FAFC", fg="#0F172A", relief=tk.FLAT, bd=0)
+        self.entry_cliente_identificacion.pack(fill=tk.X, padx=1, pady=1, ipady=3)
+
         
         # Panel de cobro y total
         frame_total = tk.Frame(frame_pos_right, bg="#FFFFFF")
@@ -1225,8 +1353,10 @@ class InventarioApp:
         elif pestaña_activa == 1:
             self.pos_actualizar_lista_productos(self.entry_busca_pos.get())
             self.pos_actualizar_tabla_carrito()
+            self.verificar_conexion_async()
         elif pestaña_activa == 2:
             self.reporte_actualizar_datos()
+
 
     # ==========================================
     # LÓGICA DE INVENTARIO
@@ -1453,11 +1583,65 @@ class InventarioApp:
 
         metodo_pago = self.combo_pago.get()
         carrito_copia = list(self.carrito)
+        
+        # Obtener datos del cliente
+        cliente_nombre = self.entry_cliente_nombre.get().strip()
+        cliente_identificacion = self.entry_cliente_identificacion.get().strip()
+        
+        # Calcular impuestos según el país
+        total_acumulado = sum(item["precio"] * item["cantidad"] for item in self.carrito)
+        pais = self.config.get("pais_operacion", "Otro / Ninguno (Solo local)") if self.config else "Otro"
+        
+        tasa_iva = 0.0
+        if pais == "Chile":
+            tasa_iva = 0.19
+        elif pais == "Colombia":
+            tasa_iva = 0.19
+        elif pais == "México":
+            tasa_iva = 0.16
+        elif pais == "Argentina":
+            tasa_iva = 0.21
+            
+        if tasa_iva > 0:
+            # IVA Incluido: Calcular neto e IVA
+            neto = total_acumulado / (1 + tasa_iva)
+            iva_calculado = total_acumulado - neto
+        else:
+            iva_calculado = 0.0
+
+        # Generar código fiscal simulado
+        codigo_fiscal = ""
+        fiscal_qr_url = ""
+        import random
+        
+        if pais == "Chile":
+            folio = random.randint(100000, 999999)
+            codigo_fiscal = f"Folio Autorizado SII: {folio}\nTimbre Electrónico SII"
+            fiscal_qr_url = f"https://www.sii.cl/verificar?folio={folio}&monto={total_acumulado:.0f}"
+        elif pais == "Colombia":
+            cufe = uuid.uuid4().hex.upper()
+            codigo_fiscal = f"CUFE: {cufe[:36]}"
+            fiscal_qr_url = f"https://catalogo-vpfe.dian.gov.co/document/search?cufe={cufe}"
+        elif pais == "México":
+            uid = str(uuid.uuid4()).upper()
+            codigo_fiscal = f"CFDI UUID: {uid}"
+            fiscal_qr_url = f"https://verificacfdi.facturaelectronica.sat.gob.mx/default.aspx?id={uid}&re=EMISOR&rr=RECEPTOR&tt={total_acumulado:.2f}"
+        elif pais == "Argentina":
+            cae = "".join([str(random.randint(0, 9)) for _ in range(14)])
+            vto = (datetime.datetime.now() + datetime.timedelta(days=10)).strftime("%d/%m/%Y")
+            codigo_fiscal = f"CAE: {cae}\nVto CAE: {vto}"
+            fiscal_qr_url = f"https://www.afip.gob.ar/fe/qr/?cae={cae}&vto={vto}&total={total_acumulado:.2f}"
+        else:
+            codigo_fiscal = "Comprobante Comercial Local"
+            fiscal_qr_url = f"https://sistema-pos-local/ticket?total={total_acumulado:.2f}"
 
         # Registrar cada artículo
         errores = []
         for item in self.carrito:
-            exito, msg = database.registrar_venta(item["id"], item["cantidad"], item["precio"], metodo_pago)
+            exito, msg = database.registrar_venta(
+                item["id"], item["cantidad"], item["precio"], metodo_pago,
+                cliente_nombre, cliente_identificacion, iva_calculado, codigo_fiscal, fiscal_qr_url
+            )
             if not exito:
                 errores.append(f"{item['nombre']}: {msg}")
 
@@ -1472,10 +1656,15 @@ class InventarioApp:
             self.lbl_pos_foto_preview.config(image="", text="Sin foto")
             self.lbl_pos_foto_preview.image = None
             
+            # Limpiar entradas de cliente
+            self.entry_cliente_nombre.delete(0, tk.END)
+            self.entry_cliente_identificacion.delete(0, tk.END)
+            
             # Generar ticket térmico
-            self.pos_generar_ticket(carrito_copia, metodo_pago)
+            self.pos_generar_ticket(carrito_copia, metodo_pago, cliente_nombre, cliente_identificacion, iva_calculado, codigo_fiscal, fiscal_qr_url)
 
-    def pos_generar_ticket(self, carrito_copia, metodo_pago):
+
+    def pos_generar_ticket(self, carrito_copia, metodo_pago, cliente_nombre="", cliente_identificacion="", impuestos=0.0, codigo_fiscal="", fiscal_qr_url=""):
         try:
             import datetime
             fecha_str = datetime.datetime.now().strftime("%Y-%m-%d %I:%M:%S %p")
@@ -1514,10 +1703,32 @@ class InventarioApp:
             if self.config.get("direccion"):
                 lineas.append(f" Dir: {self.config['direccion']}")
                 
+            pais = self.config.get("pais_operacion", "Otro / Ninguno (Solo local)") if self.config else "Otro"
+            lineas.append(f" Pais: {pais}")
+            
             lineas.extend([
                 f" Fecha: {fecha_str}",
                 f" Metodo Pago: {metodo_pago}",
-                "------------------------------------------",
+                "------------------------------------------"
+            ])
+            
+            # Datos del cliente en el ticket
+            if cliente_nombre:
+                lineas.append(f" Cliente: {cliente_nombre}")
+            if cliente_identificacion:
+                id_labels = {
+                    "Chile": "RUT",
+                    "Colombia": "NIT",
+                    "México": "RFC",
+                    "Argentina": "CUIT"
+                }
+                lbl_id = id_labels.get(pais, "ID Fiscal")
+                lineas.append(f" {lbl_id}: {cliente_identificacion}")
+                
+            if cliente_nombre or cliente_identificacion:
+                lineas.append("------------------------------------------")
+                
+            lineas.extend([
                 f"{'Cant':<5}{'Producto':<22}{'Precio':<8}{'Total':<7}",
                 "------------------------------------------"
             ])
@@ -1531,12 +1742,33 @@ class InventarioApp:
                 total_str = f"${total_item:,.0f}"
                 lineas.append(f"{item['cantidad']:<5}{nombre_prod:<22}{precio_str:<9}{total_str}")
                 
+            lineas.append("------------------------------------------")
+            
+            # Desglose de impuestos
+            if impuestos > 0:
+                neto = total_acumulado - impuestos
+                tasa_lbl = {
+                    "Chile": "IVA (19%)",
+                    "Colombia": "IVA (19%)",
+                    "México": "IVA (16%)",
+                    "Argentina": "IVA (21%)"
+                }
+                lbl_tasa = tasa_lbl.get(pais, "IVA")
+                lineas.append(f" NETO AFECTO:                 ${neto:,.0f}")
+                lineas.append(f" {lbl_tasa:<28} ${impuestos:,.0f}")
+                lineas.append("------------------------------------------")
+                
             lineas.extend([
-                "------------------------------------------",
                 f"TOTAL A PAGAR:               ${total_acumulado:,.0f}",
                 "=========================================="
             ])
             
+            # Datos fiscales
+            if codigo_fiscal:
+                for col_f in codigo_fiscal.split("\n"):
+                    lineas.append(f" {col_f}")
+                lineas.append("==========================================")
+                
             # Dynamic wrapped footer message
             import textwrap
             mensaje_ticket = self.config.get("mensaje_ticket", "¡Gracias por su compra!")
@@ -1551,21 +1783,55 @@ class InventarioApp:
             with open(path_ticket_txt, "w", encoding="utf-8") as f:
                 f.write(texto_ticket)
             
-            # --- Mostrar diálogo de acciones post-venta ---
-            self._mostrar_dialogo_ticket(texto_ticket, lineas, path_ticket_txt, timestamp_file, dir_tickets, carrito_copia, total_acumulado, metodo_pago, fecha_str)
+            # Descargar código QR asíncrono
+            qr_filename = f"qr_{timestamp_file}.png"
+            path_qr = os.path.join(dir_tickets, qr_filename)
             
+            def descargar_qr_y_mostrar():
+                descargado = False
+                if fiscal_qr_url:
+                    try:
+                        import urllib.parse
+                        encoded_data = urllib.parse.quote_plus(fiscal_qr_url)
+                        url = f"https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={encoded_data}"
+                        urllib.request.urlretrieve(url, path_qr)
+                        descargado = os.path.exists(path_qr)
+                    except Exception:
+                        pass
+                
+                # Ejecutar diálogo en el hilo principal
+                self.root.after(0, lambda: self._mostrar_dialogo_ticket(
+                    texto_ticket, lineas, path_ticket_txt, timestamp_file, dir_tickets,
+                    carrito_copia, total_acumulado, metodo_pago, fecha_str, path_qr if descargado else None
+                ))
+            
+            threading.Thread(target=descargar_qr_y_mostrar, daemon=True).start()
         except Exception as e:
-            messagebox.showerror("Error al generar ticket", f"No se pudo crear el ticket: {str(e)}")
+            messagebox.showerror("Error", f"No se pudo generar el ticket: {str(e)}")
 
-    def _mostrar_dialogo_ticket(self, texto_ticket, lineas, path_txt, timestamp_file, dir_tickets, carrito_copia, total_acumulado, metodo_pago, fecha_str):
+    def _mostrar_dialogo_ticket(self, texto_ticket, lineas, path_txt, timestamp_file, dir_tickets, carrito_copia, total_acumulado, metodo_pago, fecha_str, path_qr=None):
         win = tk.Toplevel(self.root)
         win.title("Comprobante de Venta")
-        win.geometry("500x680")
+        
+        # Ajustar geometría según la presencia del QR
+        if path_qr and os.path.exists(path_qr):
+            win.geometry("750x680")
+        else:
+            win.geometry("500x680")
+            
         win.configure(bg="#F8FAFC")
         win.grab_set()
         win.resizable(False, False)
         
-        # ── BOTONES (se empaquetan PRIMERO al fondo para que siempre sean visibles) ──
+        # Center the window
+        win.update_idletasks()
+        width = win.winfo_width()
+        height = win.winfo_height()
+        x = (win.winfo_screenwidth() // 2) - (width // 2)
+        y = (win.winfo_screenheight() // 2) - (height // 2)
+        win.geometry(f'+{x}+{y}')
+        
+        # ── BOTONES (al fondo) ──
         frame_btns = tk.Frame(win, bg="#F8FAFC")
         frame_btns.pack(side=tk.BOTTOM, fill=tk.X, padx=20, pady=(0, 15))
         
@@ -1587,7 +1853,6 @@ class InventarioApp:
                     messagebox.showinfo("Imprimiendo", "El ticket se ha enviado a la impresora.", parent=win)
                 except Exception as e:
                     messagebox.showerror("Error", f"No se pudo imprimir: {str(e)}", parent=win)
-
         
         def guardar_pdf():
             try:
@@ -1627,7 +1892,6 @@ class InventarioApp:
         btn_cerrar.bind("<Enter>", lambda e: btn_cerrar.config(bg="#CBD5E1"))
         btn_cerrar.bind("<Leave>", lambda e: btn_cerrar.config(bg="#E2E8F0"))
         
-        # ── SEPARADOR VISUAL ──
         tk.Frame(win, bg="#E2E8F0", height=1).pack(side=tk.BOTTOM, fill=tk.X, padx=20, pady=(5, 0))
         
         # ── BANNER SUPERIOR ──
@@ -1636,8 +1900,6 @@ class InventarioApp:
         
         tk.Label(frame_banner, text="✅", font=("Segoe UI", 24), bg="#F8FAFC").pack(pady=(15, 0))
         tk.Label(frame_banner, text="¡Venta Registrada con Éxito!", font=("Segoe UI", 14, "bold"), bg="#F8FAFC", fg="#0F172A").pack(pady=(2, 2))
-        
-        # Total destacado
         tk.Label(frame_banner, text=f"${total_acumulado:,.0f}", font=("Segoe UI", 28, "bold"), bg="#F8FAFC", fg="#10B981").pack(pady=(0, 5))
         
         # ── TARJETAS RESUMEN ──
@@ -1659,19 +1921,47 @@ class InventarioApp:
             tk.Label(card, text=titulo, font=("Segoe UI", 7, "bold"), bg="#FFFFFF", fg="#94A3B8").pack(anchor=tk.W, padx=10, pady=(4, 0))
             tk.Label(card, text=valor, font=("Segoe UI", 9, "bold"), bg="#FFFFFF", fg=color).pack(anchor=tk.W, padx=10, pady=(0, 3))
         
-        # ── DETALLE DEL COMPROBANTE ──
-        frame_ticket_outer = tk.Frame(win, bg="#F8FAFC")
-        frame_ticket_outer.pack(fill=tk.BOTH, expand=True, padx=20, pady=(0, 5))
+        # ── DISTRIBUCIÓN HORIZONTAL (TICKET + QR) ──
+        frame_main_body = tk.Frame(win, bg="#F8FAFC")
+        frame_main_body.pack(fill=tk.BOTH, expand=True, padx=20, pady=(0, 5))
         
-        tk.Label(frame_ticket_outer, text="DETALLE DEL COMPROBANTE", font=("Segoe UI", 8, "bold"), bg="#F8FAFC", fg="#94A3B8").pack(anchor=tk.W, pady=(0, 3))
+        # Columna Izquierda: Detalle del ticket
+        frame_left_col = tk.Frame(frame_main_body, bg="#F8FAFC")
+        frame_left_col.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         
-        frame_ticket = tk.Frame(frame_ticket_outer, bg="#FFFFF0", highlightbackground="#E2E8F0", highlightthickness=1)
+        tk.Label(frame_left_col, text="DETALLE DEL COMPROBANTE", font=("Segoe UI", 8, "bold"), bg="#F8FAFC", fg="#94A3B8").pack(anchor=tk.W, pady=(0, 3))
+        
+        frame_ticket = tk.Frame(frame_left_col, bg="#FFFFF0", highlightbackground="#E2E8F0", highlightthickness=1)
         frame_ticket.pack(fill=tk.BOTH, expand=True)
         
         txt = tk.Text(frame_ticket, font=("Consolas", 9), bg="#FFFFF0", fg="#334155", bd=0, wrap=tk.NONE, padx=12, pady=8, selectbackground="#E0E7FF")
         txt.pack(fill=tk.BOTH, expand=True)
         txt.insert(tk.END, texto_ticket)
         txt.config(state=tk.DISABLED)
+        
+        # Columna Derecha: Vista QR
+        if path_qr and os.path.exists(path_qr):
+            frame_right_col = tk.Frame(frame_main_body, bg="#FFFFFF", highlightbackground="#E2E8F0", highlightthickness=1, width=230)
+            frame_right_col.pack(side=tk.RIGHT, fill=tk.Y, padx=(15, 0))
+            frame_right_col.pack_propagate(False)
+            
+            tk.Label(frame_right_col, text="CÓDIGO QR FISCAL", font=("Segoe UI", 9, "bold"), bg="#FFFFFF", fg="#4F46E5").pack(pady=(15, 10))
+            
+            # Label para el QR
+            lbl_qr_img = tk.Label(frame_right_col, bg="#FFFFFF")
+            lbl_qr_img.pack(pady=10)
+            
+            # Cargar imagen QR usando PIL
+            try:
+                img = Image.open(path_qr)
+                photo = ImageTk.PhotoImage(img)
+                lbl_qr_img.config(image=photo)
+                lbl_qr_img.image = photo # Referencia
+            except Exception:
+                lbl_qr_img.config(text="Error al cargar QR")
+                
+            tk.Label(frame_right_col, text="Factura Electrónica\nSimulada", font=("Segoe UI", 10, "bold"), bg="#FFFFFF", fg="#0F172A", justify=tk.CENTER).pack(pady=(10, 5))
+            tk.Label(frame_right_col, text="Escanea este código con tu celular\npara visualizar el comprobante\nen la base de datos de pruebas.", font=("Segoe UI", 8, "italic"), bg="#FFFFFF", fg="#64748B", justify=tk.CENTER).pack(pady=5, padx=10)
 
     def _generar_pdf_ticket(self, lineas, ruta_pdf):
         """Genera un PDF básico del ticket sin dependencias externas usando formato PDF crudo."""

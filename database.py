@@ -41,6 +41,11 @@ def init_db():
                 total REAL NOT NULL,
                 metodo_pago TEXT NOT NULL DEFAULT 'Efectivo',
                 fecha TIMESTAMP DEFAULT (datetime('now', 'localtime')),
+                cliente_nombre TEXT,
+                cliente_identificacion TEXT,
+                impuestos REAL DEFAULT 0.0,
+                codigo_fiscal TEXT,
+                fiscal_qr_url TEXT,
                 FOREIGN KEY (producto_id) REFERENCES productos(id)
             )
         """)
@@ -52,13 +57,23 @@ def init_db():
                 telefono TEXT,
                 direccion TEXT,
                 mensaje_ticket TEXT DEFAULT '¡Gracias por su compra!',
-                impresora_ticket TEXT
+                impresora_ticket TEXT,
+                pais_operacion TEXT DEFAULT 'Otro / Ninguno (Solo local)'
             )
         """)
         try:
             cursor.execute("ALTER TABLE configuracion ADD COLUMN impresora_ticket TEXT;")
         except sqlite3.OperationalError:
             pass # Ya existe la columna
+        try:
+            cursor.execute("ALTER TABLE configuracion ADD COLUMN pais_operacion TEXT DEFAULT 'Otro / Ninguno (Solo local)';")
+        except sqlite3.OperationalError:
+            pass
+        for col_name, col_type in [("cliente_nombre", "TEXT"), ("cliente_identificacion", "TEXT"), ("impuestos", "REAL DEFAULT 0.0"), ("codigo_fiscal", "TEXT"), ("fiscal_qr_url", "TEXT")]:
+            try:
+                cursor.execute(f"ALTER TABLE ventas ADD COLUMN {col_name} {col_type};")
+            except sqlite3.OperationalError:
+                pass
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS usuarios (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -68,6 +83,7 @@ def init_db():
             )
         """)
         conn.commit()
+
 
 
 def reiniciar_base_datos():
@@ -112,7 +128,7 @@ def modificar_stock(producto_id, cantidad):
         cursor.execute("UPDATE productos SET stock = MAX(0, stock + ?) WHERE id = ?", (cantidad, producto_id))
         conn.commit()
 
-def registrar_venta(producto_id, cantidad, precio_unitario, metodo_pago):
+def registrar_venta(producto_id, cantidad, precio_unitario, metodo_pago, cliente_nombre="", cliente_identificacion="", impuestos=0.0, codigo_fiscal="", fiscal_qr_url=""):
     with sqlite3.connect(DB_NAME) as conn:
         cursor = conn.cursor()
         try:
@@ -128,11 +144,11 @@ def registrar_venta(producto_id, cantidad, precio_unitario, metodo_pago):
                 return False, f"Stock insuficiente. Disponible: {stock_actual}"
             
             total = cantidad * precio_unitario
-            # Registrar en tabla ventas con el costo actual
+            # Registrar en tabla ventas con el costo y campos fiscales
             cursor.execute("""
-                INSERT INTO ventas (producto_id, cantidad, precio_unitario, precio_costo_unitario, total, metodo_pago)
-                VALUES (?, ?, ?, ?, ?, ?)
-            """, (producto_id, cantidad, precio_unitario, precio_costo_actual, total, metodo_pago))
+                INSERT INTO ventas (producto_id, cantidad, precio_unitario, precio_costo_unitario, total, metodo_pago, cliente_nombre, cliente_identificacion, impuestos, codigo_fiscal, fiscal_qr_url)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (producto_id, cantidad, precio_unitario, precio_costo_actual, total, metodo_pago, cliente_nombre, cliente_identificacion, impuestos, codigo_fiscal, fiscal_qr_url))
             
             # Descontar stock
             cursor.execute("""
@@ -258,7 +274,7 @@ def obtener_top_productos(filtro_fecha="Todo"):
 def obtener_configuracion():
     with sqlite3.connect(DB_NAME) as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT nombre_empresa, propietario, telefono, direccion, mensaje_ticket, impresora_ticket FROM configuracion WHERE id = 1")
+        cursor.execute("SELECT nombre_empresa, propietario, telefono, direccion, mensaje_ticket, impresora_ticket, pais_operacion FROM configuracion WHERE id = 1")
         res = cursor.fetchone()
         if res:
             return {
@@ -267,11 +283,12 @@ def obtener_configuracion():
                 "telefono": res[2] or "",
                 "direccion": res[3] or "",
                 "mensaje_ticket": res[4] or "¡Gracias por su compra!",
-                "impresora_ticket": res[5] or ""
+                "impresora_ticket": res[5] or "",
+                "pais_operacion": res[6] or "Otro / Ninguno (Solo local)"
             }
         return None
 
-def guardar_configuracion(nombre_empresa, propietario, telefono, direccion, mensaje_ticket, impresora_ticket=""):
+def guardar_configuracion(nombre_empresa, propietario, telefono, direccion, mensaje_ticket, impresora_ticket="", pais_operacion="Otro / Ninguno (Solo local)"):
     with sqlite3.connect(DB_NAME) as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT COUNT(*) FROM configuracion WHERE id = 1")
@@ -280,14 +297,14 @@ def guardar_configuracion(nombre_empresa, propietario, telefono, direccion, mens
         if existe:
             cursor.execute("""
                 UPDATE configuracion 
-                SET nombre_empresa = ?, propietario = ?, telefono = ?, direccion = ?, mensaje_ticket = ?, impresora_ticket = ?
+                SET nombre_empresa = ?, propietario = ?, telefono = ?, direccion = ?, mensaje_ticket = ?, impresora_ticket = ?, pais_operacion = ?
                 WHERE id = 1
-            """, (nombre_empresa, propietario, telefono, direccion, mensaje_ticket, impresora_ticket))
+            """, (nombre_empresa, propietario, telefono, direccion, mensaje_ticket, impresora_ticket, pais_operacion))
         else:
             cursor.execute("""
-                INSERT INTO configuracion (id, nombre_empresa, propietario, telefono, direccion, mensaje_ticket, impresora_ticket)
-                VALUES (1, ?, ?, ?, ?, ?, ?)
-            """, (nombre_empresa, propietario, telefono, direccion, mensaje_ticket, impresora_ticket))
+                INSERT INTO configuracion (id, nombre_empresa, propietario, telefono, direccion, mensaje_ticket, impresora_ticket, pais_operacion)
+                VALUES (1, ?, ?, ?, ?, ?, ?, ?)
+            """, (nombre_empresa, propietario, telefono, direccion, mensaje_ticket, impresora_ticket, pais_operacion))
         conn.commit()
 
 
