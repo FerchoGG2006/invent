@@ -914,6 +914,9 @@ class InventarioApp:
     # ==========================================
     def construir_tab_pos(self):
         # Panel Izquierdo (Búsqueda de Productos para venta)
+        frame_pos_left = tk.Frame(self.tab_pos, bg="#FFFFFF", width=460, highlightbackground="#E2E8F0", highlightthickness=1)
+        frame_pos_left.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=20, pady=20)
+
         frame_pos_header = tk.Frame(frame_pos_left, bg="#FFFFFF")
         frame_pos_header.pack(fill=tk.X, pady=10, padx=15)
         tk.Label(frame_pos_header, text="SELECCIONAR PRODUCTO", font=("Segoe UI", 12, "bold"), bg="#FFFFFF", fg="#0F172A").pack(side=tk.LEFT)
