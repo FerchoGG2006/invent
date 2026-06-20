@@ -95,6 +95,11 @@ class ReportesTab:
         btn_anular.bind("<Enter>", lambda e: btn_anular.config(bg="#DC2626"))
         btn_anular.bind("<Leave>", lambda e: btn_anular.config(bg="#EF4444"))
 
+        btn_reimprimir = tk.Button(frame_controles_rep, text="🖨️ Ver/Imprimir Ticket", font=("Segoe UI", 9, "bold"), bg="#F59E0B", fg="white", bd=0, cursor="hand2", command=self.reimprimir_ticket_seleccionado)
+        btn_reimprimir.pack(side=tk.RIGHT, padx=5, ipady=4, ipadx=10)
+        btn_reimprimir.bind("<Enter>", lambda e: btn_reimprimir.config(bg="#D97706"))
+        btn_reimprimir.bind("<Leave>", lambda e: btn_reimprimir.config(bg="#F59E0B"))
+
         btn_config = tk.Button(frame_controles_rep, text="⚙️ Configuración", font=("Segoe UI", 9, "bold"), bg="#475569", fg="white", bd=0, cursor="hand2", command=self.app.mostrar_editar_configuracion)
         btn_config.pack(side=tk.RIGHT, padx=5, ipady=4, ipadx=10)
         btn_config.bind("<Enter>", lambda e: btn_config.config(bg="#334155"))
@@ -106,10 +111,10 @@ class ReportesTab:
         btn_logout.bind("<Leave>", lambda e: btn_logout.config(bg="#EF4444"))
 
         # Tabla del reporte
-        columnas_rep = ("id", "codigo", "nombre", "cantidad", "precio", "total", "fecha", "metodo_pago")
+        columnas_rep = ("id", "codigo", "nombre", "cantidad", "precio", "descuento", "total", "fecha", "metodo_pago")
         self.tabla_reporte = ttk.Treeview(frame_reporte_grid, columns=columnas_rep, show="headings")
 
-        headers_rep = [("ID Venta", 60), ("Referencia", 100), ("Producto", 220), ("Cant.", 60), ("Precio Unit.", 95), ("Total Venta", 100), ("Fecha / Hora", 150), ("Método", 95)]
+        headers_rep = [("ID Venta", 60), ("Referencia", 100), ("Producto", 190), ("Cant.", 60), ("Precio Unit.", 90), ("Desc.", 70), ("Total Venta", 90), ("Fecha / Hora", 150), ("Método", 90)]
         for col, (texto, ancho) in zip(columnas_rep, headers_rep):
             self.tabla_reporte.heading(col, text=texto)
             self.tabla_reporte.column(col, width=ancho, anchor=tk.CENTER if col not in ["nombre"] else tk.W)
@@ -143,12 +148,99 @@ class ReportesTab:
         for item in self.tabla_reporte.get_children():
             self.tabla_reporte.delete(item)
 
-        ventas = database.obtener_ventas_reporte(filtro)
-        for v in ventas:
+        self.ventas_data = database.obtener_ventas_reporte(filtro)
+        for v in self.ventas_data:
             precio_f = f"${v[4]:,.0f}"
+            desc_f = f"${v[8]:,.0f}" if v[8] else "$0"
             total_f = f"${v[5]:,.0f}"
-            valores = (v[0], v[1] or "---", v[2], v[3], precio_f, total_f, v[6], v[7])
+            valores = (v[0], v[1] or "---", v[2], v[3], precio_f, desc_f, total_f, v[6], v[7])
             self.tabla_reporte.insert("", tk.END, values=valores)
+
+    def reimprimir_ticket_seleccionado(self):
+        seleccion = self.tabla_reporte.selection()
+        if not seleccion:
+            messagebox.showwarning("Atención", "Selecciona una transacción de la tabla para ver/imprimir su ticket.")
+            return
+            
+        valores = self.tabla_reporte.item(seleccion[0])["values"]
+        venta_id = int(valores[0])
+        
+        # Buscar los datos completos en self.ventas_data
+        venta = next((v for v in self.ventas_data if v[0] == venta_id), None)
+        if not venta:
+            return
+            
+        # v: 0:id, 1:codigo, 2:nombre, 3:cantidad, 4:precio, 5:total, 6:fecha, 7:metodo, 8:descuento, 9:cliente_nombre, 10:cliente_identificacion, 11:impuestos, 12:codigo_fiscal, 13:fiscal_qr_url, 14:es_cortesia, 15:autorizado_por
+        
+        texto_ticket = "==============================\n"
+        texto_ticket += "    COPIA TICKET DE VENTA     \n"
+        texto_ticket += "==============================\n"
+        texto_ticket += f"Ticket #: {venta[0]}\n"
+        texto_ticket += f"Fecha: {venta[6]}\n"
+        if venta[9]:
+            texto_ticket += f"Cliente: {venta[9]}\n"
+            if venta[10]:
+                texto_ticket += f"ID: {venta[10]}\n"
+        texto_ticket += "------------------------------\n"
+        texto_ticket += "CANT  PRODUCTO          PRECIO\n"
+        texto_ticket += "------------------------------\n"
+        
+        nombre = venta[2][:15].ljust(15)
+        precio_bruto = venta[3] * venta[4]
+        texto_ticket += f"{venta[3]:<4} {nombre} ${precio_bruto:,.0f}\n"
+        texto_ticket += "------------------------------\n"
+        
+        if venta[8] and venta[8] > 0:
+            texto_ticket += f"Descuento:         -${venta[8]:,.0f}\n"
+        if venta[11] and venta[11] > 0:
+            texto_ticket += f"Subtotal:           ${venta[5] - venta[11]:,.0f}\n"
+            texto_ticket += f"IVA:                ${venta[11]:,.0f}\n"
+        
+        texto_ticket += f"TOTAL:              ${venta[5]:,.0f}\n"
+        texto_ticket += "------------------------------\n"
+        texto_ticket += f"Método de Pago: {venta[7]}\n"
+        
+        if venta[14]: # es_cortesia
+            texto_ticket += "\n*** CORTESÍA ***\n"
+            if venta[15]:
+                texto_ticket += f"Autorizado por: {venta[15]}\n"
+        
+        if venta[12]: # codigo_fiscal
+            texto_ticket += f"\nFolio Fiscal:\n{venta[12]}\n"
+        if venta[13]: # fiscal_qr_url
+            texto_ticket += f"\nCódigo QR:\n{venta[13]}\n"
+            
+        texto_ticket += "\n    ¡Gracias por su compra!   \n"
+        texto_ticket += "==============================\n"
+
+        # Mostrar en modal
+        win = tk.Toplevel(self.app.root)
+        win.title(f"Ticket de Venta #{venta_id}")
+        win.geometry("340x500")
+        win.configure(bg="#F8FAFC")
+        win.grab_set()
+
+        tk.Label(win, text="Copia de Ticket", font=("Segoe UI", 12, "bold"), bg="#F8FAFC", fg="#0F172A").pack(pady=10)
+
+        txt = tk.Text(win, font=("Consolas", 10), height=18, width=38, bd=1, relief=tk.SOLID, bg="#FFFFFF", fg="#334155")
+        txt.pack(pady=5, padx=15)
+        txt.insert(tk.END, texto_ticket)
+        txt.config(state=tk.DISABLED)
+
+        def imprimir():
+            impresora = self.app.config.get("impresora_ticket", "")
+            if not impresora:
+                messagebox.showerror("Error", "No hay impresora configurada en Ajustes.")
+                return
+            from utils.printer import enviar_impresion_directa
+            exito, msg = enviar_impresion_directa(impresora, texto_ticket)
+            if exito:
+                messagebox.showinfo("Éxito", msg)
+            else:
+                messagebox.showerror("Error de Impresión", msg)
+
+        btn_imprimir = tk.Button(win, text="🖨️ Imprimir Copia", font=("Segoe UI", 10, "bold"), bg="#10B981", fg="white", bd=0, cursor="hand2", command=imprimir)
+        btn_imprimir.pack(fill=tk.X, padx=15, pady=10, ipady=6)
 
     def anular_venta_seleccionada(self):
         seleccion = self.tabla_reporte.selection()
@@ -209,10 +301,28 @@ class ReportesTab:
             self.app.root.clipboard_clear()
             self.app.root.clipboard_append(texto_corte)
             messagebox.showinfo("Copiado", "¡Corte de caja copiado al portapapeles!")
-            win.destroy()
 
-        btn_copiar = tk.Button(win, text="Copiar y Cerrar", font=("Segoe UI", 10, "bold"), bg="#4F46E5", fg="white", bd=0, cursor="hand2", command=copiar)
-        btn_copiar.pack(fill=tk.X, padx=15, pady=15, ipady=6)
+        def imprimir():
+            impresora = self.app.config.get("impresora_ticket", "")
+            if not impresora:
+                messagebox.showerror("Error", "No hay impresora configurada en Ajustes.")
+                return
+            from utils.printer import enviar_impresion_directa
+            exito, msg = enviar_impresion_directa(impresora, texto_corte)
+            if exito:
+                messagebox.showinfo("Éxito", msg)
+                win.destroy()
+            else:
+                messagebox.showerror("Error de Impresión", msg)
+
+        frame_btns = tk.Frame(win, bg="#F8FAFC")
+        frame_btns.pack(fill=tk.X, padx=15, pady=10)
+
+        btn_imprimir = tk.Button(frame_btns, text="🖨️ Imprimir Ticket", font=("Segoe UI", 10, "bold"), bg="#10B981", fg="white", bd=0, cursor="hand2", command=imprimir)
+        btn_imprimir.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5, ipady=6)
+
+        btn_copiar = tk.Button(frame_btns, text="📋 Copiar y Cerrar", font=("Segoe UI", 10, "bold"), bg="#4F46E5", fg="white", bd=0, cursor="hand2", command=copiar)
+        btn_copiar.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5, ipady=6)
 
     def exportar_reporte_csv(self):
         filtro = self.combo_filtro_fecha.get()

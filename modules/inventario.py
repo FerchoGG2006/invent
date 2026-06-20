@@ -155,7 +155,17 @@ class InventarioTab:
         # Actualizar opciones de combos de proveedores y categorias
         cat = database.obtener_categorias()
         prov = database.obtener_proveedores()
-        self.inputs["categoria"]["values"] = [c[1] for c in cat]
+        
+        # Combinamos categorías formales con las que los usuarios han escrito libremente
+        categorias_nombres = [c[1] for c in cat]
+        with database.sqlite3.connect(database.DB_NAME) as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT DISTINCT categoria FROM productos WHERE categoria IS NOT NULL AND categoria != ''")
+            for row in cursor.fetchall():
+                if row[0] not in categorias_nombres:
+                    categorias_nombres.append(row[0])
+                    
+        self.inputs["categoria"]["values"] = sorted(categorias_nombres)
         self.inputs["proveedor_id"]["values"] = [f"{p[0]} - {p[1]}" for p in prov]
 
     def pos_seleccionar_imagen(self):

@@ -12,6 +12,7 @@ import shutil
 from utils.printer import obtener_impresoras_sistema, enviar_impresion_directa
 from utils.network import verificar_conexion_internet, verificar_conexion_async
 from utils.fiscal import obtener_label_id_fiscal
+from utils import updater
 from modules import config as config_module
 from modules.inventario import InventarioTab
 from modules.pos import PosTab
@@ -47,6 +48,9 @@ class InventarioApp:
         else:
             self.root.title(f"Control de Inventario y Ventas - {self.config['nombre_empresa']}")
             self.mostrar_splash(self.config)
+
+        # Buscar actualizaciones y mensajes globales en segundo plano
+        updater.buscar_actualizaciones(self)
 
     # ==========================================
     # DELEGACIÓN A MÓDULO DE CONFIGURACIÓN

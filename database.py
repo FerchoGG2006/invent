@@ -338,7 +338,7 @@ def obtener_ventas_reporte(filtro_fecha="Todo"):
             condicion = "WHERE strftime('%Y-%m', v.fecha) = strftime('%Y-%m', 'now', 'localtime')"
 
         query = f"""
-            SELECT v.id, p.codigo, p.nombre, v.cantidad, v.precio_unitario, v.total, v.fecha, v.metodo_pago
+            SELECT v.id, p.codigo, p.nombre, v.cantidad, v.precio_unitario, v.total, v.fecha, v.metodo_pago, v.descuento, v.cliente_nombre, v.cliente_identificacion, v.impuestos, v.codigo_fiscal, v.fiscal_qr_url, v.es_cortesia, v.autorizado_por
             FROM ventas v
             JOIN productos p ON v.producto_id = p.id
             {condicion}
@@ -686,6 +686,9 @@ def abrir_turno_caja(usuario_id, monto_apertura, caja_id=1):
             
         cursor.execute("INSERT INTO turnos_caja (caja_id, usuario_id, monto_apertura) VALUES (?, ?, ?)",
                        (caja_id, usuario_id, monto_apertura))
+        turno_id = cursor.lastrowid
+        cursor.execute("INSERT INTO movimientos_caja (turno_id, tipo, monto, descripcion) VALUES (?, 'Ingreso', ?, 'Apertura de Turno')",
+                       (turno_id, monto_apertura))
         conn.commit()
         return True, "Turno abierto exitosamente."
 
@@ -708,5 +711,7 @@ def cerrar_turno_caja(turno_id, monto_cierre_real):
             SET fecha_cierre = datetime('now', 'localtime'), monto_cierre_real = ?, diferencia = ?, estado = 'Cerrado'
             WHERE id = ?
         """, (monto_cierre_real, diferencia, turno_id))
+        cursor.execute("INSERT INTO movimientos_caja (turno_id, tipo, monto, descripcion) VALUES (?, 'Ingreso', ?, 'Cierre de Turno (Declarado)')",
+                       (turno_id, monto_cierre_real))
         conn.commit()
         return True, "Turno cerrado exitosamente."

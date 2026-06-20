@@ -497,7 +497,7 @@ class PosTab:
             self.app.entry_cliente_identificacion.delete(0, tk.END)
 
             # Para el ticket tendríamos que enviarle los pagos mixtos, el descuento y propina total
-            self.app.pos_generar_ticket(carrito_copia, metodo_pago, cliente_nombre, cliente_identificacion, iva_calculado, codigo_fiscal, fiscal_qr_url)
+            self.pos_generar_ticket(carrito_copia, metodo_pago, cliente_nombre, cliente_identificacion, iva_calculado, codigo_fiscal, fiscal_qr_url)
 
     def pos_on_busca_enter(self, event):
         children = self.tabla_pos_prod.get_children()
@@ -518,6 +518,52 @@ class PosTab:
 
     def pos_on_precio_enter(self, event):
         self.pos_agregar_al_carrito()
+
+    def pos_generar_ticket(self, carrito_copia, metodo_pago, cliente_nombre, cliente_identificacion, iva_calculado, codigo_fiscal, fiscal_qr_url):
+        impresora = self.app.config.get("impresora_ticket", "")
+        if not impresora:
+            return # Si no hay impresora configurada, no intentar imprimir el ticket
+
+        import datetime
+        from utils.printer import enviar_impresion_directa
+        
+        texto_ticket = "==============================\n"
+        texto_ticket += "        TICKET DE VENTA       \n"
+        texto_ticket += "==============================\n"
+        texto_ticket += f"Fecha: {datetime.datetime.now().strftime('%d/%m/%Y %H:%M')}\n"
+        if cliente_nombre:
+            texto_ticket += f"Cliente: {cliente_nombre}\n"
+            if cliente_identificacion:
+                texto_ticket += f"ID: {cliente_identificacion}\n"
+        texto_ticket += "------------------------------\n"
+        texto_ticket += "CANT  PRODUCTO          PRECIO\n"
+        texto_ticket += "------------------------------\n"
+        
+        total = 0
+        for item in carrito_copia:
+            nombre = item['nombre'][:15].ljust(15)
+            precio_total = item['cantidad'] * item['precio']
+            total += precio_total
+            texto_ticket += f"{item['cantidad']:<4} {nombre} ${precio_total:,.0f}\n"
+            
+        texto_ticket += "------------------------------\n"
+        if iva_calculado > 0:
+            texto_ticket += f"Subtotal:           ${total - iva_calculado:,.0f}\n"
+            texto_ticket += f"IVA:                ${iva_calculado:,.0f}\n"
+        texto_ticket += f"TOTAL:              ${total:,.0f}\n"
+        texto_ticket += "------------------------------\n"
+        texto_ticket += f"Método de Pago: {metodo_pago}\n"
+        
+        if codigo_fiscal:
+            texto_ticket += f"\nFolio Fiscal:\n{codigo_fiscal}\n"
+        if fiscal_qr_url:
+            texto_ticket += f"\nCódigo QR:\n{fiscal_qr_url}\n"
+            
+        texto_ticket += "\n    ¡Gracias por su compra!   \n"
+        texto_ticket += "==============================\n"
+
+        enviar_impresion_directa(impresora, texto_ticket)
+
         self.entry_busca_pos.delete(0, tk.END)
         self.pos_actualizar_lista_productos("")
         self.entry_busca_pos.focus_set()
