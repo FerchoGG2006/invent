@@ -16,6 +16,8 @@ from modules import config as config_module
 from modules.inventario import InventarioTab
 from modules.pos import PosTab
 from modules.reportes import ReportesTab
+from modules.proveedores import ProveedoresTab
+from modules.caja import CajaTab
 
 
 class InventarioApp:
@@ -160,7 +162,7 @@ class InventarioApp:
         self.tab_pos = tk.Frame(self.notebook, bg="#F8FAFC")
         self.tab_reportes = tk.Frame(self.notebook, bg="#F8FAFC")
 
-        # Agregar pestañas
+        # Agregar pestañas (Proveedores y Caja las añade sus propias clases o aquí)
         self.notebook.add(self.tab_inventario, text=" 📦 Inventario ")
         self.notebook.add(self.tab_pos, text=" 🛒 Punto de Venta ")
         self.notebook.add(self.tab_reportes, text=" 📊 Historial de Ventas ")
@@ -172,6 +174,8 @@ class InventarioApp:
         self.inventario_controller = InventarioTab(self)
         self.pos_controller = PosTab(self)
         self.reportes_controller = ReportesTab(self)
+        self.proveedores_controller = ProveedoresTab(self)
+        self.caja_controller = CajaTab(self)
 
     # ==========================================
     # DELEGACIÓN DE MÉTODOS PARA COMPATIBILIDAD (Temporal o Helper)
