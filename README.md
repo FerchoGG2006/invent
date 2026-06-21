@@ -75,6 +75,18 @@ Para saber cómo va tu negocio y retirar las ganancias de forma segura:
 
 ---
 
+### 6. ☁️ Sincronización en la Nube y Panel Web (Desde cualquier lugar)
+Si activas la conexión a la nube en la configuración, obtendrás superpoderes para tu negocio:
+* **Sincronización Automática**: El sistema de escritorio sube tus productos y ventas a internet de forma segura cada 30 segundos. Verás un indicador arriba que dice `☁️ Nube OK` para saber que todo está al día.
+* **Funciona sin internet**: Si tu internet falla, el programa de escritorio sigue registrando ventas de forma normal. Cuando vuelva la conexión, subirá todo lo acumulado automáticamente sin que hagas nada.
+* **🌐 Tu Página Web de Administración**: Ahora puedes ver cómo va tu barbería desde tu teléfono móvil o laptop desde tu hogar o viaje, abriendo el Panel Web:
+  * **Estadísticas Visuales**: Mira gráficos sencillos de cuánto dinero vas ganando, cuáles son los métodos de pago preferidos y qué productos se venden más.
+  * **Inventario al Instante**: Conoce cuántos productos te quedan y cuáles tienen alerta de bajo stock para hacer las compras a tiempo.
+  * **Acceso Seguro**: Tu panel está protegido por contraseña para que solo tú o las personas autorizadas puedan ver las ganancias.
+
+---
+
+
 ## ❓ Preguntas Frecuentes (FAQ)
 
 #### ¿Qué hago si me sale un aviso de "Alerta de Stock"?
