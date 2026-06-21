@@ -5,8 +5,7 @@ import database
 class CajaTab:
     def __init__(self, app):
         self.app = app
-        self.tab = tk.Frame(app.notebook, bg="#F8FAFC")
-        app.notebook.add(self.tab, text=" 💰 Caja y Turnos ")
+        self.tab = app.tab_caja
         
         self.construir_tab()
 

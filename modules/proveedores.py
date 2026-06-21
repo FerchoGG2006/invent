@@ -5,8 +5,7 @@ import database
 class ProveedoresTab:
     def __init__(self, app):
         self.app = app
-        self.tab = tk.Frame(app.notebook, bg="#F8FAFC")
-        app.notebook.add(self.tab, text=" 🚚 Proveedores y Compras ")
+        self.tab = app.tab_proveedores
         
         self.inputs = {}
         self.construir_tab()

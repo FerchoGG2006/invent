@@ -52,6 +52,10 @@ class InventarioApp:
         # Buscar actualizaciones y mensajes globales en segundo plano
         updater.buscar_actualizaciones(self)
 
+        # Iniciar sincronización en la nube en segundo plano
+        from utils import sync
+        sync.iniciar_hilo_sincronizacion(self)
+
     # ==========================================
     # DELEGACIÓN A MÓDULO DE CONFIGURACIÓN
     # ==========================================
@@ -131,17 +135,6 @@ class InventarioApp:
         style = ttk.Style()
         style.theme_use("clam")
 
-        # Estilo del Notebook (Pestañas)
-        style.configure("TNotebook", background="#F8FAFC", borderwidth=0)
-        style.configure("TNotebook.Tab",
-                        background="#E2E8F0",
-                        foreground="#334155",
-                        padding=[15, 8],
-                        font=("Segoe UI", 10, "bold"))
-        style.map("TNotebook.Tab",
-                  background=[("selected", "#4F46E5")],
-                  foreground=[("selected", "#FFFFFF")])
-
         # Estilo del Treeview
         style.configure("Treeview",
                         background="#FFFFFF",
@@ -157,22 +150,33 @@ class InventarioApp:
                   background=[('selected', '#E0E7FF')],
                   foreground=[('selected', '#312E81')])
 
-        # Contenedor principal de pestañas
-        self.notebook = ttk.Notebook(self.root)
+        # Contenedor principal de pestañas usando CustomTkinter
+        import customtkinter as ctk
+        self.notebook = ctk.CTkTabview(
+            self.root, 
+            command=self.on_tab_changed,
+            segmented_button_selected_color="#4F46E5",
+            segmented_button_unselected_color="#E2E8F0",
+            segmented_button_selected_hover_color="#4338CA",
+            text_color="#1E293B"
+        )
         self.notebook.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
-        # Crear frames para cada pestaña
-        self.tab_inventario = tk.Frame(self.notebook, bg="#F8FAFC")
-        self.tab_pos = tk.Frame(self.notebook, bg="#F8FAFC")
-        self.tab_reportes = tk.Frame(self.notebook, bg="#F8FAFC")
+        # Crear y registrar pestañas
+        self.notebook.add(" 📦 Inventario ")
+        self.notebook.add(" 🛒 Punto de Venta ")
+        self.notebook.add(" 📊 Historial de Ventas ")
+        self.notebook.add(" 🚚 Proveedores ")
+        self.notebook.add(" 💰 Caja y Turnos ")
+        self.notebook.add(" 📈 Analíticas ")
 
-        # Agregar pestañas (Proveedores y Caja las añade sus propias clases o aquí)
-        self.notebook.add(self.tab_inventario, text=" 📦 Inventario ")
-        self.notebook.add(self.tab_pos, text=" 🛒 Punto de Venta ")
-        self.notebook.add(self.tab_reportes, text=" 📊 Historial de Ventas ")
-
-        # Evento al cambiar de pestaña
-        self.notebook.bind("<<NotebookTabChanged>>", self.on_tab_changed)
+        # Guardar referencias de los frames de cada pestaña
+        self.tab_inventario = self.notebook.tab(" 📦 Inventario ")
+        self.tab_pos = self.notebook.tab(" 🛒 Punto de Venta ")
+        self.tab_reportes = self.notebook.tab(" 📊 Historial de Ventas ")
+        self.tab_proveedores = self.notebook.tab(" 🚚 Proveedores ")
+        self.tab_caja = self.notebook.tab(" 💰 Caja y Turnos ")
+        self.tab_analiticas = self.notebook.tab(" 📈 Analíticas ")
 
         # Inicializar controladores de cada pestaña
         self.inventario_controller = InventarioTab(self)
@@ -190,25 +194,25 @@ class InventarioApp:
             self.inventario_controller.cargar_datos(self.inventario_controller.entry_buscar.get())
 
     def pos_actualizar_alertas_pestaña(self):
-        try:
-            alertas = database.obtener_alertas_stock()
-            if alertas > 0:
-                self.notebook.tab(0, text=f" 📦 Inventario ({alertas} 🚨) ")
-            else:
-                self.notebook.tab(0, text=" 📦 Inventario ")
-        except Exception:
-            pass
+        # Deshabilitado el indicador de alertas en el nombre del Tab ya que CTkTabview no permite modificar texto dinámicamente de forma directa fácilmente
+        pass
 
-    def on_tab_changed(self, event):
-        pestaña_activa = self.notebook.index(self.notebook.select())
-        if pestaña_activa == 0:
+    def on_tab_changed(self):
+        tab_activa = self.notebook.get().strip()
+        if tab_activa == "📦 Inventario":
             self.inventario_controller.cargar_datos(self.inventario_controller.entry_buscar.get())
-        elif pestaña_activa == 1:
+        elif tab_activa == "🛒 Punto de Venta":
             self.pos_controller.pos_actualizar_lista_productos(self.pos_controller.entry_busca_pos.get())
             self.pos_controller.pos_actualizar_tabla_carrito()
             self.verificar_conexion_async()
-        elif pestaña_activa == 2:
+        elif tab_activa == "📊 Historial de Ventas":
             self.reportes_controller.reporte_actualizar_datos()
+        elif tab_activa == "📈 Analíticas":
+            self.reportes_controller.analitica_actualizar_datos()
+        elif tab_activa == "🚚 Proveedores":
+            self.proveedores_controller.cargar_datos(self.proveedores_controller.entry_buscar.get())
+        elif tab_activa == "💰 Caja y Turnos":
+            self.caja_controller.verificar_estado()
 
     # ==========================================
     # RESPALDAR BASE DE DATOS
@@ -282,6 +286,9 @@ class InventarioApp:
 
 
 if __name__ == "__main__":
-    root = tk.Tk()
+    import customtkinter as ctk
+    ctk.set_appearance_mode("Light")
+    ctk.set_default_color_theme("blue")
+    root = ctk.CTk()
     app = InventarioApp(root)
     root.mainloop()

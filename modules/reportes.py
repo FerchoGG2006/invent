@@ -1,149 +1,154 @@
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
+import customtkinter as ctk
 import database
 import csv
 import datetime
+
+# Importar Matplotlib para los gráficos
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.figure import Figure
 
 class ReportesTab:
     def __init__(self, app):
         self.app = app
         self.tab = app.tab_reportes
-        self.construir_tab()
+        self.tab_analiticas = app.tab_analiticas
+        self.ventas_data = []
 
+        # Listas para guardar las referencias de los lienzos de Matplotlib
+        self.canvas_tendencia = None
+        self.canvas_pagos = None
+        self.canvas_productos = None
+
+        self.construir_tab()
+        self.construir_tab_analiticas()
+
+    # ==========================================
+    # PESTAÑA: HISTORIAL DE VENTAS
+    # ==========================================
     def construir_tab(self):
         # Panel superior con 4 tarjetas de resumen financiero
-        frame_cards = tk.Frame(self.tab, bg="#F8FAFC")
-        frame_cards.pack(fill=tk.X, padx=20, pady=(20, 10))
+        frame_cards = ctk.CTkFrame(self.tab, fg_color="transparent")
+        frame_cards.pack(fill=tk.X, padx=15, pady=(15, 5))
 
         # Tarjeta 1: Ventas Totales del Rango
-        self.card_hoy = tk.Frame(frame_cards, bg="#FFFFFF", highlightbackground="#E2E8F0", highlightthickness=1)
-        self.card_hoy.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 5), ipady=12)
+        self.card_hoy = ctk.CTkFrame(frame_cards, fg_color="#FFFFFF", border_color="#E2E8F0", border_width=1, corner_radius=8)
+        self.card_hoy.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 5))
 
-        self.lbl_card_hoy_titulo = tk.Label(self.card_hoy, text="Ventas del Período", font=("Segoe UI", 9, "bold"), bg="#FFFFFF", fg="#64748B")
-        self.lbl_card_hoy_titulo.pack(anchor=tk.W, padx=15, pady=(5, 0))
-        self.lbl_card_hoy_valor = tk.Label(self.card_hoy, text="$0", font=("Segoe UI", 16, "bold"), bg="#FFFFFF", fg="#4F46E5")
+        self.lbl_card_hoy_titulo = ctk.CTkLabel(self.card_hoy, text="Ventas del Período", font=("Segoe UI", 10, "bold"), text_color="#64748B")
+        self.lbl_card_hoy_titulo.pack(anchor=tk.W, padx=15, pady=(10, 0))
+        self.lbl_card_hoy_valor = ctk.CTkLabel(self.card_hoy, text="$0", font=("Segoe UI", 18, "bold"), text_color="#4F46E5")
         self.lbl_card_hoy_valor.pack(anchor=tk.W, padx=15, pady=(2, 0))
-        self.lbl_card_hoy_sub = tk.Label(self.card_hoy, text="0 transacciones", font=("Segoe UI", 8), bg="#FFFFFF", fg="#94A3B8")
-        self.lbl_card_hoy_sub.pack(anchor=tk.W, padx=15)
+        self.lbl_card_hoy_sub = ctk.CTkLabel(self.card_hoy, text="0 transacciones", font=("Segoe UI", 9), text_color="#94A3B8")
+        self.lbl_card_hoy_sub.pack(anchor=tk.W, padx=15, pady=(0, 10))
 
         # Tarjeta 2: Ingresos por Tipo de Pago
-        self.card_total = tk.Frame(frame_cards, bg="#FFFFFF", highlightbackground="#E2E8F0", highlightthickness=1)
-        self.card_total.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5, ipady=12)
+        self.card_total = ctk.CTkFrame(frame_cards, fg_color="#FFFFFF", border_color="#E2E8F0", border_width=1, corner_radius=8)
+        self.card_total.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
 
-        self.lbl_card_tot_titulo = tk.Label(self.card_total, text="Ingresos por Pago", font=("Segoe UI", 9, "bold"), bg="#FFFFFF", fg="#64748B")
-        self.lbl_card_tot_titulo.pack(anchor=tk.W, padx=15, pady=(5, 0))
-        self.lbl_card_tot_valor = tk.Label(self.card_total, text="Efectivo / Transferencia", font=("Segoe UI", 11, "bold"), bg="#FFFFFF", fg="#0F172A")
-        self.lbl_card_tot_valor.pack(anchor=tk.W, padx=15, pady=(5, 0))
-        self.lbl_card_tot_sub = tk.Label(self.card_total, text="Efe: $0 | Transf: $0", font=("Segoe UI", 9), bg="#FFFFFF", fg="#475569")
-        self.lbl_card_tot_sub.pack(anchor=tk.W, padx=15)
+        self.lbl_card_tot_titulo = ctk.CTkLabel(self.card_total, text="Ingresos por Pago", font=("Segoe UI", 10, "bold"), text_color="#64748B")
+        self.lbl_card_tot_titulo.pack(anchor=tk.W, padx=15, pady=(10, 0))
+        self.lbl_card_tot_valor = ctk.CTkLabel(self.card_total, text="Efectivo / Transferencia", font=("Segoe UI", 12, "bold"), text_color="#0F172A")
+        self.lbl_card_tot_valor.pack(anchor=tk.W, padx=15, pady=(2, 0))
+        self.lbl_card_tot_sub = ctk.CTkLabel(self.card_total, text="Efe: $0 | Transf: $0", font=("Segoe UI", 10), text_color="#475569")
+        self.lbl_card_tot_sub.pack(anchor=tk.W, padx=15, pady=(0, 10))
 
         # Tarjeta 3: Utilidad Real (Ganancia Neta)
-        self.card_utilidad = tk.Frame(frame_cards, bg="#FFFFFF", highlightbackground="#E2E8F0", highlightthickness=1)
-        self.card_utilidad.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5, ipady=12)
+        self.card_utilidad = ctk.CTkFrame(frame_cards, fg_color="#FFFFFF", border_color="#E2E8F0", border_width=1, corner_radius=8)
+        self.card_utilidad.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
 
-        self.lbl_card_ut_titulo = tk.Label(self.card_utilidad, text="Ganancia Neta (Utilidad)", font=("Segoe UI", 9, "bold"), bg="#FFFFFF", fg="#64748B")
-        self.lbl_card_ut_titulo.pack(anchor=tk.W, padx=15, pady=(5, 0))
-        self.lbl_card_ut_valor = tk.Label(self.card_utilidad, text="$0", font=("Segoe UI", 16, "bold"), bg="#FFFFFF", fg="#10B981")
+        self.lbl_card_ut_titulo = ctk.CTkLabel(self.card_utilidad, text="Ganancia Neta (Utilidad)", font=("Segoe UI", 10, "bold"), text_color="#64748B")
+        self.lbl_card_ut_titulo.pack(anchor=tk.W, padx=15, pady=(10, 0))
+        self.lbl_card_ut_valor = ctk.CTkLabel(self.card_utilidad, text="$0", font=("Segoe UI", 18, "bold"), text_color="#10B981")
         self.lbl_card_ut_valor.pack(anchor=tk.W, padx=15, pady=(2, 0))
-        self.lbl_card_ut_sub = tk.Label(self.card_utilidad, text="Ingreso - Costo Adquisición", font=("Segoe UI", 8), bg="#FFFFFF", fg="#059669")
-        self.lbl_card_ut_sub.pack(anchor=tk.W, padx=15)
+        self.lbl_card_ut_sub = ctk.CTkLabel(self.card_utilidad, text="Ingreso - Costo Adquisición", font=("Segoe UI", 9), text_color="#059669")
+        self.lbl_card_ut_sub.pack(anchor=tk.W, padx=15, pady=(0, 10))
 
         # Tarjeta 4: Top 3 Más Vendidos
-        self.card_top = tk.Frame(frame_cards, bg="#FFFFFF", highlightbackground="#E2E8F0", highlightthickness=1)
-        self.card_top.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(5, 0), ipady=12)
+        self.card_top = ctk.CTkFrame(frame_cards, fg_color="#FFFFFF", border_color="#E2E8F0", border_width=1, corner_radius=8)
+        self.card_top.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(5, 0))
 
-        self.lbl_card_top_titulo = tk.Label(self.card_top, text="Top 3 Más Vendidos", font=("Segoe UI", 9, "bold"), bg="#FFFFFF", fg="#64748B")
-        self.lbl_card_top_titulo.pack(anchor=tk.W, padx=15, pady=(5, 0))
-        self.lbl_card_top_valor = tk.Label(self.card_top, text="Cargando...", font=("Segoe UI", 9, "bold"), bg="#FFFFFF", fg="#334155", justify=tk.LEFT)
-        self.lbl_card_top_valor.pack(anchor=tk.W, padx=15, pady=(5, 0))
+        self.lbl_card_top_titulo = ctk.CTkLabel(self.card_top, text="Top 3 Más Vendidos", font=("Segoe UI", 10, "bold"), text_color="#64748B")
+        self.lbl_card_top_titulo.pack(anchor=tk.W, padx=15, pady=(10, 0))
+        self.lbl_card_top_valor = ctk.CTkLabel(self.card_top, text="Cargando...", font=("Segoe UI", 10, "bold"), text_color="#334155", justify=tk.LEFT)
+        self.lbl_card_top_valor.pack(anchor=tk.W, padx=15, pady=(2, 10))
 
         # Grid de Reportes
-        frame_reporte_grid = tk.Frame(self.tab, bg="#FFFFFF", highlightbackground="#E2E8F0", highlightthickness=1)
-        frame_reporte_grid.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+        frame_reporte_grid = ctk.CTkFrame(self.tab, fg_color="#FFFFFF", border_color="#E2E8F0", border_width=1, corner_radius=12)
+        frame_reporte_grid.pack(fill=tk.BOTH, expand=True, padx=15, pady=15)
 
         # Header de controles (Filtro de fecha y botones de acción)
-        frame_controles_rep = tk.Frame(frame_reporte_grid, bg="#FFFFFF")
+        frame_controles_rep = ctk.CTkFrame(frame_reporte_grid, fg_color="transparent")
         frame_controles_rep.pack(fill=tk.X, padx=15, pady=15)
 
-        tk.Label(frame_controles_rep, text="TRANSACCIONES REGISTRADAS", font=("Segoe UI", 11, "bold"), bg="#FFFFFF", fg="#0F172A").pack(side=tk.LEFT)
+        ctk.CTkLabel(frame_controles_rep, text="TRANSACCIONES REGISTRADAS", font=("Segoe UI", 11, "bold"), text_color="#0F172A").pack(side=tk.LEFT)
 
         # Selector de Fecha
-        tk.Label(frame_controles_rep, text="Filtrar:", font=("Segoe UI", 9, "bold"), bg="#FFFFFF", fg="#64748B").pack(side=tk.LEFT, padx=(30, 5))
-        self.combo_filtro_fecha = ttk.Combobox(frame_controles_rep, values=["Todo", "Hoy", "Últimos 7 días", "Este Mes"], state="readonly", width=15, font=("Segoe UI", 9))
+        ctk.CTkLabel(frame_controles_rep, text="Filtrar:", font=("Segoe UI", 10, "bold"), text_color="#64748B").pack(side=tk.LEFT, padx=(20, 5))
+        self.combo_filtro_fecha = ctk.CTkComboBox(frame_controles_rep, values=["Todo", "Hoy", "Últimos 7 días", "Este Mes"], font=("Segoe UI", 10), height=28, width=120, command=lambda e: self.reporte_actualizar_datos())
         self.combo_filtro_fecha.pack(side=tk.LEFT, padx=5)
         self.combo_filtro_fecha.set("Todo")
-        self.combo_filtro_fecha.bind("<<ComboboxSelected>>", lambda e: self.reporte_actualizar_datos())
 
         # Botones de Acciones en Reportes
-        btn_exportar = tk.Button(frame_controles_rep, text="Exportar Reporte (CSV)", font=("Segoe UI", 9, "bold"), bg="#1E293B", fg="white", bd=0, cursor="hand2", command=self.exportar_reporte_csv)
-        btn_exportar.pack(side=tk.RIGHT, padx=5, ipady=4, ipadx=10)
-        btn_exportar.bind("<Enter>", lambda e: btn_exportar.config(bg="#0F172A"))
-        btn_exportar.bind("<Leave>", lambda e: btn_exportar.config(bg="#1E293B"))
+        btn_logout = ctk.CTkButton(frame_controles_rep, text="🚪 Cerrar Sesión", font=("Segoe UI", 10, "bold"), fg_color="#EF4444", hover_color="#DC2626", text_color="white", height=28, width=105, corner_radius=6, command=self.app.cerrar_sesion)
+        btn_logout.pack(side=tk.RIGHT, padx=3)
 
-        btn_corte = tk.Button(frame_controles_rep, text="Corte de Caja", font=("Segoe UI", 9, "bold"), bg="#10B981", fg="white", bd=0, cursor="hand2", command=self.generar_corte_caja)
-        btn_corte.pack(side=tk.RIGHT, padx=5, ipady=4, ipadx=10)
-        btn_corte.bind("<Enter>", lambda e: btn_corte.config(bg="#059669"))
-        btn_corte.bind("<Leave>", lambda e: btn_corte.config(bg="#10B981"))
+        btn_config = ctk.CTkButton(frame_controles_rep, text="⚙️ Configuración", font=("Segoe UI", 10, "bold"), fg_color="#475569", hover_color="#334155", text_color="white", height=28, width=105, corner_radius=6, command=self.app.mostrar_editar_configuracion)
+        btn_config.pack(side=tk.RIGHT, padx=3)
 
-        btn_backup = tk.Button(frame_controles_rep, text="Respaldar DB", font=("Segoe UI", 9, "bold"), bg="#4F46E5", fg="white", bd=0, cursor="hand2", command=self.app.respaldar_base_datos)
-        btn_backup.pack(side=tk.RIGHT, padx=5, ipady=4, ipadx=10)
-        btn_backup.bind("<Enter>", lambda e: btn_backup.config(bg="#3730A3"))
-        btn_backup.bind("<Leave>", lambda e: btn_backup.config(bg="#4F46E5"))
+        btn_reimprimir = ctk.CTkButton(frame_controles_rep, text="🖨️ Ver Ticket", font=("Segoe UI", 10, "bold"), fg_color="#F59E0B", hover_color="#D97706", text_color="white", height=28, width=90, corner_radius=6, command=self.reimprimir_ticket_seleccionado)
+        btn_reimprimir.pack(side=tk.RIGHT, padx=3)
 
-        btn_anular = tk.Button(frame_controles_rep, text="Anular Venta", font=("Segoe UI", 9, "bold"), bg="#EF4444", fg="white", bd=0, cursor="hand2", command=self.anular_venta_seleccionada)
-        btn_anular.pack(side=tk.RIGHT, padx=5, ipady=4, ipadx=10)
-        btn_anular.bind("<Enter>", lambda e: btn_anular.config(bg="#DC2626"))
-        btn_anular.bind("<Leave>", lambda e: btn_anular.config(bg="#EF4444"))
+        btn_anular = ctk.CTkButton(frame_controles_rep, text="Anular Venta", font=("Segoe UI", 10, "bold"), fg_color="#EF4444", hover_color="#DC2626", text_color="white", height=28, width=90, corner_radius=6, command=self.anular_venta_seleccionada)
+        btn_anular.pack(side=tk.RIGHT, padx=3)
 
-        btn_reimprimir = tk.Button(frame_controles_rep, text="🖨️ Ver/Imprimir Ticket", font=("Segoe UI", 9, "bold"), bg="#F59E0B", fg="white", bd=0, cursor="hand2", command=self.reimprimir_ticket_seleccionado)
-        btn_reimprimir.pack(side=tk.RIGHT, padx=5, ipady=4, ipadx=10)
-        btn_reimprimir.bind("<Enter>", lambda e: btn_reimprimir.config(bg="#D97706"))
-        btn_reimprimir.bind("<Leave>", lambda e: btn_reimprimir.config(bg="#F59E0B"))
+        btn_backup = ctk.CTkButton(frame_controles_rep, text="Respaldar DB", font=("Segoe UI", 10, "bold"), fg_color="#4F46E5", hover_color="#3730A3", text_color="white", height=28, width=95, corner_radius=6, command=self.app.respaldar_base_datos)
+        btn_backup.pack(side=tk.RIGHT, padx=3)
 
-        btn_config = tk.Button(frame_controles_rep, text="⚙️ Configuración", font=("Segoe UI", 9, "bold"), bg="#475569", fg="white", bd=0, cursor="hand2", command=self.app.mostrar_editar_configuracion)
-        btn_config.pack(side=tk.RIGHT, padx=5, ipady=4, ipadx=10)
-        btn_config.bind("<Enter>", lambda e: btn_config.config(bg="#334155"))
-        btn_config.bind("<Leave>", lambda e: btn_config.config(bg="#475569"))
+        btn_corte = ctk.CTkButton(frame_controles_rep, text="Corte de Caja", font=("Segoe UI", 10, "bold"), fg_color="#10B981", hover_color="#059669", text_color="white", height=28, width=95, corner_radius=6, command=self.generar_corte_caja)
+        btn_corte.pack(side=tk.RIGHT, padx=3)
 
-        btn_logout = tk.Button(frame_controles_rep, text="🚪 Cerrar Sesión", font=("Segoe UI", 9, "bold"), bg="#EF4444", fg="white", bd=0, cursor="hand2", command=self.app.cerrar_sesion)
-        btn_logout.pack(side=tk.RIGHT, padx=5, ipady=4, ipadx=10)
-        btn_logout.bind("<Enter>", lambda e: btn_logout.config(bg="#DC2626"))
-        btn_logout.bind("<Leave>", lambda e: btn_logout.config(bg="#EF4444"))
+        btn_exportar = ctk.CTkButton(frame_controles_rep, text="Exportar (CSV)", font=("Segoe UI", 10, "bold"), fg_color="#1E293B", hover_color="#0F172A", text_color="white", height=28, width=95, corner_radius=6, command=self.exportar_reporte_csv)
+        btn_exportar.pack(side=tk.RIGHT, padx=3)
 
         # Tabla del reporte
+        frame_tabla = ctk.CTkFrame(frame_reporte_grid, fg_color="transparent")
+        frame_tabla.pack(fill=tk.BOTH, expand=True, padx=15, pady=(0, 15))
+        
         columnas_rep = ("id", "codigo", "nombre", "cantidad", "precio", "descuento", "total", "fecha", "metodo_pago")
-        self.tabla_reporte = ttk.Treeview(frame_reporte_grid, columns=columnas_rep, show="headings")
+        self.tabla_reporte = ttk.Treeview(frame_tabla, columns=columnas_rep, show="headings")
 
         headers_rep = [("ID Venta", 60), ("Referencia", 100), ("Producto", 190), ("Cant.", 60), ("Precio Unit.", 90), ("Desc.", 70), ("Total Venta", 90), ("Fecha / Hora", 150), ("Método", 90)]
         for col, (texto, ancho) in zip(columnas_rep, headers_rep):
             self.tabla_reporte.heading(col, text=texto)
             self.tabla_reporte.column(col, width=ancho, anchor=tk.CENTER if col not in ["nombre"] else tk.W)
 
-        self.tabla_reporte.pack(fill=tk.BOTH, expand=True, padx=15, pady=(0, 15))
+        self.tabla_reporte.pack(fill=tk.BOTH, expand=True)
 
     def reporte_actualizar_datos(self):
         filtro = self.combo_filtro_fecha.get()
         resumen = database.obtener_resumen_ventas(filtro)
 
-        self.lbl_card_hoy_valor.config(text=f"${resumen['total']:,.0f}")
-        self.lbl_card_hoy_sub.config(text=f"{resumen['cant']} transacciones")
+        self.lbl_card_hoy_valor.configure(text=f"${resumen['total']:,.0f}")
+        self.lbl_card_hoy_sub.configure(text=f"{resumen['cant']} transacciones")
 
-        self.lbl_card_tot_sub.config(
+        self.lbl_card_tot_sub.configure(
             text=f"Efe: ${resumen['efe']:,.0f}  |  Transf: ${resumen['tra']:,.0f}"
         )
 
-        self.lbl_card_ut_valor.config(text=f"${resumen['utilidad']:,.0f}")
+        self.lbl_card_ut_valor.configure(text=f"${resumen['utilidad']:,.0f}")
         if resumen['utilidad'] >= 0:
-            self.lbl_card_ut_valor.config(fg="#10B981")
+            self.lbl_card_ut_valor.configure(text_color="#10B981")
         else:
-            self.lbl_card_ut_valor.config(fg="#EF4444")
+            self.lbl_card_ut_valor.configure(text_color="#EF4444")
 
         top_prods = database.obtener_top_productos(filtro)
         if top_prods:
             top_texto = "\n".join([f"{i+1}. {p[0]} ({p[1]} uds)" for i, p in enumerate(top_prods)])
-            self.lbl_card_top_valor.config(text=top_texto)
+            self.lbl_card_top_valor.configure(text=top_texto)
         else:
-            self.lbl_card_top_valor.config(text="Sin ventas en el período")
+            self.lbl_card_top_valor.configure(text="Sin ventas en el período")
 
         for item in self.tabla_reporte.get_children():
             self.tabla_reporte.delete(item)
@@ -165,13 +170,10 @@ class ReportesTab:
         valores = self.tabla_reporte.item(seleccion[0])["values"]
         venta_id = int(valores[0])
         
-        # Buscar los datos completos en self.ventas_data
         venta = next((v for v in self.ventas_data if v[0] == venta_id), None)
         if not venta:
             return
             
-        # v: 0:id, 1:codigo, 2:nombre, 3:cantidad, 4:precio, 5:total, 6:fecha, 7:metodo, 8:descuento, 9:cliente_nombre, 10:cliente_identificacion, 11:impuestos, 12:codigo_fiscal, 13:fiscal_qr_url, 14:es_cortesia, 15:autorizado_por
-        
         texto_ticket = "==============================\n"
         texto_ticket += "    COPIA TICKET DE VENTA     \n"
         texto_ticket += "==============================\n"
@@ -200,47 +202,46 @@ class ReportesTab:
         texto_ticket += "------------------------------\n"
         texto_ticket += f"Método de Pago: {venta[7]}\n"
         
-        if venta[14]: # es_cortesia
+        if venta[14]:
             texto_ticket += "\n*** CORTESÍA ***\n"
             if venta[15]:
                 texto_ticket += f"Autorizado por: {venta[15]}\n"
         
-        if venta[12]: # codigo_fiscal
+        if venta[12]:
             texto_ticket += f"\nFolio Fiscal:\n{venta[12]}\n"
-        if venta[13]: # fiscal_qr_url
+        if venta[13]:
             texto_ticket += f"\nCódigo QR:\n{venta[13]}\n"
             
         texto_ticket += "\n    ¡Gracias por su compra!   \n"
         texto_ticket += "==============================\n"
 
-        # Mostrar en modal
-        win = tk.Toplevel(self.app.root)
+        win = ctk.CTkToplevel(self.app.root)
         win.title(f"Ticket de Venta #{venta_id}")
-        win.geometry("340x500")
-        win.configure(bg="#F8FAFC")
+        win.geometry("360x540")
+        win.configure(fg_color="#F8FAFC")
         win.grab_set()
 
-        tk.Label(win, text="Copia de Ticket", font=("Segoe UI", 12, "bold"), bg="#F8FAFC", fg="#0F172A").pack(pady=10)
+        ctk.CTkLabel(win, text="Copia de Ticket", font=("Segoe UI", 12, "bold"), text_color="#0F172A").pack(pady=10)
 
-        txt = tk.Text(win, font=("Consolas", 10), height=18, width=38, bd=1, relief=tk.SOLID, bg="#FFFFFF", fg="#334155")
+        txt = ctk.CTkTextbox(win, font=("Consolas", 11), height=340, width=320, border_color="#D1D5DB", border_width=1, fg_color="#FFFFFF", text_color="#334155")
         txt.pack(pady=5, padx=15)
         txt.insert(tk.END, texto_ticket)
-        txt.config(state=tk.DISABLED)
+        txt.configure(state="disabled")
 
         def imprimir():
             impresora = self.app.config.get("impresora_ticket", "")
             if not impresora:
-                messagebox.showerror("Error", "No hay impresora configurada en Ajustes.")
+                messagebox.showerror("Error", "No hay impresora configurada en Ajustes.", parent=win)
                 return
             from utils.printer import enviar_impresion_directa
             exito, msg = enviar_impresion_directa(impresora, texto_ticket)
             if exito:
-                messagebox.showinfo("Éxito", msg)
+                messagebox.showinfo("Éxito", msg, parent=win)
             else:
-                messagebox.showerror("Error de Impresión", msg)
+                messagebox.showerror("Error de Impresión", msg, parent=win)
 
-        btn_imprimir = tk.Button(win, text="🖨️ Imprimir Copia", font=("Segoe UI", 10, "bold"), bg="#10B981", fg="white", bd=0, cursor="hand2", command=imprimir)
-        btn_imprimir.pack(fill=tk.X, padx=15, pady=10, ipady=6)
+        btn_imprimir = ctk.CTkButton(win, text="🖨️ Imprimir Copia", font=("Segoe UI", 11, "bold"), fg_color="#10B981", hover_color="#059669", text_color="white", height=38, corner_radius=6, command=imprimir)
+        btn_imprimir.pack(fill=tk.X, padx=15, pady=10)
 
     def anular_venta_seleccionada(self):
         seleccion = self.tabla_reporte.selection()
@@ -284,45 +285,45 @@ class ReportesTab:
             "==========================="
         )
 
-        win = tk.Toplevel(self.app.root)
+        win = ctk.CTkToplevel(self.app.root)
         win.title("Corte de Caja Diario")
-        win.geometry("340x380")
-        win.configure(bg="#F8FAFC")
+        win.geometry("360x420")
+        win.configure(fg_color="#F8FAFC")
         win.grab_set()
 
-        tk.Label(win, text="Cierre de Caja del Día", font=("Segoe UI", 12, "bold"), bg="#F8FAFC", fg="#0F172A").pack(pady=15)
+        ctk.CTkLabel(win, text="Cierre de Caja del Día", font=("Segoe UI", 12, "bold"), text_color="#0F172A").pack(pady=15)
 
-        txt = tk.Text(win, font=("Consolas", 10), height=10, width=38, bd=1, relief=tk.SOLID, bg="#FFFFFF", fg="#334155")
+        txt = ctk.CTkTextbox(win, font=("Consolas", 11), height=200, width=320, border_color="#D1D5DB", border_width=1, fg_color="#FFFFFF", text_color="#334155")
         txt.pack(pady=5, padx=15)
         txt.insert(tk.END, texto_corte)
-        txt.config(state=tk.DISABLED)
+        txt.configure(state="disabled")
 
         def copiar():
             self.app.root.clipboard_clear()
             self.app.root.clipboard_append(texto_corte)
-            messagebox.showinfo("Copiado", "¡Corte de caja copiado al portapapeles!")
+            messagebox.showinfo("Copiado", "¡Corte de caja copiado al portapapeles!", parent=win)
 
         def imprimir():
             impresora = self.app.config.get("impresora_ticket", "")
             if not impresora:
-                messagebox.showerror("Error", "No hay impresora configurada en Ajustes.")
+                messagebox.showerror("Error", "No hay impresora configurada en Ajustes.", parent=win)
                 return
             from utils.printer import enviar_impresion_directa
             exito, msg = enviar_impresion_directa(impresora, texto_corte)
             if exito:
-                messagebox.showinfo("Éxito", msg)
+                messagebox.showinfo("Éxito", msg, parent=win)
                 win.destroy()
             else:
-                messagebox.showerror("Error de Impresión", msg)
+                messagebox.showerror("Error de Impresión", msg, parent=win)
 
-        frame_btns = tk.Frame(win, bg="#F8FAFC")
+        frame_btns = ctk.CTkFrame(win, fg_color="transparent")
         frame_btns.pack(fill=tk.X, padx=15, pady=10)
 
-        btn_imprimir = tk.Button(frame_btns, text="🖨️ Imprimir Ticket", font=("Segoe UI", 10, "bold"), bg="#10B981", fg="white", bd=0, cursor="hand2", command=imprimir)
-        btn_imprimir.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5, ipady=6)
+        btn_imprimir = ctk.CTkButton(frame_btns, text="🖨️ Imprimir Ticket", font=("Segoe UI", 10, "bold"), fg_color="#10B981", hover_color="#059669", text_color="white", height=35, corner_radius=6, command=imprimir)
+        btn_imprimir.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
 
-        btn_copiar = tk.Button(frame_btns, text="📋 Copiar y Cerrar", font=("Segoe UI", 10, "bold"), bg="#4F46E5", fg="white", bd=0, cursor="hand2", command=copiar)
-        btn_copiar.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5, ipady=6)
+        btn_copiar = ctk.CTkButton(frame_btns, text="📋 Copiar y Cerrar", font=("Segoe UI", 10, "bold"), fg_color="#4F46E5", hover_color="#3730A3", text_color="white", height=35, corner_radius=6, command=copiar)
+        btn_copiar.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
 
     def exportar_reporte_csv(self):
         filtro = self.combo_filtro_fecha.get()
@@ -349,3 +350,196 @@ class ReportesTab:
             messagebox.showinfo("Exportación Exitosa", f"El archivo ha sido guardado exitosamente en:\n{ruta}")
         except Exception as e:
             messagebox.showerror("Error al guardar", f"No se pudo guardar el archivo:\n{str(e)}")
+
+    # ==========================================
+    # PESTAÑA NUEVA: TABLERO DE ANALÍTICAS (MATPLOTLIB)
+    # ==========================================
+    def construir_tab_analiticas(self):
+        # Panel superior de controles de analítica
+        frame_controles = ctk.CTkFrame(self.tab_analiticas, fg_color="#FFFFFF", border_color="#E2E8F0", border_width=1, corner_radius=8, height=60)
+        frame_controles.pack(fill=tk.X, padx=15, pady=(15, 10))
+
+        ctk.CTkLabel(frame_controles, text="📊 TABLERO ESTADÍSTICO DE TU NEGOCIO", font=("Segoe UI", 12, "bold"), text_color="#0F172A").pack(side=tk.LEFT, padx=15, pady=15)
+
+        # Combo para seleccionar rango en analíticas
+        ctk.CTkLabel(frame_controles, text="Período:", font=("Segoe UI", 10, "bold"), text_color="#64748B").pack(side=tk.LEFT, padx=(20, 5))
+        self.combo_filtro_analitica = ctk.CTkComboBox(frame_controles, values=["Todo", "Hoy", "Últimos 7 días", "Este Mes"], font=("Segoe UI", 10), height=28, width=120, command=lambda e: self.analitica_actualizar_datos())
+        self.combo_filtro_analitica.pack(side=tk.LEFT, padx=5)
+        self.combo_filtro_analitica.set("Este Mes")
+
+        # Contenedor para colocar los gráficos (Grid flexible)
+        self.frame_graficos = ctk.CTkFrame(self.tab_analiticas, fg_color="transparent")
+        self.frame_graficos.pack(fill=tk.BOTH, expand=True, padx=15, pady=(0, 15))
+
+        # Configurar grid de 2 columnas y 2 filas
+        self.frame_graficos.columnconfigure(0, weight=1)
+        self.frame_graficos.columnconfigure(1, weight=1)
+        self.frame_graficos.rowconfigure(0, weight=1)
+
+    def analitica_actualizar_datos(self):
+        filtro = self.combo_filtro_analitica.get()
+
+        # Limpiar widgets previos dentro del frame de gráficos
+        for widget in self.frame_graficos.winfo_children():
+            widget.destroy()
+
+        # Crear contenedores para los gráficos
+        # Panel Izquierdo: Línea de Tendencia (Ventas a lo largo del tiempo)
+        frame_izq = ctk.CTkFrame(self.frame_graficos, fg_color="#FFFFFF", border_color="#E2E8F0", border_width=1, corner_radius=12)
+        frame_izq.grid(row=0, column=0, padx=(0, 7), pady=5, sticky="nsew")
+        
+        # Panel Derecho Superior: Pie Chart (Método de Pago)
+        frame_der_up = ctk.CTkFrame(self.frame_graficos, fg_color="#FFFFFF", border_color="#E2E8F0", border_width=1, corner_radius=12)
+        frame_der_up.grid(row=0, column=1, padx=(7, 0), pady=5, sticky="nsew")
+
+        # Configurar filas extras para el gráfico de barras horizontales (Top Productos) en la fila inferior
+        self.frame_graficos.rowconfigure(1, weight=1)
+        frame_inf = ctk.CTkFrame(self.frame_graficos, fg_color="#FFFFFF", border_color="#E2E8F0", border_width=1, corner_radius=12)
+        frame_inf.grid(row=1, column=0, columnspan=2, padx=0, pady=(10, 5), sticky="nsew")
+
+        # Consultar datos para graficar
+        ventas = database.obtener_ventas_reporte(filtro)
+        resumen = database.obtener_resumen_ventas(filtro)
+
+        # ---------------------------------------------
+        # 1. GRÁFICO 1: TENDENCIA DE VENTAS (Líneas)
+        # ---------------------------------------------
+        fig_tendencia = Figure(figsize=(5, 3), dpi=90)
+        fig_tendencia.patch.set_facecolor('#FFFFFF')
+        ax_tendencia = fig_tendencia.add_subplot(111)
+        ax_tendencia.set_facecolor('#FFFFFF')
+        
+        # Agrupar ventas por fecha
+        datos_tiempo = {}
+        for v in reversed(ventas): # Invertir para orden cronológico
+            fecha_str = v[6].split(" ")[0] # Tomar solo YYYY-MM-DD
+            monto = v[5]
+            datos_tiempo[fecha_str] = datos_tiempo.get(fecha_str, 0.0) + monto
+
+        if datos_tiempo:
+            fechas = list(datos_tiempo.keys())
+            montos = list(datos_tiempo.values())
+            # Tomar solo las últimas 10 fechas para no saturar
+            fechas_plot = fechas[-10:]
+            montos_plot = montos[-10:]
+            
+            # Formatear etiquetas de fecha cortas
+            fechas_labels = [datetime.datetime.strptime(f, "%Y-%m-%d").strftime("%d/%m") if "-" in f else f for f in fechas_plot]
+
+            ax_tendencia.plot(fechas_labels, montos_plot, marker='o', color='#4F46E5', linewidth=2.5, markersize=6)
+            ax_tendencia.fill_between(fechas_labels, montos_plot, color='#4F46E5', alpha=0.1)
+        else:
+            ax_tendencia.text(0.5, 0.5, "Sin transacciones en este rango", ha='center', va='center', color='#64748B')
+
+        ax_tendencia.set_title("Evolución de Ingresos ($)", fontname="Segoe UI", fontsize=10, weight='bold', color="#0F172A", pad=10)
+        ax_tendencia.spines['top'].set_visible(False)
+        ax_tendencia.spines['right'].set_visible(False)
+        ax_tendencia.spines['left'].set_color('#E2E8F0')
+        ax_tendencia.spines['bottom'].set_color('#E2E8F0')
+        ax_tendencia.tick_params(axis='both', colors='#475569', labelsize=8)
+        ax_tendencia.grid(axis='y', linestyle='--', alpha=0.5, color='#E2E8F0')
+        fig_tendencia.tight_layout()
+
+        canvas_t = FigureCanvasTkAgg(fig_tendencia, master=frame_izq)
+        canvas_t.draw()
+        canvas_t.get_tk_widget().pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+
+        # ---------------------------------------------
+        # 2. GRÁFICO 2: MÉTODOS DE PAGO (Circular)
+        # ---------------------------------------------
+        fig_pagos = Figure(figsize=(4.5, 3), dpi=90)
+        fig_pagos.patch.set_facecolor('#FFFFFF')
+        ax_pagos = fig_pagos.add_subplot(111)
+        
+        datos_pagos = {}
+        for v in ventas:
+            mp = v[7]
+            monto = v[5]
+            datos_pagos[mp] = datos_pagos.get(mp, 0.0) + monto
+
+        if datos_pagos:
+            labels = list(datos_pagos.keys())
+            valores = list(datos_pagos.values())
+            colores = ['#10B981', '#38BDF8', '#F59E0B', '#8B5CF6', '#EF4444', '#EC4899']
+            
+            # Dibujar gráfico de pastel plano y elegante
+            wedges, texts, autotexts = ax_pagos.pie(
+                valores, 
+                labels=labels, 
+                autopct='%1.0f%%', 
+                startangle=90, 
+                colors=colores[:len(labels)],
+                textprops=dict(color="#1E293B", fontname="Segoe UI", fontsize=8),
+                wedgeprops=dict(width=0.4, edgecolor='w', linewidth=2) # Estilo Donut
+            )
+            for autotext in autotexts:
+                autotext.set_color('white')
+                autotext.set_weight('bold')
+        else:
+            ax_pagos.text(0.5, 0.5, "Sin datos de cobros", ha='center', va='center', color='#64748B')
+            
+        ax_pagos.set_title("Canales de Venta / Métodos de Pago", fontname="Segoe UI", fontsize=10, weight='bold', color="#0F172A", pad=10)
+        fig_pagos.tight_layout()
+
+        canvas_p = FigureCanvasTkAgg(fig_pagos, master=frame_der_up)
+        canvas_p.draw()
+        canvas_p.get_tk_widget().pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+
+        # ---------------------------------------------
+        # 3. GRÁFICO 3: TOP 5 PRODUCTOS MÁS VENDIDOS (Barras Horizontales)
+        # ---------------------------------------------
+        fig_productos = Figure(figsize=(8, 2.5), dpi=90)
+        fig_productos.patch.set_facecolor('#FFFFFF')
+        ax_productos = fig_productos.add_subplot(111)
+        ax_productos.set_facecolor('#FFFFFF')
+
+        # Agrupar productos más vendidos
+        datos_productos = {}
+        for v in ventas:
+            prod_nombre = v[2]
+            cant = v[3]
+            datos_productos[prod_nombre] = datos_productos.get(prod_nombre, 0) + cant
+
+        if datos_productos:
+            # Ordenar descendente y tomar los top 5
+            productos_sorted = sorted(datos_productos.items(), key=lambda x: x[1], reverse=True)[:5]
+            nombres_prod = [x[0] for x in productos_sorted]
+            cants_prod = [x[1] for x in productos_sorted]
+
+            # Invertir para que el mayor quede arriba
+            nombres_prod.reverse()
+            cants_prod.reverse()
+            
+            # Recortar nombres largos
+            nombres_cortos = [n[:18] + ".." if len(n) > 20 else n for n in nombres_prod]
+
+            bars = ax_productos.barh(nombres_cortos, cants_prod, color='#6366F1', height=0.6, edgecolor='none')
+            
+            # Mostrar números en el extremo de la barra
+            for bar in bars:
+                width = bar.get_width()
+                ax_productos.text(
+                    width + 0.1, 
+                    bar.get_y() + bar.get_height()/2, 
+                    f"{int(width)} uds", 
+                    ha='left', 
+                    va='center', 
+                    color='#475569', 
+                    fontname="Segoe UI", 
+                    fontsize=8, 
+                    weight='bold'
+                )
+        else:
+            ax_productos.text(0.5, 0.5, "Sin productos vendidos en el rango", ha='center', va='center', color='#64748B')
+
+        ax_productos.set_title("Top 5 Productos con Mayor Rotación (Cantidad)", fontname="Segoe UI", fontsize=10, weight='bold', color="#0F172A", pad=10)
+        ax_productos.spines['top'].set_visible(False)
+        ax_productos.spines['right'].set_visible(False)
+        ax_productos.spines['left'].set_color('#E2E8F0')
+        ax_productos.spines['bottom'].set_color('#E2E8F0')
+        ax_productos.tick_params(axis='both', colors='#475569', labelsize=8)
+        fig_productos.tight_layout()
+
+        canvas_pr = FigureCanvasTkAgg(fig_productos, master=frame_inf)
+        canvas_pr.draw()
+        canvas_pr.get_tk_widget().pack(fill=tk.BOTH, expand=True, padx=10, pady=10)

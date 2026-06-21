@@ -60,7 +60,9 @@ def init_db():
                 direccion TEXT,
                 mensaje_ticket TEXT DEFAULT '¡Gracias por su compra!',
                 impresora_ticket TEXT,
-                pais_operacion TEXT DEFAULT 'Otro / Ninguno (Solo local)'
+                pais_operacion TEXT DEFAULT 'Otro / Ninguno (Solo local)',
+                supabase_url TEXT,
+                supabase_key TEXT
             )
         """)
         cursor.execute("""
@@ -192,7 +194,9 @@ def init_db():
         # Migraciones Configuracion
         columnas_config = [
             ("impresora_ticket", "TEXT"),
-            ("pais_operacion", "TEXT DEFAULT 'Otro / Ninguno (Solo local)'")
+            ("pais_operacion", "TEXT DEFAULT 'Otro / Ninguno (Solo local)'"),
+            ("supabase_url", "TEXT"),
+            ("supabase_key", "TEXT")
         ]
         for col_name, col_type in columnas_config:
             try:
@@ -210,7 +214,8 @@ def init_db():
             ("descuento", "REAL DEFAULT 0.0"),
             ("propina", "REAL DEFAULT 0.0"),
             ("es_cortesia", "INTEGER DEFAULT 0"),
-            ("autorizado_por", "TEXT")
+            ("autorizado_por", "TEXT"),
+            ("sincronizado", "INTEGER DEFAULT 0")
         ]
         for col_name, col_type in columnas_ventas:
             try:
@@ -455,7 +460,7 @@ def obtener_top_productos(filtro_fecha="Todo"):
 def obtener_configuracion():
     with sqlite3.connect(DB_NAME) as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT nombre_empresa, propietario, telefono, direccion, mensaje_ticket, impresora_ticket, pais_operacion FROM configuracion WHERE id = 1")
+        cursor.execute("SELECT nombre_empresa, propietario, telefono, direccion, mensaje_ticket, impresora_ticket, pais_operacion, supabase_url, supabase_key FROM configuracion WHERE id = 1")
         res = cursor.fetchone()
         if res:
             return {
@@ -465,11 +470,13 @@ def obtener_configuracion():
                 "direccion": res[3] or "",
                 "mensaje_ticket": res[4] or "¡Gracias por su compra!",
                 "impresora_ticket": res[5] or "",
-                "pais_operacion": res[6] or "Otro / Ninguno (Solo local)"
+                "pais_operacion": res[6] or "Otro / Ninguno (Solo local)",
+                "supabase_url": res[7] or "",
+                "supabase_key": res[8] or ""
             }
         return None
 
-def guardar_configuracion(nombre_empresa, propietario, telefono, direccion, mensaje_ticket, impresora_ticket="", pais_operacion="Otro / Ninguno (Solo local)"):
+def guardar_configuracion(nombre_empresa, propietario, telefono, direccion, mensaje_ticket, impresora_ticket="", pais_operacion="Otro / Ninguno (Solo local)", supabase_url="", supabase_key=""):
     with sqlite3.connect(DB_NAME) as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT COUNT(*) FROM configuracion WHERE id = 1")
@@ -478,14 +485,14 @@ def guardar_configuracion(nombre_empresa, propietario, telefono, direccion, mens
         if existe:
             cursor.execute("""
                 UPDATE configuracion 
-                SET nombre_empresa = ?, propietario = ?, telefono = ?, direccion = ?, mensaje_ticket = ?, impresora_ticket = ?, pais_operacion = ?
+                SET nombre_empresa = ?, propietario = ?, telefono = ?, direccion = ?, mensaje_ticket = ?, impresora_ticket = ?, pais_operacion = ?, supabase_url = ?, supabase_key = ?
                 WHERE id = 1
-            """, (nombre_empresa, propietario, telefono, direccion, mensaje_ticket, impresora_ticket, pais_operacion))
+            """, (nombre_empresa, propietario, telefono, direccion, mensaje_ticket, impresora_ticket, pais_operacion, supabase_url, supabase_key))
         else:
             cursor.execute("""
-                INSERT INTO configuracion (id, nombre_empresa, propietario, telefono, direccion, mensaje_ticket, impresora_ticket, pais_operacion)
-                VALUES (1, ?, ?, ?, ?, ?, ?, ?)
-            """, (nombre_empresa, propietario, telefono, direccion, mensaje_ticket, impresora_ticket, pais_operacion))
+                INSERT INTO configuracion (id, nombre_empresa, propietario, telefono, direccion, mensaje_ticket, impresora_ticket, pais_operacion, supabase_url, supabase_key)
+                VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (nombre_empresa, propietario, telefono, direccion, mensaje_ticket, impresora_ticket, pais_operacion, supabase_url, supabase_key))
         conn.commit()
 
 
@@ -715,3 +722,28 @@ def cerrar_turno_caja(turno_id, monto_cierre_real):
                        (turno_id, monto_cierre_real))
         conn.commit()
         return True, "Turno cerrado exitosamente."
+
+# --- FUNCIONES DE SINCRONIZACIÓN EN LA NUBE ---
+
+def obtener_ventas_no_sincronizadas():
+    with sqlite3.connect(DB_NAME) as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT v.id, p.codigo, p.nombre, v.cantidad, v.precio_unitario, v.total, v.fecha, v.metodo_pago, v.descuento, v.cliente_nombre, v.impuestos
+            FROM ventas v
+            JOIN productos p ON v.producto_id = p.id
+            WHERE v.sincronizado = 0
+        """)
+        return cursor.fetchall()
+
+def marcar_venta_sincronizada(venta_id):
+    with sqlite3.connect(DB_NAME) as conn:
+        cursor = conn.cursor()
+        cursor.execute("UPDATE ventas SET sincronizado = 1 WHERE id = ?", (venta_id,))
+        conn.commit()
+
+def obtener_todos_productos():
+    with sqlite3.connect(DB_NAME) as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, codigo, nombre, categoria, precio_venta, stock, stock_minimo FROM productos")
+        return cursor.fetchall()
