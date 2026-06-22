@@ -26,7 +26,7 @@ class InventarioApp:
         self.root = root
         self.root.withdraw()  # Ocultar inmediatamente para evitar parpadeos
         self.root.geometry("1200x750")
-        self.root.configure(bg=("#F8FAFC", ("#0F172A", "#F8FAFC")))  # Slate 50
+        self.root.configure(fg_color=("#F8FAFC", "#0F172A"))  # Slate 50
 
         database.init_db()
         self.config = database.obtener_configuracion()
@@ -146,19 +146,7 @@ class InventarioApp:
         style.theme_use("clam")
 
         # Estilo del Treeview
-        style.configure("Treeview",
-                        background=("#FFFFFF", "#1E293B"),
-                        foreground="#1E293B",
-                        fieldbackground=("#FFFFFF", "#1E293B"),
-                        font=("Segoe UI", 9),
-                        rowheight=30)
-        style.configure("Treeview.Heading",
-                        background="#F1F5F9",
-                        foreground="#334155",
-                        font=("Segoe UI", 9, "bold"))
-        style.map("Treeview",
-                  background=[('selected', '#E0E7FF')],
-                  foreground=[('selected', '#312E81')])
+        self.actualizar_estilos_treeview()
 
         # Contenedor principal de pestañas usando CustomTkinter
         import customtkinter as ctk
@@ -201,6 +189,42 @@ class InventarioApp:
         # Verificar stock bajo al iniciar
         self.root.after(2000, self.verificar_stock_bajo_inicio)
         
+    def actualizar_estilos_treeview(self):
+        style = ttk.Style()
+        import customtkinter as ctk
+        mode = ctk.get_appearance_mode()
+        
+        if mode == "Dark":
+            bg_color = "#1E293B"       # Slate 800
+            fg_color = "#F8FAFC"       # Slate 50
+            heading_bg = "#0F172A"     # Slate 900
+            heading_fg = "#F8FAFC"     # Slate 50
+            selected_bg = "#334155"    # Slate 700
+            selected_fg = "#FFFFFF"
+        else:
+            bg_color = "#FFFFFF"
+            fg_color = "#0F172A"       # Slate 900
+            heading_bg = "#F1F5F9"     # Slate 100
+            heading_fg = "#334155"     # Slate 700
+            selected_bg = "#E0E7FF"    # Indigo 100
+            selected_fg = "#312E81"    # Indigo 900
+
+        style.configure("Treeview",
+                        background=bg_color,
+                        foreground=fg_color,
+                        fieldbackground=bg_color,
+                        font=("Segoe UI", 9),
+                        rowheight=30)
+        
+        style.configure("Treeview.Heading",
+                        background=heading_bg,
+                        foreground=heading_fg,
+                        font=("Segoe UI", 9, "bold"))
+        
+        style.map("Treeview",
+                  background=[('selected', selected_bg)],
+                  foreground=[('selected', selected_fg)])
+
     def verificar_stock_bajo_inicio(self):
         productos_bajos = database.obtener_productos_stock_bajo()
         if productos_bajos:

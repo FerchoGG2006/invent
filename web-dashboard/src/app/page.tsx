@@ -11,7 +11,8 @@ import clsx from "clsx";
 // Types
 type Venta = {
   id: number;
-  producto_id: number;
+  producto_id?: number;
+  nombre?: string;
   cantidad: number;
   precio_unitario: number;
   total: number;
@@ -115,8 +116,7 @@ export default function Dashboard() {
 
   // Top Productos Data
   const ventasPorProducto = filteredVentas.reduce((acc: any, v) => {
-    const prod = productos.find(p => p.id === v.producto_id);
-    const nombre = prod ? prod.nombre : `Producto #${v.producto_id}`;
+    const nombre = v.nombre || (v.producto_id ? `Producto #${v.producto_id}` : "Producto Desconocido");
     if (!acc[nombre]) acc[nombre] = 0;
     acc[nombre] += v.cantidad;
     return acc;

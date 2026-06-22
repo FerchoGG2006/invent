@@ -36,7 +36,7 @@ class PosTab:
         frame_busca_pos.pack(fill=tk.X, padx=15, pady=(0, 5))
         ctk.CTkLabel(frame_busca_pos, text="Buscar:", font=("Segoe UI", 10, "bold"), text_color=("#475569", "#CBD5E1")).pack(side=tk.LEFT, padx=(5, 10))
 
-        self.entry_busca_pos = ctk.CTkEntry(frame_busca_pos, font=("Segoe UI", 11), fg_color=("#F8FAFC", ("#0F172A", "#F8FAFC")), text_color=("#0F172A", "#F8FAFC"), border_color=("#D1D5DB", "#475569"), height=32, corner_radius=6)
+        self.entry_busca_pos = ctk.CTkEntry(frame_busca_pos, font=("Segoe UI", 11), fg_color=("#F8FAFC", "#0F172A"), text_color=("#0F172A", "#F8FAFC"), border_color=("#D1D5DB", "#475569"), height=32, corner_radius=6)
         self.entry_busca_pos.pack(side=tk.LEFT, fill=tk.X, expand=True)
         self.entry_busca_pos.bind("<KeyRelease>", lambda e: self.pos_actualizar_lista_productos(self.entry_busca_pos.get()))
         self.entry_busca_pos.bind("<Return>", self.pos_on_busca_enter)
@@ -60,18 +60,18 @@ class PosTab:
         frame_control_add.pack(fill=tk.X, padx=15, pady=10)
 
         ctk.CTkLabel(frame_control_add, text="Cant:", font=("Segoe UI", 9, "bold"), text_color=("#475569", "#CBD5E1")).grid(row=0, column=0, padx=2, sticky=tk.W)
-        self.entry_cant_pos = ctk.CTkEntry(frame_control_add, font=("Segoe UI", 10, "bold"), width=60, fg_color=("#F8FAFC", ("#0F172A", "#F8FAFC")), text_color=("#0F172A", "#F8FAFC"), border_color=("#D1D5DB", "#475569"), height=28, justify=tk.CENTER)
+        self.entry_cant_pos = ctk.CTkEntry(frame_control_add, font=("Segoe UI", 10, "bold"), width=60, fg_color=("#F8FAFC", "#0F172A"), text_color=("#0F172A", "#F8FAFC"), border_color=("#D1D5DB", "#475569"), height=28, justify=tk.CENTER)
         self.entry_cant_pos.grid(row=0, column=1, padx=5, pady=2)
         self.entry_cant_pos.insert(0, "1")
         self.entry_cant_pos.bind("<Return>", self.pos_on_cant_enter)
 
         ctk.CTkLabel(frame_control_add, text="Precio ($):", font=("Segoe UI", 9, "bold"), text_color=("#475569", "#CBD5E1")).grid(row=0, column=2, padx=2, sticky=tk.W)
-        self.entry_precio_pos = ctk.CTkEntry(frame_control_add, font=("Segoe UI", 10, "bold"), width=90, fg_color=("#F8FAFC", ("#0F172A", "#F8FAFC")), text_color=("#0F172A", "#F8FAFC"), border_color=("#D1D5DB", "#475569"), height=28, justify=tk.CENTER)
+        self.entry_precio_pos = ctk.CTkEntry(frame_control_add, font=("Segoe UI", 10, "bold"), width=90, fg_color=("#F8FAFC", "#0F172A"), text_color=("#0F172A", "#F8FAFC"), border_color=("#D1D5DB", "#475569"), height=28, justify=tk.CENTER)
         self.entry_precio_pos.grid(row=0, column=3, padx=5, pady=2)
         self.entry_precio_pos.bind("<Return>", self.pos_on_precio_enter)
         
         ctk.CTkLabel(frame_control_add, text="Nota:", font=("Segoe UI", 9, "bold"), text_color=("#475569", "#CBD5E1")).grid(row=1, column=0, padx=2, sticky=tk.W)
-        self.entry_nota_pos = ctk.CTkEntry(frame_control_add, font=("Segoe UI", 9), fg_color=("#F8FAFC", ("#0F172A", "#F8FAFC")), text_color=("#0F172A", "#F8FAFC"), border_color=("#D1D5DB", "#475569"), height=28)
+        self.entry_nota_pos = ctk.CTkEntry(frame_control_add, font=("Segoe UI", 9), fg_color=("#F8FAFC", "#0F172A"), text_color=("#0F172A", "#F8FAFC"), border_color=("#D1D5DB", "#475569"), height=28)
         self.entry_nota_pos.grid(row=1, column=1, columnspan=3, sticky=tk.EW, padx=5, pady=2)
         self.entry_nota_pos.bind("<Return>", self.pos_on_precio_enter)
 
@@ -84,11 +84,11 @@ class PosTab:
 
         ctk.CTkLabel(frame_pos_preview, text="Imagen del Producto:", font=("Segoe UI", 9, "bold"), text_color=("#64748B", "#94A3B8")).pack(side=tk.LEFT, padx=5, anchor=tk.N)
         
-        frame_pos_img_container = ctk.CTkFrame(frame_pos_preview, fg_color=("#F8FAFC", ("#0F172A", "#F8FAFC")), border_color=("#D1D5DB", "#475569"), border_width=1, width=220, height=140, corner_radius=6)
+        frame_pos_img_container = ctk.CTkFrame(frame_pos_preview, fg_color=("#F8FAFC", "#0F172A"), border_color=("#D1D5DB", "#475569"), border_width=1, width=220, height=140, corner_radius=6)
         frame_pos_img_container.pack(side=tk.LEFT, padx=10)
         frame_pos_img_container.pack_propagate(False)
         
-        self.lbl_pos_foto_preview = tk.Label(frame_pos_img_container, text="Sin foto", font=("Segoe UI", 9, "italic"), bg=("#F8FAFC", ("#0F172A", "#F8FAFC")), fg="#94A3B8", compound="center")
+        self.lbl_pos_foto_preview = tk.Label(frame_pos_img_container, text="Sin foto", font=("Segoe UI", 9, "italic"), bg="#F8FAFC", fg="#94A3B8", compound="center")
         self.lbl_pos_foto_preview.pack(expand=True, fill=tk.BOTH)
 
         # Panel Derecho (Carrito de Compra)
@@ -123,7 +123,7 @@ class PosTab:
         cell_name = ctk.CTkFrame(frame_cliente_grid, fg_color="transparent")
         cell_name.grid(row=0, column=0, padx=5, sticky="ew")
         ctk.CTkLabel(cell_name, text="Nombre / Razón Social", font=("Segoe UI", 8, "bold"), text_color=("#64748B", "#94A3B8")).pack(anchor=tk.W)
-        self.app.entry_cliente_nombre = ctk.CTkEntry(cell_name, font=("Segoe UI", 9), fg_color=("#F8FAFC", ("#0F172A", "#F8FAFC")), text_color=("#0F172A", "#F8FAFC"), border_color=("#D1D5DB", "#475569"), height=28, corner_radius=5)
+        self.app.entry_cliente_nombre = ctk.CTkEntry(cell_name, font=("Segoe UI", 9), fg_color=("#F8FAFC", "#0F172A"), text_color=("#0F172A", "#F8FAFC"), border_color=("#D1D5DB", "#475569"), height=28, corner_radius=5)
         self.app.entry_cliente_nombre.pack(fill=tk.X, pady=1)
 
         cell_id = ctk.CTkFrame(frame_cliente_grid, fg_color="transparent")
@@ -135,20 +135,12 @@ class PosTab:
         self.app.lbl_cliente_identificacion = ctk.CTkLabel(cell_id, text=lbl_id_text, font=("Segoe UI", 8, "bold"), text_color=("#64748B", "#94A3B8"))
         self.app.lbl_cliente_identificacion.pack(anchor=tk.W)
 
-        self.app.entry_cliente_identificacion = ctk.CTkEntry(cell_id, font=("Segoe UI", 9), fg_color=("#F8FAFC", ("#0F172A", "#F8FAFC")), text_color=("#0F172A", "#F8FAFC"), border_color=("#D1D5DB", "#475569"), height=28, corner_radius=5)
+        self.app.entry_cliente_identificacion = ctk.CTkEntry(cell_id, font=("Segoe UI", 9), fg_color=("#F8FAFC", "#0F172A"), text_color=("#0F172A", "#F8FAFC"), border_color=("#D1D5DB", "#475569"), height=28, corner_radius=5)
         self.app.entry_cliente_identificacion.pack(fill=tk.X, pady=1)
         
         self.app.entry_cliente_identificacion.bind("<Return>", self.pos_buscar_cliente_por_id)
         self.app.entry_cliente_identificacion.bind("<FocusOut>", self.pos_buscar_cliente_por_id)
 
-    def pos_buscar_cliente_por_id(self, event=None):
-        identificacion = self.app.entry_cliente_identificacion.get().strip()
-        if not identificacion:
-            return
-        cliente = database.buscar_cliente_por_identificacion(identificacion)
-        if cliente:
-            self.app.entry_cliente_nombre.delete(0, tk.END)
-            self.app.entry_cliente_nombre.insert(0, cliente[1]) # Nombre
 
         # Panel de cobro, total, descuentos y propinas
         frame_total = ctk.CTkFrame(frame_pos_right, fg_color="transparent")
@@ -196,6 +188,15 @@ class PosTab:
         self.combo_pago = ctk.CTkComboBox(frame_total_botones, values=metodos, font=("Segoe UI", 9), height=28, width=110, corner_radius=6, command=self.on_metodo_pago_changed)
         self.combo_pago.pack(side=tk.RIGHT, padx=2)
         self.combo_pago.set("Efectivo")
+
+    def pos_buscar_cliente_por_id(self, event=None):
+        identificacion = self.app.entry_cliente_identificacion.get().strip()
+        if not identificacion:
+            return
+        cliente = database.buscar_cliente_por_identificacion(identificacion)
+        if cliente:
+            self.app.entry_cliente_nombre.delete(0, tk.END)
+            self.app.entry_cliente_nombre.insert(0, cliente[1]) # Nombre
 
     def actualizar_estado_nube(self):
         from utils import sync

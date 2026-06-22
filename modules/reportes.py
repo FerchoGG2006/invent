@@ -9,6 +9,16 @@ import datetime
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 
+
+def rc(color_val):
+    if isinstance(color_val, tuple):
+        import customtkinter as ctk
+        try:
+            return color_val[1] if ctk.get_appearance_mode() == "Dark" else color_val[0]
+        except Exception:
+            return color_val[0]
+    return color_val
+
 class ReportesTab:
     def __init__(self, app):
         self.app = app
@@ -33,10 +43,10 @@ class ReportesTab:
         frame_cards.pack(fill=tk.X, padx=15, pady=(15, 5))
 
         # Tarjeta 1: Ventas Totales del Rango
-        self.card_hoy = ctk.CTkFrame(frame_cards, fg_color=("#FFFFFF", "#1E293B"), border_color=("#E2E8F0", "#334155"), border_width=1, corner_radius=8)
+        self.card_hoy = ctk.CTkFrame(frame_cards, fg_color=("#FFFFFF", "#1E293B"), border_color=rc(("#E2E8F0", "#334155")), border_width=1, corner_radius=8)
         self.card_hoy.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 5))
 
-        self.lbl_card_hoy_titulo = ctk.CTkLabel(self.card_hoy, text="Ventas del Período", font=("Segoe UI", 10, "bold"), text_color=("#64748B", "#94A3B8"))
+        self.lbl_card_hoy_titulo = ctk.CTkLabel(self.card_hoy, text="Ventas del Período", font=("Segoe UI", 10, "bold"), text_color=rc(("#64748B", "#94A3B8")))
         self.lbl_card_hoy_titulo.pack(anchor=tk.W, padx=15, pady=(10, 0))
         self.lbl_card_hoy_valor = ctk.CTkLabel(self.card_hoy, text="$0", font=("Segoe UI", 18, "bold"), text_color="#4F46E5")
         self.lbl_card_hoy_valor.pack(anchor=tk.W, padx=15, pady=(2, 0))
@@ -44,21 +54,21 @@ class ReportesTab:
         self.lbl_card_hoy_sub.pack(anchor=tk.W, padx=15, pady=(0, 10))
 
         # Tarjeta 2: Ingresos por Tipo de Pago
-        self.card_total = ctk.CTkFrame(frame_cards, fg_color=("#FFFFFF", "#1E293B"), border_color=("#E2E8F0", "#334155"), border_width=1, corner_radius=8)
+        self.card_total = ctk.CTkFrame(frame_cards, fg_color=("#FFFFFF", "#1E293B"), border_color=rc(("#E2E8F0", "#334155")), border_width=1, corner_radius=8)
         self.card_total.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
 
-        self.lbl_card_tot_titulo = ctk.CTkLabel(self.card_total, text="Ingresos por Pago", font=("Segoe UI", 10, "bold"), text_color=("#64748B", "#94A3B8"))
+        self.lbl_card_tot_titulo = ctk.CTkLabel(self.card_total, text="Ingresos por Pago", font=("Segoe UI", 10, "bold"), text_color=rc(("#64748B", "#94A3B8")))
         self.lbl_card_tot_titulo.pack(anchor=tk.W, padx=15, pady=(10, 0))
-        self.lbl_card_tot_valor = ctk.CTkLabel(self.card_total, text="Efectivo / Transferencia", font=("Segoe UI", 12, "bold"), text_color=("#0F172A", "#F8FAFC"))
+        self.lbl_card_tot_valor = ctk.CTkLabel(self.card_total, text="Efectivo / Transferencia", font=("Segoe UI", 12, "bold"), text_color=rc(("#0F172A", "#F8FAFC")))
         self.lbl_card_tot_valor.pack(anchor=tk.W, padx=15, pady=(2, 0))
-        self.lbl_card_tot_sub = ctk.CTkLabel(self.card_total, text="Efe: $0 | Transf: $0", font=("Segoe UI", 10), text_color=("#475569", "#CBD5E1"))
+        self.lbl_card_tot_sub = ctk.CTkLabel(self.card_total, text="Efe: $0 | Transf: $0", font=("Segoe UI", 10), text_color=rc(("#475569", "#CBD5E1")))
         self.lbl_card_tot_sub.pack(anchor=tk.W, padx=15, pady=(0, 10))
 
         # Tarjeta 3: Utilidad Real (Ganancia Neta)
-        self.card_utilidad = ctk.CTkFrame(frame_cards, fg_color=("#FFFFFF", "#1E293B"), border_color=("#E2E8F0", "#334155"), border_width=1, corner_radius=8)
+        self.card_utilidad = ctk.CTkFrame(frame_cards, fg_color=("#FFFFFF", "#1E293B"), border_color=rc(("#E2E8F0", "#334155")), border_width=1, corner_radius=8)
         self.card_utilidad.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
 
-        self.lbl_card_ut_titulo = ctk.CTkLabel(self.card_utilidad, text="Ganancia Neta (Utilidad)", font=("Segoe UI", 10, "bold"), text_color=("#64748B", "#94A3B8"))
+        self.lbl_card_ut_titulo = ctk.CTkLabel(self.card_utilidad, text="Ganancia Neta (Utilidad)", font=("Segoe UI", 10, "bold"), text_color=rc(("#64748B", "#94A3B8")))
         self.lbl_card_ut_titulo.pack(anchor=tk.W, padx=15, pady=(10, 0))
         self.lbl_card_ut_valor = ctk.CTkLabel(self.card_utilidad, text="$0", font=("Segoe UI", 18, "bold"), text_color="#10B981")
         self.lbl_card_ut_valor.pack(anchor=tk.W, padx=15, pady=(2, 0))
@@ -66,26 +76,26 @@ class ReportesTab:
         self.lbl_card_ut_sub.pack(anchor=tk.W, padx=15, pady=(0, 10))
 
         # Tarjeta 4: Top 3 Más Vendidos
-        self.card_top = ctk.CTkFrame(frame_cards, fg_color=("#FFFFFF", "#1E293B"), border_color=("#E2E8F0", "#334155"), border_width=1, corner_radius=8)
+        self.card_top = ctk.CTkFrame(frame_cards, fg_color=("#FFFFFF", "#1E293B"), border_color=rc(("#E2E8F0", "#334155")), border_width=1, corner_radius=8)
         self.card_top.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(5, 0))
 
-        self.lbl_card_top_titulo = ctk.CTkLabel(self.card_top, text="Top 3 Más Vendidos", font=("Segoe UI", 10, "bold"), text_color=("#64748B", "#94A3B8"))
+        self.lbl_card_top_titulo = ctk.CTkLabel(self.card_top, text="Top 3 Más Vendidos", font=("Segoe UI", 10, "bold"), text_color=rc(("#64748B", "#94A3B8")))
         self.lbl_card_top_titulo.pack(anchor=tk.W, padx=15, pady=(10, 0))
         self.lbl_card_top_valor = ctk.CTkLabel(self.card_top, text="Cargando...", font=("Segoe UI", 10, "bold"), text_color="#334155", justify=tk.LEFT)
         self.lbl_card_top_valor.pack(anchor=tk.W, padx=15, pady=(2, 10))
 
         # Grid de Reportes
-        frame_reporte_grid = ctk.CTkFrame(self.tab, fg_color=("#FFFFFF", "#1E293B"), border_color=("#E2E8F0", "#334155"), border_width=1, corner_radius=12)
+        frame_reporte_grid = ctk.CTkFrame(self.tab, fg_color=("#FFFFFF", "#1E293B"), border_color=rc(("#E2E8F0", "#334155")), border_width=1, corner_radius=12)
         frame_reporte_grid.pack(fill=tk.BOTH, expand=True, padx=15, pady=15)
 
         # Header de controles (Filtro de fecha y botones de acción)
         frame_controles_rep = ctk.CTkFrame(frame_reporte_grid, fg_color="transparent")
         frame_controles_rep.pack(fill=tk.X, padx=15, pady=15)
 
-        ctk.CTkLabel(frame_controles_rep, text="TRANSACCIONES REGISTRADAS", font=("Segoe UI", 11, "bold"), text_color=("#0F172A", "#F8FAFC")).pack(side=tk.LEFT)
+        ctk.CTkLabel(frame_controles_rep, text="TRANSACCIONES REGISTRADAS", font=("Segoe UI", 11, "bold"), text_color=rc(("#0F172A", "#F8FAFC"))).pack(side=tk.LEFT)
 
         # Selector de Fecha
-        ctk.CTkLabel(frame_controles_rep, text="Filtrar:", font=("Segoe UI", 10, "bold"), text_color=("#64748B", "#94A3B8")).pack(side=tk.LEFT, padx=(20, 5))
+        ctk.CTkLabel(frame_controles_rep, text="Filtrar:", font=("Segoe UI", 10, "bold"), text_color=rc(("#64748B", "#94A3B8"))).pack(side=tk.LEFT, padx=(20, 5))
         self.combo_filtro_fecha = ctk.CTkComboBox(frame_controles_rep, values=["Todo", "Hoy", "Últimos 7 días", "Este Mes"], font=("Segoe UI", 10), height=28, width=120, command=lambda e: self.reporte_actualizar_datos())
         self.combo_filtro_fecha.pack(side=tk.LEFT, padx=5)
         self.combo_filtro_fecha.set("Todo")
@@ -94,7 +104,7 @@ class ReportesTab:
         btn_logout = ctk.CTkButton(frame_controles_rep, text="🚪 Cerrar Sesión", font=("Segoe UI", 10, "bold"), fg_color="#EF4444", hover_color="#DC2626", text_color="white", height=28, width=105, corner_radius=6, command=self.app.cerrar_sesion)
         btn_logout.pack(side=tk.RIGHT, padx=3)
 
-        btn_config = ctk.CTkButton(frame_controles_rep, text="⚙️ Configuración", font=("Segoe UI", 10, "bold"), fg_color=("#475569", "#CBD5E1"), hover_color="#334155", text_color="white", height=28, width=105, corner_radius=6, command=self.app.mostrar_editar_configuracion)
+        btn_config = ctk.CTkButton(frame_controles_rep, text="⚙️ Configuración", font=("Segoe UI", 10, "bold"), fg_color=rc(("#475569", "#CBD5E1")), hover_color="#334155", text_color="white", height=28, width=105, corner_radius=6, command=self.app.mostrar_editar_configuracion)
         btn_config.pack(side=tk.RIGHT, padx=3)
 
         btn_usuarios = ctk.CTkButton(frame_controles_rep, text="👥 Usuarios", font=("Segoe UI", 10, "bold"), fg_color="#8B5CF6", hover_color="#7C3AED", text_color="white", height=28, width=90, corner_radius=6, command=self.app.mostrar_gestion_usuarios)
@@ -115,7 +125,7 @@ class ReportesTab:
         btn_corte = ctk.CTkButton(frame_controles_rep, text="Corte de Caja", font=("Segoe UI", 10, "bold"), fg_color="#10B981", hover_color="#059669", text_color="white", height=28, width=95, corner_radius=6, command=self.generar_corte_caja)
         btn_corte.pack(side=tk.RIGHT, padx=3)
 
-        btn_exportar = ctk.CTkButton(frame_controles_rep, text="Exportar (CSV)", font=("Segoe UI", 10, "bold"), fg_color="#1E293B", hover_color=("#0F172A", "#F8FAFC"), text_color="white", height=28, width=95, corner_radius=6, command=self.exportar_reporte_csv)
+        btn_exportar = ctk.CTkButton(frame_controles_rep, text="Exportar (CSV)", font=("Segoe UI", 10, "bold"), fg_color="#1E293B", hover_color=rc(("#0F172A", "#F8FAFC")), text_color="white", height=28, width=95, corner_radius=6, command=self.exportar_reporte_csv)
         btn_exportar.pack(side=tk.RIGHT, padx=3)
 
         btn_exportar_pdf = ctk.CTkButton(frame_controles_rep, text="Exportar (PDF)", font=("Segoe UI", 10, "bold"), fg_color="#0EA5E9", hover_color="#0284C7", text_color="white", height=28, width=95, corner_radius=6, command=self.exportar_reporte_pdf)
@@ -227,10 +237,10 @@ class ReportesTab:
         win = ctk.CTkToplevel(self.app.root)
         win.title(f"Ticket de Venta #{venta_id}")
         win.geometry("360x540")
-        win.configure(fg_color=("#F8FAFC", ("#0F172A", "#F8FAFC")))
+        win.configure(fg_color=("#F8FAFC", "#0F172A"))
         win.grab_set()
 
-        ctk.CTkLabel(win, text="Copia de Ticket", font=("Segoe UI", 12, "bold"), text_color=("#0F172A", "#F8FAFC")).pack(pady=10)
+        ctk.CTkLabel(win, text="Copia de Ticket", font=("Segoe UI", 12, "bold"), text_color=rc(("#0F172A", "#F8FAFC"))).pack(pady=10)
 
         txt = ctk.CTkTextbox(win, font=("Consolas", 11), height=340, width=320, border_color=("#D1D5DB", "#475569"), border_width=1, fg_color=("#FFFFFF", "#1E293B"), text_color="#334155")
         txt.pack(pady=5, padx=15)
@@ -330,10 +340,10 @@ class ReportesTab:
         win = ctk.CTkToplevel(self.app.root)
         win.title("Corte de Caja Diario")
         win.geometry("360x420")
-        win.configure(fg_color=("#F8FAFC", ("#0F172A", "#F8FAFC")))
+        win.configure(fg_color=("#F8FAFC", "#0F172A"))
         win.grab_set()
 
-        ctk.CTkLabel(win, text="Cierre de Caja del Día", font=("Segoe UI", 12, "bold"), text_color=("#0F172A", "#F8FAFC")).pack(pady=15)
+        ctk.CTkLabel(win, text="Cierre de Caja del Día", font=("Segoe UI", 12, "bold"), text_color=rc(("#0F172A", "#F8FAFC"))).pack(pady=15)
 
         txt = ctk.CTkTextbox(win, font=("Consolas", 11), height=200, width=320, border_color=("#D1D5DB", "#475569"), border_width=1, fg_color=("#FFFFFF", "#1E293B"), text_color="#334155")
         txt.pack(pady=5, padx=15)
@@ -423,13 +433,13 @@ class ReportesTab:
     # ==========================================
     def construir_tab_analiticas(self):
         # Panel superior de controles de analítica
-        frame_controles = ctk.CTkFrame(self.tab_analiticas, fg_color=("#FFFFFF", "#1E293B"), border_color=("#E2E8F0", "#334155"), border_width=1, corner_radius=8, height=60)
+        frame_controles = ctk.CTkFrame(self.tab_analiticas, fg_color=("#FFFFFF", "#1E293B"), border_color=rc(("#E2E8F0", "#334155")), border_width=1, corner_radius=8, height=60)
         frame_controles.pack(fill=tk.X, padx=15, pady=(15, 10))
 
-        ctk.CTkLabel(frame_controles, text="📊 TABLERO ESTADÍSTICO DE TU NEGOCIO", font=("Segoe UI", 12, "bold"), text_color=("#0F172A", "#F8FAFC")).pack(side=tk.LEFT, padx=15, pady=15)
+        ctk.CTkLabel(frame_controles, text="📊 TABLERO ESTADÍSTICO DE TU NEGOCIO", font=("Segoe UI", 12, "bold"), text_color=rc(("#0F172A", "#F8FAFC"))).pack(side=tk.LEFT, padx=15, pady=15)
 
         # Combo para seleccionar rango en analíticas
-        ctk.CTkLabel(frame_controles, text="Período:", font=("Segoe UI", 10, "bold"), text_color=("#64748B", "#94A3B8")).pack(side=tk.LEFT, padx=(20, 5))
+        ctk.CTkLabel(frame_controles, text="Período:", font=("Segoe UI", 10, "bold"), text_color=rc(("#64748B", "#94A3B8"))).pack(side=tk.LEFT, padx=(20, 5))
         self.combo_filtro_analitica = ctk.CTkComboBox(frame_controles, values=["Todo", "Hoy", "Últimos 7 días", "Este Mes"], font=("Segoe UI", 10), height=28, width=120, command=lambda e: self.analitica_actualizar_datos())
         self.combo_filtro_analitica.pack(side=tk.LEFT, padx=5)
         self.combo_filtro_analitica.set("Este Mes")
@@ -452,16 +462,16 @@ class ReportesTab:
 
         # Crear contenedores para los gráficos
         # Panel Izquierdo: Línea de Tendencia (Ventas a lo largo del tiempo)
-        frame_izq = ctk.CTkFrame(self.frame_graficos, fg_color=("#FFFFFF", "#1E293B"), border_color=("#E2E8F0", "#334155"), border_width=1, corner_radius=12)
+        frame_izq = ctk.CTkFrame(self.frame_graficos, fg_color=("#FFFFFF", "#1E293B"), border_color=rc(("#E2E8F0", "#334155")), border_width=1, corner_radius=12)
         frame_izq.grid(row=0, column=0, padx=(0, 7), pady=5, sticky="nsew")
         
         # Panel Derecho Superior: Pie Chart (Método de Pago)
-        frame_der_up = ctk.CTkFrame(self.frame_graficos, fg_color=("#FFFFFF", "#1E293B"), border_color=("#E2E8F0", "#334155"), border_width=1, corner_radius=12)
+        frame_der_up = ctk.CTkFrame(self.frame_graficos, fg_color=("#FFFFFF", "#1E293B"), border_color=rc(("#E2E8F0", "#334155")), border_width=1, corner_radius=12)
         frame_der_up.grid(row=0, column=1, padx=(7, 0), pady=5, sticky="nsew")
 
         # Configurar filas extras para el gráfico de barras horizontales (Top Productos) en la fila inferior
         self.frame_graficos.rowconfigure(1, weight=1)
-        frame_inf = ctk.CTkFrame(self.frame_graficos, fg_color=("#FFFFFF", "#1E293B"), border_color=("#E2E8F0", "#334155"), border_width=1, corner_radius=12)
+        frame_inf = ctk.CTkFrame(self.frame_graficos, fg_color=("#FFFFFF", "#1E293B"), border_color=rc(("#E2E8F0", "#334155")), border_width=1, corner_radius=12)
         frame_inf.grid(row=1, column=0, columnspan=2, padx=0, pady=(10, 5), sticky="nsew")
 
         # Consultar datos para graficar
@@ -472,9 +482,9 @@ class ReportesTab:
         # 1. GRÁFICO 1: TENDENCIA DE VENTAS (Líneas)
         # ---------------------------------------------
         fig_tendencia = Figure(figsize=(5, 3), dpi=90)
-        fig_tendencia.patch.set_facecolor(("#FFFFFF", "#1E293B"))
+        fig_tendencia.patch.set_facecolor(rc(("#FFFFFF", "#1E293B")))
         ax_tendencia = fig_tendencia.add_subplot(111)
-        ax_tendencia.set_facecolor(("#FFFFFF", "#1E293B"))
+        ax_tendencia.set_facecolor(rc(("#FFFFFF", "#1E293B")))
         
         # Agrupar ventas por fecha
         datos_tiempo = {}
@@ -496,15 +506,15 @@ class ReportesTab:
             ax_tendencia.plot(fechas_labels, montos_plot, marker='o', color='#4F46E5', linewidth=2.5, markersize=6)
             ax_tendencia.fill_between(fechas_labels, montos_plot, color='#4F46E5', alpha=0.1)
         else:
-            ax_tendencia.text(0.5, 0.5, "Sin transacciones en este rango", ha='center', va='center', color=("#64748B", "#94A3B8"))
+            ax_tendencia.text(0.5, 0.5, "Sin transacciones en este rango", ha='center', va='center', color=rc(("#64748B", "#94A3B8")))
 
-        ax_tendencia.set_title("Evolución de Ingresos ($)", fontname="Segoe UI", fontsize=10, weight='bold', color=("#0F172A", "#F8FAFC"), pad=10)
+        ax_tendencia.set_title("Evolución de Ingresos ($)", fontname="Segoe UI", fontsize=10, weight='bold', color=rc(("#0F172A", "#F8FAFC")), pad=10)
         ax_tendencia.spines['top'].set_visible(False)
         ax_tendencia.spines['right'].set_visible(False)
-        ax_tendencia.spines['left'].set_color(("#E2E8F0", "#334155"))
-        ax_tendencia.spines['bottom'].set_color(("#E2E8F0", "#334155"))
-        ax_tendencia.tick_params(axis='both', colors=("#475569", "#CBD5E1"), labelsize=8)
-        ax_tendencia.grid(axis='y', linestyle='--', alpha=0.5, color=("#E2E8F0", "#334155"))
+        ax_tendencia.spines['left'].set_color(rc(("#E2E8F0", "#334155")))
+        ax_tendencia.spines['bottom'].set_color(rc(("#E2E8F0", "#334155")))
+        ax_tendencia.tick_params(axis='both', colors=rc(("#475569", "#CBD5E1")), labelsize=8)
+        ax_tendencia.grid(axis='y', linestyle='--', alpha=0.5, color=rc(("#E2E8F0", "#334155")))
         fig_tendencia.tight_layout()
 
         canvas_t = FigureCanvasTkAgg(fig_tendencia, master=frame_izq)
@@ -515,7 +525,7 @@ class ReportesTab:
         # 2. GRÁFICO 2: MÉTODOS DE PAGO (Circular)
         # ---------------------------------------------
         fig_pagos = Figure(figsize=(4.5, 3), dpi=90)
-        fig_pagos.patch.set_facecolor(("#FFFFFF", "#1E293B"))
+        fig_pagos.patch.set_facecolor(rc(("#FFFFFF", "#1E293B")))
         ax_pagos = fig_pagos.add_subplot(111)
         
         datos_pagos = {}
@@ -543,9 +553,9 @@ class ReportesTab:
                 autotext.set_color('white')
                 autotext.set_weight('bold')
         else:
-            ax_pagos.text(0.5, 0.5, "Sin datos de cobros", ha='center', va='center', color=("#64748B", "#94A3B8"))
+            ax_pagos.text(0.5, 0.5, "Sin datos de cobros", ha='center', va='center', color=rc(("#64748B", "#94A3B8")))
             
-        ax_pagos.set_title("Canales de Venta / Métodos de Pago", fontname="Segoe UI", fontsize=10, weight='bold', color=("#0F172A", "#F8FAFC"), pad=10)
+        ax_pagos.set_title("Canales de Venta / Métodos de Pago", fontname="Segoe UI", fontsize=10, weight='bold', color=rc(("#0F172A", "#F8FAFC")), pad=10)
         fig_pagos.tight_layout()
 
         canvas_p = FigureCanvasTkAgg(fig_pagos, master=frame_der_up)
@@ -556,9 +566,9 @@ class ReportesTab:
         # 3. GRÁFICO 3: TOP 5 PRODUCTOS MÁS VENDIDOS (Barras Horizontales)
         # ---------------------------------------------
         fig_productos = Figure(figsize=(8, 2.5), dpi=90)
-        fig_productos.patch.set_facecolor(("#FFFFFF", "#1E293B"))
+        fig_productos.patch.set_facecolor(rc(("#FFFFFF", "#1E293B")))
         ax_productos = fig_productos.add_subplot(111)
-        ax_productos.set_facecolor(("#FFFFFF", "#1E293B"))
+        ax_productos.set_facecolor(rc(("#FFFFFF", "#1E293B")))
 
         # Agrupar productos más vendidos
         datos_productos = {}
@@ -591,20 +601,20 @@ class ReportesTab:
                     f"{int(width)} uds", 
                     ha='left', 
                     va='center', 
-                    color=("#475569", "#CBD5E1"), 
+                    color=rc(("#475569", "#CBD5E1")), 
                     fontname="Segoe UI", 
                     fontsize=8, 
                     weight='bold'
                 )
         else:
-            ax_productos.text(0.5, 0.5, "Sin productos vendidos en el rango", ha='center', va='center', color=("#64748B", "#94A3B8"))
+            ax_productos.text(0.5, 0.5, "Sin productos vendidos en el rango", ha='center', va='center', color=rc(("#64748B", "#94A3B8")))
 
-        ax_productos.set_title("Top 5 Productos con Mayor Rotación (Cantidad)", fontname="Segoe UI", fontsize=10, weight='bold', color=("#0F172A", "#F8FAFC"), pad=10)
+        ax_productos.set_title("Top 5 Productos con Mayor Rotación (Cantidad)", fontname="Segoe UI", fontsize=10, weight='bold', color=rc(("#0F172A", "#F8FAFC")), pad=10)
         ax_productos.spines['top'].set_visible(False)
         ax_productos.spines['right'].set_visible(False)
-        ax_productos.spines['left'].set_color(("#E2E8F0", "#334155"))
-        ax_productos.spines['bottom'].set_color(("#E2E8F0", "#334155"))
-        ax_productos.tick_params(axis='both', colors=("#475569", "#CBD5E1"), labelsize=8)
+        ax_productos.spines['left'].set_color(rc(("#E2E8F0", "#334155")))
+        ax_productos.spines['bottom'].set_color(rc(("#E2E8F0", "#334155")))
+        ax_productos.tick_params(axis='both', colors=rc(("#475569", "#CBD5E1")), labelsize=8)
         fig_productos.tight_layout()
 
         canvas_pr = FigureCanvasTkAgg(fig_productos, master=frame_inf)

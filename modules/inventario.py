@@ -51,7 +51,7 @@ class InventarioTab:
                 combo.pack(fill=tk.X, pady=1)
                 self.inputs[key] = combo
             else:
-                entry = ctk.CTkEntry(cell, font=("Segoe UI", 10), fg_color=("#F8FAFC", ("#0F172A", "#F8FAFC")), text_color=("#0F172A", "#F8FAFC"), border_color=("#D1D5DB", "#475569"), height=28, corner_radius=5)
+                entry = ctk.CTkEntry(cell, font=("Segoe UI", 10), fg_color=("#F8FAFC", "#0F172A"), text_color=("#0F172A", "#F8FAFC"), border_color=("#D1D5DB", "#475569"), height=28, corner_radius=5)
                 entry.pack(fill=tk.X, pady=1)
                 self.inputs[key] = entry
 
@@ -74,10 +74,10 @@ class InventarioTab:
         self.lbl_img_path.pack(side=tk.LEFT, padx=10, fill=tk.X, expand=True)
 
         # Recuadro Vista Previa Formulario
-        frame_form_img_container = ctk.CTkFrame(frame_form, fg_color=("#F8FAFC", ("#0F172A", "#F8FAFC")), border_color=("#D1D5DB", "#475569"), border_width=1, height=90, corner_radius=6)
+        frame_form_img_container = ctk.CTkFrame(frame_form, fg_color=("#F8FAFC", "#0F172A"), border_color=("#D1D5DB", "#475569"), border_width=1, height=90, corner_radius=6)
         frame_form_img_container.pack(pady=5, padx=20, fill=tk.X)
         frame_form_img_container.pack_propagate(False)
-        self.lbl_img_preview = tk.Label(frame_form_img_container, text="Sin vista previa", font=("Segoe UI", 8, "italic"), bg=("#F8FAFC", ("#0F172A", "#F8FAFC")), fg="#94A3B8", compound="center")
+        self.lbl_img_preview = tk.Label(frame_form_img_container, text="Sin vista previa", font=("Segoe UI", 8, "italic"), bg="#F8FAFC", fg="#94A3B8", compound="center")
         self.lbl_img_preview.pack(expand=True, fill=tk.BOTH)
 
         btn_guardar = ctk.CTkButton(frame_form, text="Guardar Producto", font=("Segoe UI", 10, "bold"), fg_color="#4F46E5", hover_color="#4338CA", text_color="white", height=35, corner_radius=8, command=self.guardar_producto)
@@ -137,7 +137,7 @@ class InventarioTab:
         frame_inv_img_container.pack(pady=2, fill=tk.X)
         frame_inv_img_container.pack_propagate(False)
         
-        self.lbl_inv_foto_preview = tk.Label(frame_inv_img_container, text="Sin foto", font=("Segoe UI", 9, "italic"), bg=("#FFFFFF", "#1E293B"), fg="#94A3B8", compound="center")
+        self.lbl_inv_foto_preview = tk.Label(frame_inv_img_container, text="Sin foto", font=("Segoe UI", 9, "italic"), bg="#FFFFFF", fg="#94A3B8", compound="center")
         self.lbl_inv_foto_preview.pack(expand=True, fill=tk.BOTH)
 
         for entry in self.inputs.values():

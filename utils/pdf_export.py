@@ -17,12 +17,12 @@ def generar_reporte_pdf(ruta_archivo, filtro, resumen, ventas_data):
     estilos = getSampleStyleSheet()
     
     # Título
-    estilo_titulo = ParagraphStyle('Titulo', parent=estilos['Heading1'], alignment=1, fontSize=18, spaceAfter=20, textColor=colors.HexColor(("#0F172A", "#F8FAFC")))
+    estilo_titulo = ParagraphStyle('Titulo', parent=estilos['Heading1'], alignment=1, fontSize=18, spaceAfter=20, textColor=colors.HexColor("#0F172A"))
     elementos.append(Paragraph("Reporte de Ventas", estilo_titulo))
     
     # Subtítulo (Filtro y Fecha)
     fecha_generacion = datetime.datetime.now().strftime("%d/%m/%Y %H:%M")
-    estilo_sub = ParagraphStyle('Sub', parent=estilos['Normal'], alignment=1, fontSize=11, spaceAfter=20, textColor=colors.HexColor(("#475569", "#CBD5E1")))
+    estilo_sub = ParagraphStyle('Sub', parent=estilos['Normal'], alignment=1, fontSize=11, spaceAfter=20, textColor=colors.HexColor("#475569"))
     elementos.append(Paragraph(f"Período: {filtro} | Generado el: {fecha_generacion}", estilo_sub))
     
     # Resumen (Tarjetas)
@@ -33,20 +33,20 @@ def generar_reporte_pdf(ruta_archivo, filtro, resumen, ventas_data):
     
     tabla_resumen = Table(datos_resumen, colWidths=[1.3*inch]*5)
     tabla_resumen.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor(("#F8FAFC", ("#0F172A", "#F8FAFC")))),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.HexColor(("#475569", "#CBD5E1"))),
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor("#F8FAFC")),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.HexColor("#475569")),
         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
         ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
         ('FONTSIZE', (0, 0), (-1, 0), 10),
         ('BOTTOMPADDING', (0, 0), (-1, 0), 10),
         ('BACKGROUND', (0, 1), (-1, 1), colors.white),
-        ('TEXTCOLOR', (0, 1), (-1, 1), colors.HexColor(("#0F172A", "#F8FAFC"))),
+        ('TEXTCOLOR', (0, 1), (-1, 1), colors.HexColor("#0F172A")),
         ('FONTNAME', (0, 1), (-1, 1), 'Helvetica-Bold'),
         ('FONTSIZE', (0, 1), (-1, 1), 12),
         ('TOPPADDING', (0, 1), (-1, 1), 10),
         ('BOTTOMPADDING', (0, 1), (-1, 1), 10),
-        ('BOX', (0,0), (-1,-1), 1, colors.HexColor(("#E2E8F0", "#334155"))),
-        ('INNERGRID', (0,0), (-1,-1), 1, colors.HexColor(("#E2E8F0", "#334155"))),
+        ('BOX', (0,0), (-1,-1), 1, colors.HexColor("#E2E8F0")),
+        ('INNERGRID', (0,0), (-1,-1), 1, colors.HexColor("#E2E8F0")),
     ]))
     elementos.append(tabla_resumen)
     elementos.append(Spacer(1, 30))
@@ -93,7 +93,7 @@ def generar_reporte_pdf(ruta_archivo, filtro, resumen, ventas_data):
         ('BOTTOMPADDING', (0, 1), (-1, -1), 6),
         ('TOPPADDING', (0, 1), (-1, -1), 6),
         ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor('#CBD5E1')),
-        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor(("#F8FAFC", ("#0F172A", "#F8FAFC")))])
+        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor("#F8FAFC")])
     ]))
     
     elementos.append(tabla_ventas)

@@ -18,7 +18,7 @@ def mostrar_configuracion_inicial(app):
     setup_win = ctk.CTkToplevel(app.root)
     setup_win.title("Configuración de Empresa - POS")
     setup_win.geometry("480x750")
-    setup_win.configure(fg_color=("#F8FAFC", ("#0F172A", "#F8FAFC")))
+    setup_win.configure(fg_color=("#F8FAFC", "#0F172A"))
     setup_win.resizable(False, False)
 
     setup_win.update_idletasks()
@@ -55,7 +55,7 @@ def mostrar_configuracion_inicial(app):
     entries = {}
     for label_text, key in campos:
         ctk.CTkLabel(frame_form, text=label_text, font=("Segoe UI", 9, "bold"), text_color=("#475569", "#CBD5E1")).pack(anchor=tk.W, padx=15, pady=(5, 1))
-        entry = ctk.CTkEntry(frame_form, font=("Segoe UI", 10), fg_color=("#F8FAFC", ("#0F172A", "#F8FAFC")), text_color=("#0F172A", "#F8FAFC"), border_color=("#D1D5DB", "#475569"), height=32, corner_radius=6)
+        entry = ctk.CTkEntry(frame_form, font=("Segoe UI", 10), fg_color=("#F8FAFC", "#0F172A"), text_color=("#0F172A", "#F8FAFC"), border_color=("#D1D5DB", "#475569"), height=32, corner_radius=6)
         entry.pack(fill=tk.X, padx=15, pady=1)
         entries[key] = entry
 
@@ -128,7 +128,7 @@ def mostrar_registro_administrador(app):
     reg_win = ctk.CTkToplevel(app.root)
     reg_win.title("Crear Usuario Administrador")
     reg_win.geometry("420x460")
-    reg_win.configure(fg_color=("#F8FAFC", ("#0F172A", "#F8FAFC")))
+    reg_win.configure(fg_color=("#F8FAFC", "#0F172A"))
     reg_win.resizable(False, False)
 
     reg_win.update_idletasks()
@@ -153,12 +153,12 @@ def mostrar_registro_administrador(app):
     frame_form.pack(fill=tk.BOTH, expand=True, padx=40, pady=(0, 30))
 
     ctk.CTkLabel(frame_form, text="Nombre de Usuario *", font=("Segoe UI", 10, "bold"), text_color=("#475569", "#CBD5E1")).pack(anchor=tk.W, padx=25, pady=(20, 2))
-    entry_user = ctk.CTkEntry(frame_form, font=("Segoe UI", 10), fg_color=("#F8FAFC", ("#0F172A", "#F8FAFC")), text_color=("#0F172A", "#F8FAFC"), border_color=("#D1D5DB", "#475569"), height=35, corner_radius=6)
+    entry_user = ctk.CTkEntry(frame_form, font=("Segoe UI", 10), fg_color=("#F8FAFC", "#0F172A"), text_color=("#0F172A", "#F8FAFC"), border_color=("#D1D5DB", "#475569"), height=35, corner_radius=6)
     entry_user.pack(fill=tk.X, padx=25, pady=2)
     entry_user.focus_set()
 
     ctk.CTkLabel(frame_form, text="Contraseña *", font=("Segoe UI", 10, "bold"), text_color=("#475569", "#CBD5E1")).pack(anchor=tk.W, padx=25, pady=(15, 2))
-    entry_pass = ctk.CTkEntry(frame_form, font=("Segoe UI", 10), fg_color=("#F8FAFC", ("#0F172A", "#F8FAFC")), text_color=("#0F172A", "#F8FAFC"), border_color=("#D1D5DB", "#475569"), height=35, corner_radius=6, show="*")
+    entry_pass = ctk.CTkEntry(frame_form, font=("Segoe UI", 10), fg_color=("#F8FAFC", "#0F172A"), text_color=("#0F172A", "#F8FAFC"), border_color=("#D1D5DB", "#475569"), height=35, corner_radius=6, show="*")
     entry_pass.pack(fill=tk.X, padx=25, pady=2)
 
     def guardar_usuario():
@@ -188,7 +188,7 @@ def mostrar_login(app):
     login_win = ctk.CTkToplevel(app.root)
     login_win.title("Iniciar Sesión")
     login_win.geometry("420x500")
-    login_win.configure(fg_color=("#F8FAFC", ("#0F172A", "#F8FAFC")))
+    login_win.configure(fg_color=("#F8FAFC", "#0F172A"))
     login_win.resizable(False, False)
 
     login_win.update_idletasks()
@@ -216,12 +216,12 @@ def mostrar_login(app):
     frame_form.pack(fill=tk.BOTH, expand=True, padx=40, pady=(0, 30))
 
     ctk.CTkLabel(frame_form, text="Usuario *", font=("Segoe UI", 10, "bold"), text_color=("#475569", "#CBD5E1")).pack(anchor=tk.W, padx=25, pady=(15, 2))
-    entry_user = ctk.CTkEntry(frame_form, font=("Segoe UI", 10), fg_color=("#F8FAFC", ("#0F172A", "#F8FAFC")), text_color=("#0F172A", "#F8FAFC"), border_color=("#D1D5DB", "#475569"), height=35, corner_radius=6)
+    entry_user = ctk.CTkEntry(frame_form, font=("Segoe UI", 10), fg_color=("#F8FAFC", "#0F172A"), text_color=("#0F172A", "#F8FAFC"), border_color=("#D1D5DB", "#475569"), height=35, corner_radius=6)
     entry_user.pack(fill=tk.X, padx=25, pady=2)
     entry_user.focus_set()
 
     ctk.CTkLabel(frame_form, text="Contraseña *", font=("Segoe UI", 10, "bold"), text_color=("#475569", "#CBD5E1")).pack(anchor=tk.W, padx=25, pady=(10, 2))
-    entry_pass = ctk.CTkEntry(frame_form, font=("Segoe UI", 10), fg_color=("#F8FAFC", ("#0F172A", "#F8FAFC")), text_color=("#0F172A", "#F8FAFC"), border_color=("#D1D5DB", "#475569"), height=35, corner_radius=6, show="*")
+    entry_pass = ctk.CTkEntry(frame_form, font=("Segoe UI", 10), fg_color=("#F8FAFC", "#0F172A"), text_color=("#0F172A", "#F8FAFC"), border_color=("#D1D5DB", "#475569"), height=35, corner_radius=6, show="*")
     entry_pass.pack(fill=tk.X, padx=25, pady=2)
 
     def intentar_login(event=None):
@@ -265,7 +265,7 @@ def mostrar_editar_configuracion(app):
     edit_win = ctk.CTkToplevel(app.root)
     edit_win.title("Editar Configuración del Negocio")
     edit_win.geometry("480x750")
-    edit_win.configure(fg_color=("#F8FAFC", ("#0F172A", "#F8FAFC")))
+    edit_win.configure(fg_color=("#F8FAFC", "#0F172A"))
     edit_win.resizable(False, False)
     edit_win.grab_set()
 
@@ -297,7 +297,7 @@ def mostrar_editar_configuracion(app):
     entries = {}
     for label_text, key, default_val in campos:
         ctk.CTkLabel(frame_form, text=label_text, font=("Segoe UI", 9, "bold"), text_color=("#475569", "#CBD5E1")).pack(anchor=tk.W, padx=15, pady=(5, 1))
-        entry = ctk.CTkEntry(frame_form, font=("Segoe UI", 10), fg_color=("#F8FAFC", ("#0F172A", "#F8FAFC")), text_color=("#0F172A", "#F8FAFC"), border_color=("#D1D5DB", "#475569"), height=32, corner_radius=6)
+        entry = ctk.CTkEntry(frame_form, font=("Segoe UI", 10), fg_color=("#F8FAFC", "#0F172A"), text_color=("#0F172A", "#F8FAFC"), border_color=("#D1D5DB", "#475569"), height=32, corner_radius=6)
         entry.pack(fill=tk.X, padx=15, pady=1)
         entry.insert(0, default_val)
         entries[key] = entry
@@ -354,6 +354,8 @@ def mostrar_editar_configuracion(app):
     
     def cambiar_tema(tema):
         ctk.set_appearance_mode(tema)
+        if hasattr(app, "actualizar_estilos_treeview"):
+            app.actualizar_estilos_treeview()
         
     combo_tema.configure(command=cambiar_tema)
     

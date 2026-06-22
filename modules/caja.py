@@ -63,11 +63,7 @@ class CajaTab:
             self.tabla.column(col, width=ancho, anchor=tk.CENTER if col in ("id", "monto", "tipo") else tk.W)
         self.tabla.pack(fill=tk.BOTH, expand=True, padx=20, pady=(0, 20))
 
-        # Estilo de tabla
-        style = ttk.Style()
-        style.configure("Treeview.Heading", font=("Segoe UI", 10, "bold"), background="#F1F5F9", foreground=("#475569", "#CBD5E1"))
-        style.configure("Treeview", font=("Segoe UI", 10), rowheight=30)
-        style.map("Treeview", background=[('selected', '#EEF2FF')], foreground=[('selected', '#3730A3')])
+
 
         self.verificar_estado()
 

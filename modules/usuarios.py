@@ -9,7 +9,7 @@ def mostrar_gestion_usuarios(app):
     win = ctk.CTkToplevel(app.root)
     win.title("Gestión de Usuarios")
     win.geometry("500x500")
-    win.configure(fg_color=("#F8FAFC", ("#0F172A", "#F8FAFC")))
+    win.configure(fg_color=("#F8FAFC", "#0F172A"))
     win.resizable(False, False)
     win.grab_set()
 
@@ -61,7 +61,7 @@ def mostrar_gestion_usuarios(app):
         win_nuevo = ctk.CTkToplevel(win)
         win_nuevo.title("Nuevo Usuario")
         win_nuevo.geometry("350x450")
-        win_nuevo.configure(fg_color=("#F8FAFC", ("#0F172A", "#F8FAFC")))
+        win_nuevo.configure(fg_color=("#F8FAFC", "#0F172A"))
         win_nuevo.grab_set()
 
         ctk.CTkLabel(win_nuevo, text="NUEVO USUARIO", font=("Segoe UI", 12, "bold"), text_color=("#0F172A", "#F8FAFC")).pack(pady=15)

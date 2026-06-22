@@ -36,7 +36,7 @@ class ProveedoresTab:
         self.inputs = {}
         for i, (label_text, key) in enumerate(campos):
             ctk.CTkLabel(grid_inputs, text=label_text, font=("Segoe UI", 8, "bold"), text_color=("#64748B", "#94A3B8")).pack(anchor=tk.W, pady=(5, 1))
-            entry = ctk.CTkEntry(grid_inputs, font=("Segoe UI", 10), fg_color=("#F8FAFC", ("#0F172A", "#F8FAFC")), text_color=("#0F172A", "#F8FAFC"), border_color=("#D1D5DB", "#475569"), height=28, corner_radius=5)
+            entry = ctk.CTkEntry(grid_inputs, font=("Segoe UI", 10), fg_color=("#F8FAFC", "#0F172A"), text_color=("#0F172A", "#F8FAFC"), border_color=("#D1D5DB", "#475569"), height=28, corner_radius=5)
             entry.pack(fill=tk.X, pady=1)
             self.inputs[key] = entry
 
@@ -245,11 +245,11 @@ class ProveedoresTab:
         combo_prod.set("Seleccionar producto...")
         
         ctk.CTkLabel(frame_campos, text="Cantidad comprada:", font=("Segoe UI", 9, "bold"), text_color=("#64748B", "#94A3B8")).pack(anchor=tk.W, pady=(10, 2))
-        ent_cant = ctk.CTkEntry(frame_campos, font=("Segoe UI", 10), fg_color=("#F8FAFC", ("#0F172A", "#F8FAFC")), text_color=("#0F172A", "#F8FAFC"), border_color=("#D1D5DB", "#475569"), height=32, corner_radius=6, placeholder_text="Ej: 50")
+        ent_cant = ctk.CTkEntry(frame_campos, font=("Segoe UI", 10), fg_color=("#F8FAFC", "#0F172A"), text_color=("#0F172A", "#F8FAFC"), border_color=("#D1D5DB", "#475569"), height=32, corner_radius=6, placeholder_text="Ej: 50")
         ent_cant.pack(fill=tk.X)
         
         ctk.CTkLabel(frame_campos, text="Costo unitario ($):", font=("Segoe UI", 9, "bold"), text_color=("#64748B", "#94A3B8")).pack(anchor=tk.W, pady=(10, 2))
-        ent_costo = ctk.CTkEntry(frame_campos, font=("Segoe UI", 10), fg_color=("#F8FAFC", ("#0F172A", "#F8FAFC")), text_color=("#0F172A", "#F8FAFC"), border_color=("#D1D5DB", "#475569"), height=32, corner_radius=6, placeholder_text="Ej: 150.00")
+        ent_costo = ctk.CTkEntry(frame_campos, font=("Segoe UI", 10), fg_color=("#F8FAFC", "#0F172A"), text_color=("#0F172A", "#F8FAFC"), border_color=("#D1D5DB", "#475569"), height=32, corner_radius=6, placeholder_text="Ej: 150.00")
         ent_costo.pack(fill=tk.X)
 
         def confirmar():
@@ -282,7 +282,7 @@ class ProveedoresTab:
         win_hist = ctk.CTkToplevel(self.app.root)
         win_hist.title("Historial de Compras")
         win_hist.geometry("600x450")
-        win_hist.configure(fg_color=("#F8FAFC", ("#0F172A", "#F8FAFC")))
+        win_hist.configure(fg_color=("#F8FAFC", "#0F172A"))
         win_hist.grab_set()
 
         ctk.CTkLabel(win_hist, text="📜 HISTORIAL DE COMPRAS A PROVEEDORES", font=("Segoe UI", 12, "bold"), text_color=("#0F172A", "#F8FAFC")).pack(pady=15)
