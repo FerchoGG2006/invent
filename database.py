@@ -69,6 +69,7 @@ def init_db():
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS usuarios (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+                nombre TEXT,
                 usuario TEXT UNIQUE NOT NULL,
                 clave TEXT NOT NULL,
                 rol TEXT NOT NULL DEFAULT 'Administrador'
@@ -254,6 +255,10 @@ def init_db():
         # Migraciones Usuarios
         try:
             cursor.execute("ALTER TABLE usuarios ADD COLUMN permisos TEXT;")
+        except sqlite3.OperationalError:
+            pass
+        try:
+            cursor.execute("ALTER TABLE usuarios ADD COLUMN nombre TEXT;")
         except sqlite3.OperationalError:
             pass
 
@@ -554,15 +559,15 @@ def eliminar_configuracion():
 def hash_clave(clave):
     return hashlib.sha256(clave.encode('utf-8')).hexdigest()
 
-def crear_usuario(usuario, clave, rol='Administrador'):
+def crear_usuario(usuario, clave, rol='Administrador', nombre=""):
     with sqlite3.connect(DB_NAME) as conn:
         cursor = conn.cursor()
         clave_hash = hash_clave(clave)
         try:
             cursor.execute("""
-                INSERT INTO usuarios (usuario, clave, rol)
-                VALUES (?, ?, ?)
-            """, (usuario.strip(), clave_hash, rol))
+                INSERT INTO usuarios (nombre, usuario, clave, rol)
+                VALUES (?, ?, ?, ?)
+            """, (nombre, usuario.strip(), clave_hash, rol))
             conn.commit()
             return True
         except sqlite3.IntegrityError:

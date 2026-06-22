@@ -98,7 +98,7 @@ def mostrar_gestion_usuarios(app):
             with database.sqlite3.connect(database.DB_NAME) as conn:
                 cursor = conn.cursor()
                 try:
-                    cursor.execute("INSERT INTO usuarios (nombre, usuario, password, rol) VALUES (?, ?, ?, ?)", (n, u, database.hash_password(p), r))
+                    cursor.execute("INSERT INTO usuarios (nombre, usuario, clave, rol) VALUES (?, ?, ?, ?)", (n, u, database.hash_clave(p), r))
                     conn.commit()
                     messagebox.showinfo("Éxito", "Usuario creado correctamente.", parent=win_nuevo)
                     actualizar_tabla()
