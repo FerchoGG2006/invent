@@ -97,15 +97,15 @@ class InventarioApp:
     def actualizar_indicador_conexion(self, conectado):
         if hasattr(self, "lbl_conexion_pos"):
             if conectado:
-                self.lbl_conexion_pos.config(text="🟢 En línea", fg="#10B981")
+                self.lbl_conexion_pos.configure(text="🟢 En línea", text_color="#10B981")
             else:
-                self.lbl_conexion_pos.config(text="🔴 Sin conexión", fg="#EF4444")
+                self.lbl_conexion_pos.configure(text="🔴 Sin conexión", text_color="#EF4444")
 
     def actualizar_labels_facturacion(self):
         if hasattr(self, "lbl_cliente_identificacion"):
             pais = self.config.get("pais_operacion", "Otro / Ninguno (Solo local)") if self.config else "Otro"
             lbl_id_text = obtener_label_id_fiscal(pais)
-            self.lbl_cliente_identificacion.config(text=lbl_id_text)
+            self.lbl_cliente_identificacion.configure(text=lbl_id_text)
 
     # ==========================================
     # VISTA PREVIA DE IMAGEN (HELPER)
