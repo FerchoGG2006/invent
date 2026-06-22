@@ -18,7 +18,7 @@ def mostrar_configuracion_inicial(app):
     setup_win = ctk.CTkToplevel(app.root)
     setup_win.title("Configuración de Empresa - POS")
     setup_win.geometry("480x750")
-    setup_win.configure(fg_color="#F8FAFC")
+    setup_win.configure(fg_color=("#F8FAFC", ("#0F172A", "#F8FAFC")))
     setup_win.resizable(False, False)
 
     setup_win.update_idletasks()
@@ -39,9 +39,9 @@ def mostrar_configuracion_inicial(app):
     ctk.CTkLabel(frame_header, text="✨ CONFIGURACIÓN DE TU NEGOCIO ✨", font=("Segoe UI", 13, "bold"), text_color="white").pack(pady=20)
 
     ctk.CTkLabel(setup_win, text="¡Bienvenido! Personaliza el sistema POS con los datos\nde tu empresa. Estos datos aparecerán en tus tickets y reportes.",
-                 font=("Segoe UI", 10, "italic"), text_color="#64748B", justify=tk.CENTER).pack(pady=10)
+                 font=("Segoe UI", 10, "italic"), text_color=("#64748B", "#94A3B8"), justify=tk.CENTER).pack(pady=10)
 
-    frame_form = ctk.CTkScrollableFrame(setup_win, fg_color="#FFFFFF", border_color="#E2E8F0", border_width=1, corner_radius=12)
+    frame_form = ctk.CTkScrollableFrame(setup_win, fg_color=("#FFFFFF", "#1E293B"), border_color=("#E2E8F0", "#334155"), border_width=1, corner_radius=12)
     frame_form.pack(fill=tk.BOTH, expand=True, padx=25, pady=(0, 20))
 
     campos = [
@@ -54,15 +54,15 @@ def mostrar_configuracion_inicial(app):
 
     entries = {}
     for label_text, key in campos:
-        ctk.CTkLabel(frame_form, text=label_text, font=("Segoe UI", 9, "bold"), text_color="#475569").pack(anchor=tk.W, padx=15, pady=(5, 1))
-        entry = ctk.CTkEntry(frame_form, font=("Segoe UI", 10), fg_color="#F8FAFC", text_color="#0F172A", border_color="#D1D5DB", height=32, corner_radius=6)
+        ctk.CTkLabel(frame_form, text=label_text, font=("Segoe UI", 9, "bold"), text_color=("#475569", "#CBD5E1")).pack(anchor=tk.W, padx=15, pady=(5, 1))
+        entry = ctk.CTkEntry(frame_form, font=("Segoe UI", 10), fg_color=("#F8FAFC", ("#0F172A", "#F8FAFC")), text_color=("#0F172A", "#F8FAFC"), border_color=("#D1D5DB", "#475569"), height=32, corner_radius=6)
         entry.pack(fill=tk.X, padx=15, pady=1)
         entries[key] = entry
 
     entries["mensaje"].insert(0, "¡Gracias por su compra!")
 
     # Selector de Impresora
-    ctk.CTkLabel(frame_form, text="Impresora Térmica (Opcional)", font=("Segoe UI", 9, "bold"), text_color="#475569").pack(anchor=tk.W, padx=15, pady=(5, 1))
+    ctk.CTkLabel(frame_form, text="Impresora Térmica (Opcional)", font=("Segoe UI", 9, "bold"), text_color=("#475569", "#CBD5E1")).pack(anchor=tk.W, padx=15, pady=(5, 1))
     impresoras = obtener_impresoras_sistema()
     combo_impresora = ctk.CTkComboBox(frame_form, values=impresoras if impresoras else ["Ninguna"], font=("Segoe UI", 10), dropdown_font=("Segoe UI", 10), height=32, corner_radius=6)
     combo_impresora.pack(fill=tk.X, padx=15, pady=1)
@@ -72,7 +72,7 @@ def mostrar_configuracion_inicial(app):
         combo_impresora.set("Ninguna")
 
     # Selector de País
-    ctk.CTkLabel(frame_form, text="País de Operación", font=("Segoe UI", 9, "bold"), text_color="#475569").pack(anchor=tk.W, padx=15, pady=(5, 1))
+    ctk.CTkLabel(frame_form, text="País de Operación", font=("Segoe UI", 9, "bold"), text_color=("#475569", "#CBD5E1")).pack(anchor=tk.W, padx=15, pady=(5, 1))
     paises = ["Chile", "Colombia", "México", "Argentina", "Otro / Ninguno (Solo local)"]
     combo_pais = ctk.CTkComboBox(frame_form, values=paises, font=("Segoe UI", 10), dropdown_font=("Segoe UI", 10), height=32, corner_radius=6)
     combo_pais.pack(fill=tk.X, padx=15, pady=1)
@@ -128,7 +128,7 @@ def mostrar_registro_administrador(app):
     reg_win = ctk.CTkToplevel(app.root)
     reg_win.title("Crear Usuario Administrador")
     reg_win.geometry("420x460")
-    reg_win.configure(fg_color="#F8FAFC")
+    reg_win.configure(fg_color=("#F8FAFC", ("#0F172A", "#F8FAFC")))
     reg_win.resizable(False, False)
 
     reg_win.update_idletasks()
@@ -145,20 +145,20 @@ def mostrar_registro_administrador(app):
 
     frame_header = ctk.CTkFrame(reg_win, fg_color="#1E293B", corner_radius=0, height=60)
     frame_header.pack(fill=tk.X)
-    ctk.CTkLabel(frame_header, text="CREAR CUENTA DE ADMINISTRADOR", font=("Segoe UI", 12, "bold"), text_color="#FFFFFF").pack(pady=15)
+    ctk.CTkLabel(frame_header, text="CREAR CUENTA DE ADMINISTRADOR", font=("Segoe UI", 12, "bold"), text_color=("#FFFFFF", "#1E293B")).pack(pady=15)
 
     ctk.CTkLabel(reg_win, text="👤", font=("Segoe UI", 36), text_color="#1E293B").pack(pady=10)
 
-    frame_form = ctk.CTkFrame(reg_win, fg_color="#FFFFFF", border_color="#E2E8F0", border_width=1, corner_radius=12)
+    frame_form = ctk.CTkFrame(reg_win, fg_color=("#FFFFFF", "#1E293B"), border_color=("#E2E8F0", "#334155"), border_width=1, corner_radius=12)
     frame_form.pack(fill=tk.BOTH, expand=True, padx=40, pady=(0, 30))
 
-    ctk.CTkLabel(frame_form, text="Nombre de Usuario *", font=("Segoe UI", 10, "bold"), text_color="#475569").pack(anchor=tk.W, padx=25, pady=(20, 2))
-    entry_user = ctk.CTkEntry(frame_form, font=("Segoe UI", 10), fg_color="#F8FAFC", text_color="#0F172A", border_color="#D1D5DB", height=35, corner_radius=6)
+    ctk.CTkLabel(frame_form, text="Nombre de Usuario *", font=("Segoe UI", 10, "bold"), text_color=("#475569", "#CBD5E1")).pack(anchor=tk.W, padx=25, pady=(20, 2))
+    entry_user = ctk.CTkEntry(frame_form, font=("Segoe UI", 10), fg_color=("#F8FAFC", ("#0F172A", "#F8FAFC")), text_color=("#0F172A", "#F8FAFC"), border_color=("#D1D5DB", "#475569"), height=35, corner_radius=6)
     entry_user.pack(fill=tk.X, padx=25, pady=2)
     entry_user.focus_set()
 
-    ctk.CTkLabel(frame_form, text="Contraseña *", font=("Segoe UI", 10, "bold"), text_color="#475569").pack(anchor=tk.W, padx=25, pady=(15, 2))
-    entry_pass = ctk.CTkEntry(frame_form, font=("Segoe UI", 10), fg_color="#F8FAFC", text_color="#0F172A", border_color="#D1D5DB", height=35, corner_radius=6, show="*")
+    ctk.CTkLabel(frame_form, text="Contraseña *", font=("Segoe UI", 10, "bold"), text_color=("#475569", "#CBD5E1")).pack(anchor=tk.W, padx=25, pady=(15, 2))
+    entry_pass = ctk.CTkEntry(frame_form, font=("Segoe UI", 10), fg_color=("#F8FAFC", ("#0F172A", "#F8FAFC")), text_color=("#0F172A", "#F8FAFC"), border_color=("#D1D5DB", "#475569"), height=35, corner_radius=6, show="*")
     entry_pass.pack(fill=tk.X, padx=25, pady=2)
 
     def guardar_usuario():
@@ -188,7 +188,7 @@ def mostrar_login(app):
     login_win = ctk.CTkToplevel(app.root)
     login_win.title("Iniciar Sesión")
     login_win.geometry("420x500")
-    login_win.configure(fg_color="#F8FAFC")
+    login_win.configure(fg_color=("#F8FAFC", ("#0F172A", "#F8FAFC")))
     login_win.resizable(False, False)
 
     login_win.update_idletasks()
@@ -207,21 +207,21 @@ def mostrar_login(app):
     frame_header.pack(fill=tk.X)
 
     nombre_empresa = app.config["nombre_empresa"].upper() if app.config else "SISTEMA POS"
-    ctk.CTkLabel(frame_header, text=nombre_empresa, font=("Segoe UI", 13, "bold"), text_color="#FFFFFF").pack(pady=(12, 1))
+    ctk.CTkLabel(frame_header, text=nombre_empresa, font=("Segoe UI", 13, "bold"), text_color=("#FFFFFF", "#1E293B")).pack(pady=(12, 1))
     ctk.CTkLabel(frame_header, text="CONTROL DE ACCESO", font=("Segoe UI", 9, "bold"), text_color="#38BDF8").pack(pady=(0, 10))
 
     ctk.CTkLabel(login_win, text="🔒", font=("Segoe UI", 36), text_color="#1E293B").pack(pady=15)
 
-    frame_form = ctk.CTkFrame(login_win, fg_color="#FFFFFF", border_color="#E2E8F0", border_width=1, corner_radius=12)
+    frame_form = ctk.CTkFrame(login_win, fg_color=("#FFFFFF", "#1E293B"), border_color=("#E2E8F0", "#334155"), border_width=1, corner_radius=12)
     frame_form.pack(fill=tk.BOTH, expand=True, padx=40, pady=(0, 30))
 
-    ctk.CTkLabel(frame_form, text="Usuario *", font=("Segoe UI", 10, "bold"), text_color="#475569").pack(anchor=tk.W, padx=25, pady=(15, 2))
-    entry_user = ctk.CTkEntry(frame_form, font=("Segoe UI", 10), fg_color="#F8FAFC", text_color="#0F172A", border_color="#D1D5DB", height=35, corner_radius=6)
+    ctk.CTkLabel(frame_form, text="Usuario *", font=("Segoe UI", 10, "bold"), text_color=("#475569", "#CBD5E1")).pack(anchor=tk.W, padx=25, pady=(15, 2))
+    entry_user = ctk.CTkEntry(frame_form, font=("Segoe UI", 10), fg_color=("#F8FAFC", ("#0F172A", "#F8FAFC")), text_color=("#0F172A", "#F8FAFC"), border_color=("#D1D5DB", "#475569"), height=35, corner_radius=6)
     entry_user.pack(fill=tk.X, padx=25, pady=2)
     entry_user.focus_set()
 
-    ctk.CTkLabel(frame_form, text="Contraseña *", font=("Segoe UI", 10, "bold"), text_color="#475569").pack(anchor=tk.W, padx=25, pady=(10, 2))
-    entry_pass = ctk.CTkEntry(frame_form, font=("Segoe UI", 10), fg_color="#F8FAFC", text_color="#0F172A", border_color="#D1D5DB", height=35, corner_radius=6, show="*")
+    ctk.CTkLabel(frame_form, text="Contraseña *", font=("Segoe UI", 10, "bold"), text_color=("#475569", "#CBD5E1")).pack(anchor=tk.W, padx=25, pady=(10, 2))
+    entry_pass = ctk.CTkEntry(frame_form, font=("Segoe UI", 10), fg_color=("#F8FAFC", ("#0F172A", "#F8FAFC")), text_color=("#0F172A", "#F8FAFC"), border_color=("#D1D5DB", "#475569"), height=35, corner_radius=6, show="*")
     entry_pass.pack(fill=tk.X, padx=25, pady=2)
 
     def intentar_login(event=None):
@@ -265,7 +265,7 @@ def mostrar_editar_configuracion(app):
     edit_win = ctk.CTkToplevel(app.root)
     edit_win.title("Editar Configuración del Negocio")
     edit_win.geometry("480x750")
-    edit_win.configure(fg_color="#F8FAFC")
+    edit_win.configure(fg_color=("#F8FAFC", ("#0F172A", "#F8FAFC")))
     edit_win.resizable(False, False)
     edit_win.grab_set()
 
@@ -281,9 +281,9 @@ def mostrar_editar_configuracion(app):
     ctk.CTkLabel(frame_header, text="⚙️ CONFIGURACIÓN DEL NEGOCIO", font=("Segoe UI", 13, "bold"), text_color="white").pack(pady=18)
 
     ctk.CTkLabel(edit_win, text="Modifica los datos de tu empresa. Los cambios se reflejarán\nde inmediato en los nuevos tickets y reportes.",
-                 font=("Segoe UI", 10, "italic"), text_color="#64748B", justify=tk.CENTER).pack(pady=10)
+                 font=("Segoe UI", 10, "italic"), text_color=("#64748B", "#94A3B8"), justify=tk.CENTER).pack(pady=10)
 
-    frame_form = ctk.CTkScrollableFrame(edit_win, fg_color="#FFFFFF", border_color="#E2E8F0", border_width=1, corner_radius=12)
+    frame_form = ctk.CTkScrollableFrame(edit_win, fg_color=("#FFFFFF", "#1E293B"), border_color=("#E2E8F0", "#334155"), border_width=1, corner_radius=12)
     frame_form.pack(fill=tk.BOTH, expand=True, padx=25, pady=(0, 20))
 
     campos = [
@@ -296,14 +296,14 @@ def mostrar_editar_configuracion(app):
 
     entries = {}
     for label_text, key, default_val in campos:
-        ctk.CTkLabel(frame_form, text=label_text, font=("Segoe UI", 9, "bold"), text_color="#475569").pack(anchor=tk.W, padx=15, pady=(5, 1))
-        entry = ctk.CTkEntry(frame_form, font=("Segoe UI", 10), fg_color="#F8FAFC", text_color="#0F172A", border_color="#D1D5DB", height=32, corner_radius=6)
+        ctk.CTkLabel(frame_form, text=label_text, font=("Segoe UI", 9, "bold"), text_color=("#475569", "#CBD5E1")).pack(anchor=tk.W, padx=15, pady=(5, 1))
+        entry = ctk.CTkEntry(frame_form, font=("Segoe UI", 10), fg_color=("#F8FAFC", ("#0F172A", "#F8FAFC")), text_color=("#0F172A", "#F8FAFC"), border_color=("#D1D5DB", "#475569"), height=32, corner_radius=6)
         entry.pack(fill=tk.X, padx=15, pady=1)
         entry.insert(0, default_val)
         entries[key] = entry
 
     # Selector de Impresora
-    ctk.CTkLabel(frame_form, text="Impresora Térmica", font=("Segoe UI", 9, "bold"), text_color="#475569").pack(anchor=tk.W, padx=15, pady=(5, 1))
+    ctk.CTkLabel(frame_form, text="Impresora Térmica", font=("Segoe UI", 9, "bold"), text_color=("#475569", "#CBD5E1")).pack(anchor=tk.W, padx=15, pady=(5, 1))
     impresoras = obtener_impresoras_sistema()
     combo_impresora = ctk.CTkComboBox(frame_form, values=impresoras if impresoras else ["Ninguna"], font=("Segoe UI", 10), dropdown_font=("Segoe UI", 10), height=32, corner_radius=6)
     combo_impresora.pack(fill=tk.X, padx=15, pady=1)
@@ -332,7 +332,7 @@ def mostrar_editar_configuracion(app):
     btn_test.pack(fill=tk.X, padx=15, pady=5)
 
     # Selector de País
-    ctk.CTkLabel(frame_form, text="País de Operación", font=("Segoe UI", 9, "bold"), text_color="#475569").pack(anchor=tk.W, padx=15, pady=(5, 1))
+    ctk.CTkLabel(frame_form, text="País de Operación", font=("Segoe UI", 9, "bold"), text_color=("#475569", "#CBD5E1")).pack(anchor=tk.W, padx=15, pady=(5, 1))
     paises = ["Chile", "Colombia", "México", "Argentina", "Otro / Ninguno (Solo local)"]
     combo_pais = ctk.CTkComboBox(frame_form, values=paises, font=("Segoe UI", 10), dropdown_font=("Segoe UI", 10), height=32, corner_radius=6)
     combo_pais.pack(fill=tk.X, padx=15, pady=1)
@@ -341,7 +341,21 @@ def mostrar_editar_configuracion(app):
 
     # Control Sincronización Nube (Simplificado para el usuario)
     switch_nube = ctk.CTkSwitch(frame_form, text="☁️ Activar sincronización con Panel Web (Nube)", font=("Segoe UI", 10, "bold"), text_color="#1E293B", progress_color="#4F46E5")
-    switch_nube.pack(anchor=tk.W, padx=15, pady=15)
+    switch_nube.pack(anchor=tk.W, padx=15, pady=(15, 5))
+
+    # Control de Tema (Claro / Oscuro)
+    ctk.CTkLabel(frame_form, text="Tema (Claro / Oscuro)", font=("Segoe UI", 9, "bold"), text_color=("#475569", "#CBD5E1")).pack(anchor=tk.W, padx=15, pady=(10, 1))
+    combo_tema = ctk.CTkComboBox(frame_form, values=["System", "Light", "Dark"], font=("Segoe UI", 10), height=32, corner_radius=6)
+    combo_tema.pack(fill=tk.X, padx=15, pady=1)
+    
+    # Leer tema actual si está guardado en config (o por defecto System)
+    tema_actual = app.config.get("tema", "System")
+    combo_tema.set(tema_actual)
+    
+    def cambiar_tema(tema):
+        ctk.set_appearance_mode(tema)
+        
+    combo_tema.configure(command=cambiar_tema)
     
     # Comprobar si ya tiene configurado el URL para dejarlo activo
     tiene_nube = bool(app.config.get("supabase_url"))
@@ -397,7 +411,8 @@ def mostrar_editar_configuracion(app):
                 if not confirmar_error:
                     return
 
-        database.guardar_configuracion(nombre, propietario, telefono, direccion, mensaje, impresora, pais, sb_url, sb_key)
+        tema = combo_tema.get()
+        database.guardar_configuracion(nombre, propietario, telefono, direccion, mensaje, impresora, pais, sb_url, sb_key, tema)
         app.config = database.obtener_configuracion()
         app.actualizar_labels_facturacion()
 
@@ -433,7 +448,7 @@ def mostrar_splash(app, config):
     divider = ctk.CTkFrame(frame_content, fg_color="#334155", height=2, corner_radius=0)
     divider.pack(fill=tk.X, pady=10)
 
-    ctk.CTkLabel(frame_content, text=config["nombre_empresa"].upper(), font=("Segoe UI", 18, "bold"), text_color="#FFFFFF", wraplength=440).pack(pady=15)
+    ctk.CTkLabel(frame_content, text=config["nombre_empresa"].upper(), font=("Segoe UI", 18, "bold"), text_color=("#FFFFFF", "#1E293B"), wraplength=440).pack(pady=15)
 
     ctk.CTkLabel(frame_content, text="Iniciando base de datos y componentes...", font=("Segoe UI", 10, "italic"), text_color="#94A3B8").pack(pady=(10, 0))
 

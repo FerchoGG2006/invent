@@ -26,10 +26,16 @@ class InventarioApp:
         self.root = root
         self.root.withdraw()  # Ocultar inmediatamente para evitar parpadeos
         self.root.geometry("1200x750")
-        self.root.configure(bg="#F8FAFC")  # Slate 50
+        self.root.configure(bg=("#F8FAFC", ("#0F172A", "#F8FAFC")))  # Slate 50
 
         database.init_db()
         self.config = database.obtener_configuracion()
+        
+        import customtkinter as ctk
+        if self.config and self.config.get("tema"):
+            ctk.set_appearance_mode(self.config["tema"])
+        else:
+            ctk.set_appearance_mode("System")
 
         self.carrito = []  # Lista de items: {"id", "codigo", "nombre", "precio", "cantidad"}
         self.selected_cost_price = 0.0
@@ -76,6 +82,10 @@ class InventarioApp:
 
     def mostrar_splash(self, config):
         config_module.mostrar_splash(self, config)
+
+    def mostrar_gestion_usuarios(self):
+        from modules import usuarios as usuarios_module
+        usuarios_module.mostrar_gestion_usuarios(self)
 
     # ==========================================
     # UTILIDADES DELEGADAS
@@ -137,9 +147,9 @@ class InventarioApp:
 
         # Estilo del Treeview
         style.configure("Treeview",
-                        background="#FFFFFF",
+                        background=("#FFFFFF", "#1E293B"),
                         foreground="#1E293B",
-                        fieldbackground="#FFFFFF",
+                        fieldbackground=("#FFFFFF", "#1E293B"),
                         font=("Segoe UI", 9),
                         rowheight=30)
         style.configure("Treeview.Heading",
@@ -156,7 +166,7 @@ class InventarioApp:
             self.root, 
             command=self.on_tab_changed,
             segmented_button_selected_color="#4F46E5",
-            segmented_button_unselected_color="#E2E8F0",
+            segmented_button_unselected_color=("#E2E8F0", "#334155"),
             segmented_button_selected_hover_color="#4338CA",
             text_color="#1E293B"
         )
@@ -184,6 +194,44 @@ class InventarioApp:
         self.reportes_controller = ReportesTab(self)
         self.proveedores_controller = ProveedoresTab(self)
         self.caja_controller = CajaTab(self)
+        
+        # Configurar atajos de teclado globales
+        self.configurar_atajos_teclado()
+        
+        # Verificar stock bajo al iniciar
+        self.root.after(2000, self.verificar_stock_bajo_inicio)
+        
+    def verificar_stock_bajo_inicio(self):
+        productos_bajos = database.obtener_productos_stock_bajo()
+        if productos_bajos:
+            msg = f"¡Atención! Tienes {len(productos_bajos)} producto(s) con stock por debajo del mínimo permitido.\n\n"
+            for p in productos_bajos[:5]: # Mostrar maximo 5
+                msg += f"• {p[2]} (Stock: {p[3]} - Mín: {p[4]})\n"
+            if len(productos_bajos) > 5:
+                msg += f"... y {len(productos_bajos) - 5} más."
+            
+            messagebox.showwarning("Notificación de Stock Bajo", msg)
+
+    # ==========================================
+    # ATAJOS DE TECLADO GLOBALES
+    # ==========================================
+    def configurar_atajos_teclado(self):
+        # F1 a F6 para cambiar pestañas
+        def cambiar_tab(indice):
+            tabs = [" 📦 Inventario ", " 🛒 Punto de Venta ", " 📊 Historial de Ventas ", " 🚚 Proveedores ", " 💰 Caja y Turnos ", " 📈 Analíticas "]
+            if 0 <= indice < len(tabs):
+                try:
+                    self.notebook.set(tabs[indice])
+                    self.on_tab_changed()
+                except ValueError:
+                    pass
+
+        self.root.bind("<F1>", lambda e: cambiar_tab(0))
+        self.root.bind("<F2>", lambda e: cambiar_tab(1))
+        self.root.bind("<F3>", lambda e: cambiar_tab(2))
+        self.root.bind("<F4>", lambda e: cambiar_tab(3))
+        self.root.bind("<F5>", lambda e: cambiar_tab(4))
+        self.root.bind("<F6>", lambda e: cambiar_tab(5))
 
     # ==========================================
     # DELEGACIÓN DE MÉTODOS PARA COMPATIBILIDAD (Temporal o Helper)

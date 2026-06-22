@@ -62,7 +62,8 @@ def init_db():
                 impresora_ticket TEXT,
                 pais_operacion TEXT DEFAULT 'Otro / Ninguno (Solo local)',
                 supabase_url TEXT,
-                supabase_key TEXT
+                supabase_key TEXT,
+                tema TEXT DEFAULT 'System'
             )
         """)
         cursor.execute("""
@@ -189,6 +190,20 @@ def init_db():
             )
         """)
 
+        # --- TABLAS FASE 5: CLIENTES RECURRENTES ---
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS clientes (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                nombre TEXT NOT NULL,
+                identificacion TEXT,
+                telefono TEXT,
+                email TEXT,
+                direccion TEXT,
+                notas TEXT,
+                fecha_registro TIMESTAMP DEFAULT (datetime('now', 'localtime'))
+            )
+        """)
+
         # --- MIGRACIONES (ALTER TABLE PARA TABLAS EXISTENTES) ---
         
         # Migraciones Configuracion
@@ -215,7 +230,8 @@ def init_db():
             ("propina", "REAL DEFAULT 0.0"),
             ("es_cortesia", "INTEGER DEFAULT 0"),
             ("autorizado_por", "TEXT"),
-            ("sincronizado", "INTEGER DEFAULT 0")
+            ("sincronizado", "INTEGER DEFAULT 0"),
+            ("turno_id", "INTEGER")
         ]
         for col_name, col_type in columnas_ventas:
             try:
@@ -273,21 +289,53 @@ def obtener_productos(filtro=""):
             """)
         return cursor.fetchall()
 
-def insertar_producto(codigo, nombre, categoria, costo, venta, stock, min_stock, imagen, unidad_medida="Unidad", proveedor_id=None):
+def insertar_producto(codigo, nombre, categoria, costo, venta, stock, min_stock, img_ruta, unidad_medida="Unidad", proveedor_id=None):
     with sqlite3.connect(DB_NAME) as conn:
         cursor = conn.cursor()
         try:
-            margen = 0.0
-            if costo > 0:
-                margen = ((venta - costo) / costo) * 100
             cursor.execute("""
-                INSERT INTO productos (codigo, nombre, categoria, precio_costo, precio_venta, stock, stock_minimo, imagen_ruta, margen_utilidad, unidad_medida, proveedor_id)
+                INSERT INTO productos (codigo, nombre, categoria, precio_costo, precio_venta, stock, stock_minimo, imagen_ruta, unidad_medida, proveedor_id, margen_utilidad) 
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (codigo, nombre, categoria, costo, venta, stock, min_stock, imagen, margen, unidad_medida, proveedor_id))
+            """, (codigo, nombre, categoria, costo, venta, stock, min_stock, img_ruta, unidad_medida, proveedor_id, ((venta-costo)/costo*100) if costo>0 else 0))
             conn.commit()
             return True
         except sqlite3.IntegrityError:
             return False
+
+def obtener_producto_por_id(producto_id):
+    with sqlite3.connect(DB_NAME) as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT id, codigo, nombre, categoria, precio_costo, precio_venta, 
+                   stock, stock_minimo, imagen_ruta, unidad_medida, proveedor_id, margen_utilidad
+            FROM productos WHERE id = ?
+        """, (producto_id,))
+        return cursor.fetchone()
+
+def actualizar_producto_completo(p_id, codigo, nombre, categoria, costo, venta, stock, min_stock, img_ruta, unidad_medida="Unidad", proveedor_id=None):
+    with sqlite3.connect(DB_NAME) as conn:
+        cursor = conn.cursor()
+        try:
+            margen = ((venta-costo)/costo*100) if costo>0 else 0
+            if img_ruta is not None:
+                cursor.execute("""
+                    UPDATE productos 
+                    SET codigo=?, nombre=?, categoria=?, precio_costo=?, precio_venta=?, 
+                        stock=?, stock_minimo=?, imagen_ruta=?, unidad_medida=?, proveedor_id=?, margen_utilidad=?
+                    WHERE id=?
+                """, (codigo, nombre, categoria, costo, venta, stock, min_stock, img_ruta, unidad_medida, proveedor_id, margen, p_id))
+            else:
+                # No actualizar imagen si es None
+                cursor.execute("""
+                    UPDATE productos 
+                    SET codigo=?, nombre=?, categoria=?, precio_costo=?, precio_venta=?, 
+                        stock=?, stock_minimo=?, unidad_medida=?, proveedor_id=?, margen_utilidad=?
+                    WHERE id=?
+                """, (codigo, nombre, categoria, costo, venta, stock, min_stock, unidad_medida, proveedor_id, margen, p_id))
+            conn.commit()
+            return True, "Producto actualizado correctamente."
+        except sqlite3.IntegrityError:
+            return False, "La Referencia/Código ya existe en otro producto."
 
 def modificar_stock(producto_id, cantidad):
     with sqlite3.connect(DB_NAME) as conn:
@@ -460,7 +508,7 @@ def obtener_top_productos(filtro_fecha="Todo"):
 def obtener_configuracion():
     with sqlite3.connect(DB_NAME) as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT nombre_empresa, propietario, telefono, direccion, mensaje_ticket, impresora_ticket, pais_operacion, supabase_url, supabase_key FROM configuracion WHERE id = 1")
+        cursor.execute("SELECT nombre_empresa, propietario, telefono, direccion, mensaje_ticket, impresora_ticket, pais_operacion, supabase_url, supabase_key, tema FROM configuracion WHERE id = 1")
         res = cursor.fetchone()
         if res:
             return {
@@ -472,11 +520,12 @@ def obtener_configuracion():
                 "impresora_ticket": res[5] or "",
                 "pais_operacion": res[6] or "Otro / Ninguno (Solo local)",
                 "supabase_url": res[7] or "",
-                "supabase_key": res[8] or ""
+                "supabase_key": res[8] or "",
+                "tema": res[9] or "System"
             }
         return None
 
-def guardar_configuracion(nombre_empresa, propietario, telefono, direccion, mensaje_ticket, impresora_ticket="", pais_operacion="Otro / Ninguno (Solo local)", supabase_url="", supabase_key=""):
+def guardar_configuracion(nombre_empresa, propietario, telefono, direccion, mensaje_ticket, impresora_ticket="", pais_operacion="Otro / Ninguno (Solo local)", supabase_url="", supabase_key="", tema="System"):
     with sqlite3.connect(DB_NAME) as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT COUNT(*) FROM configuracion WHERE id = 1")
@@ -485,14 +534,14 @@ def guardar_configuracion(nombre_empresa, propietario, telefono, direccion, mens
         if existe:
             cursor.execute("""
                 UPDATE configuracion 
-                SET nombre_empresa = ?, propietario = ?, telefono = ?, direccion = ?, mensaje_ticket = ?, impresora_ticket = ?, pais_operacion = ?, supabase_url = ?, supabase_key = ?
+                SET nombre_empresa = ?, propietario = ?, telefono = ?, direccion = ?, mensaje_ticket = ?, impresora_ticket = ?, pais_operacion = ?, supabase_url = ?, supabase_key = ?, tema = ?
                 WHERE id = 1
-            """, (nombre_empresa, propietario, telefono, direccion, mensaje_ticket, impresora_ticket, pais_operacion, supabase_url, supabase_key))
+            """, (nombre_empresa, propietario, telefono, direccion, mensaje_ticket, impresora_ticket, pais_operacion, supabase_url, supabase_key, tema))
         else:
             cursor.execute("""
-                INSERT INTO configuracion (id, nombre_empresa, propietario, telefono, direccion, mensaje_ticket, impresora_ticket, pais_operacion, supabase_url, supabase_key)
-                VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (nombre_empresa, propietario, telefono, direccion, mensaje_ticket, impresora_ticket, pais_operacion, supabase_url, supabase_key))
+                INSERT INTO configuracion (id, nombre_empresa, propietario, telefono, direccion, mensaje_ticket, impresora_ticket, pais_operacion, supabase_url, supabase_key, tema)
+                VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (nombre_empresa, propietario, telefono, direccion, mensaje_ticket, impresora_ticket, pais_operacion, supabase_url, supabase_key, tema))
         conn.commit()
 
 
@@ -556,6 +605,8 @@ def obtener_categorias():
         return cursor.fetchall()
 
 def insertar_categoria(nombre, descripcion="", color_hex="#E2E8F0", orden=0):
+    if isinstance(color_hex, (tuple, list)):
+        color_hex = ",".join(color_hex)
     with sqlite3.connect(DB_NAME) as conn:
         cursor = conn.cursor()
         try:
@@ -774,3 +825,251 @@ def obtener_todos_productos():
         cursor = conn.cursor()
         cursor.execute("SELECT id, codigo, nombre, categoria, precio_venta, stock, stock_minimo FROM productos")
         return cursor.fetchall()
+
+# ==========================================
+# FASE 5: CLIENTES RECURRENTES
+# ==========================================
+
+def obtener_clientes(filtro=""):
+    with sqlite3.connect(DB_NAME) as conn:
+        cursor = conn.cursor()
+        if filtro:
+            cursor.execute("SELECT id, nombre, identificacion, telefono, email FROM clientes WHERE nombre LIKE ? OR identificacion LIKE ? ORDER BY nombre", (f"%{filtro}%", f"%{filtro}%"))
+        else:
+            cursor.execute("SELECT id, nombre, identificacion, telefono, email FROM clientes ORDER BY nombre")
+        return cursor.fetchall()
+
+def insertar_cliente(nombre, identificacion="", telefono="", email="", direccion="", notas=""):
+    with sqlite3.connect(DB_NAME) as conn:
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO clientes (nombre, identificacion, telefono, email, direccion, notas) VALUES (?, ?, ?, ?, ?, ?)",
+                       (nombre, identificacion, telefono, email, direccion, notas))
+        conn.commit()
+        return True, "Cliente guardado."
+
+def buscar_clientes_autocompletar(texto):
+    with sqlite3.connect(DB_NAME) as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT nombre, identificacion FROM clientes WHERE nombre LIKE ? OR identificacion LIKE ? LIMIT 8", (f"%{texto}%", f"%{texto}%"))
+        return cursor.fetchall()
+
+# ==========================================
+# GESTIÓN DE USUARIOS
+# ==========================================
+
+def obtener_usuarios():
+    with sqlite3.connect(DB_NAME) as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, usuario, rol FROM usuarios ORDER BY id")
+        return cursor.fetchall()
+
+def eliminar_usuario(usuario_id):
+    with sqlite3.connect(DB_NAME) as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT COUNT(*) FROM usuarios")
+        total = cursor.fetchone()[0]
+        if total <= 1:
+            return False, "No se puede eliminar el único usuario del sistema."
+        cursor.execute("DELETE FROM usuarios WHERE id = ?", (usuario_id,))
+        conn.commit()
+        return True, "Usuario eliminado."
+
+def cambiar_clave_usuario(usuario_id, nueva_clave):
+    with sqlite3.connect(DB_NAME) as conn:
+        cursor = conn.cursor()
+        cursor.execute("UPDATE usuarios SET clave = ? WHERE id = ?", (hash_clave(nueva_clave), usuario_id))
+        conn.commit()
+        return True, "Contraseña actualizada."
+
+def cambiar_rol_usuario(usuario_id, nuevo_rol):
+    with sqlite3.connect(DB_NAME) as conn:
+        cursor = conn.cursor()
+        cursor.execute("UPDATE usuarios SET rol = ? WHERE id = ?", (nuevo_rol, usuario_id))
+        conn.commit()
+        return True, "Rol actualizado."
+
+# ==========================================
+# HISTORIAL DE COMPRAS A PROVEEDORES
+# ==========================================
+
+def obtener_historial_compras(filtro_proveedor_id=None):
+    with sqlite3.connect(DB_NAME) as conn:
+        cursor = conn.cursor()
+        if filtro_proveedor_id:
+            cursor.execute("""
+                SELECT c.id, p.nombre, c.fecha, c.total, c.notas, u.usuario
+                FROM compras c
+                JOIN proveedores p ON c.proveedor_id = p.id
+                LEFT JOIN usuarios u ON c.usuario_id = u.id
+                WHERE c.proveedor_id = ?
+                ORDER BY c.fecha DESC
+            """, (filtro_proveedor_id,))
+        else:
+            cursor.execute("""
+                SELECT c.id, p.nombre, c.fecha, c.total, c.notas, u.usuario
+                FROM compras c
+                JOIN proveedores p ON c.proveedor_id = p.id
+                LEFT JOIN usuarios u ON c.usuario_id = u.id
+                ORDER BY c.fecha DESC
+            """)
+        return cursor.fetchall()
+
+def obtener_detalle_compra(compra_id):
+    with sqlite3.connect(DB_NAME) as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT p.nombre, cd.cantidad, cd.precio_unitario, cd.total
+            FROM compras_detalle cd
+            JOIN productos p ON cd.producto_id = p.id
+            WHERE cd.compra_id = ?
+        """, (compra_id,))
+        return cursor.fetchall()
+
+# ==========================================
+# STOCK BAJO Y ALERTAS
+# ==========================================
+
+def obtener_productos_stock_bajo():
+    with sqlite3.connect(DB_NAME) as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, codigo, nombre, stock, stock_minimo FROM productos WHERE stock <= stock_minimo ORDER BY stock ASC")
+        return cursor.fetchall()
+
+# ==========================================
+# CAJA Y TURNOS MEJORADO
+# ==========================================
+
+def obtener_turno_abierto():
+    with sqlite3.connect(DB_NAME) as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT tc.id, tc.monto_apertura, tc.fecha_apertura, u.usuario
+            FROM turnos_caja tc
+            LEFT JOIN usuarios u ON tc.usuario_id = u.id
+            WHERE tc.estado = 'Abierto'
+        """)
+        return cursor.fetchone()
+
+def obtener_resumen_turno(turno_id):
+    with sqlite3.connect(DB_NAME) as conn:
+        cursor = conn.cursor()
+        # Ventas del turno
+        cursor.execute("""
+            SELECT 
+                COUNT(id), 
+                COALESCE(SUM(total), 0),
+                COALESCE(SUM(CASE WHEN metodo_pago = 'Efectivo' THEN total ELSE 0 END), 0),
+                COALESCE(SUM(CASE WHEN metodo_pago = 'Transferencia' THEN total ELSE 0 END), 0),
+                COALESCE(SUM(CASE WHEN metodo_pago NOT IN ('Efectivo', 'Transferencia') THEN total ELSE 0 END), 0),
+                COALESCE(SUM(total - (cantidad * precio_costo_unitario)), 0)
+            FROM ventas
+            WHERE turno_id = ?
+        """, (turno_id,))
+        res = cursor.fetchone()
+        return {
+            "transacciones": res[0],
+            "total_ventas": res[1],
+            "efectivo": res[2],
+            "transferencia": res[3],
+            "otros": res[4],
+            "utilidad": res[5]
+        }
+
+def cerrar_turno_caja_mejorado(turno_id, monto_cierre_real):
+    with sqlite3.connect(DB_NAME) as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT monto_apertura FROM turnos_caja WHERE id = ?", (turno_id,))
+        apertura = cursor.fetchone()[0]
+        
+        # Calcular esperado = apertura + ventas en efectivo del turno
+        cursor.execute("""
+            SELECT COALESCE(SUM(total), 0) FROM ventas 
+            WHERE turno_id = ? AND metodo_pago = 'Efectivo'
+        """, (turno_id,))
+        ventas_efectivo = cursor.fetchone()[0]
+        
+        esperado = apertura + ventas_efectivo
+        diferencia = monto_cierre_real - esperado
+        
+        cursor.execute("""
+            UPDATE turnos_caja 
+            SET fecha_cierre = datetime('now', 'localtime'), 
+                monto_cierre_esperado = ?,
+                monto_cierre_real = ?, 
+                diferencia = ?, 
+                estado = 'Cerrado'
+            WHERE id = ?
+        """, (esperado, monto_cierre_real, diferencia, turno_id))
+        conn.commit()
+        return True, "Turno cerrado exitosamente.", esperado, diferencia
+
+# ==========================================
+# DEVOLUCIONES PARCIALES
+# ==========================================
+
+def devolucion_parcial(venta_id, cantidad_devolver):
+    with sqlite3.connect(DB_NAME) as conn:
+        cursor = conn.cursor()
+        try:
+            cursor.execute("SELECT producto_id, cantidad, precio_unitario, total FROM ventas WHERE id = ?", (venta_id,))
+            res = cursor.fetchone()
+            if not res:
+                return False, "Venta no encontrada."
+            
+            producto_id, cant_original, precio_unit, total_original = res
+            
+            if cantidad_devolver >= cant_original:
+                return False, f"Para devolver todo ({cant_original} unidades), usa 'Anular Venta'."
+            
+            if cantidad_devolver <= 0:
+                return False, "La cantidad a devolver debe ser mayor a 0."
+            
+            # Actualizar la venta con la nueva cantidad
+            nueva_cantidad = cant_original - cantidad_devolver
+            nuevo_total = nueva_cantidad * precio_unit
+            
+            cursor.execute("""
+                UPDATE ventas SET cantidad = ?, total = ? WHERE id = ?
+            """, (nueva_cantidad, nuevo_total, venta_id))
+            
+            # Devolver stock
+            cursor.execute("UPDATE productos SET stock = stock + ? WHERE id = ?", (cantidad_devolver, producto_id))
+            
+            conn.commit()
+            return True, f"Devolución parcial exitosa: {cantidad_devolver} unidades devueltas al inventario."
+        except Exception as e:
+            conn.rollback()
+            return False, f"Error: {str(e)}"
+
+# ==========================================
+# CLIENTES RECURRENTES
+# ==========================================
+
+def obtener_clientes(filtro=""):
+    with sqlite3.connect(DB_NAME) as conn:
+        cursor = conn.cursor()
+        if filtro:
+            q = f"%{filtro}%"
+            cursor.execute("SELECT id, nombre, identificacion, telefono, email, direccion FROM clientes WHERE nombre LIKE ? OR identificacion LIKE ? ORDER BY nombre", (q, q))
+        else:
+            cursor.execute("SELECT id, nombre, identificacion, telefono, email, direccion FROM clientes ORDER BY nombre")
+        return cursor.fetchall()
+
+def guardar_cliente(nombre, identificacion, telefono, email, direccion):
+    with sqlite3.connect(DB_NAME) as conn:
+        cursor = conn.cursor()
+        try:
+            cursor.execute("""
+                INSERT INTO clientes (nombre, identificacion, telefono, email, direccion)
+                VALUES (?, ?, ?, ?, ?)
+            """, (nombre, identificacion, telefono, email, direccion))
+            conn.commit()
+            return True, "Cliente guardado exitosamente."
+        except Exception as e:
+            return False, str(e)
+
+def buscar_cliente_por_identificacion(identificacion):
+    with sqlite3.connect(DB_NAME) as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, nombre, identificacion, telefono, email, direccion FROM clientes WHERE identificacion = ?", (identificacion,))
+        return cursor.fetchone()
