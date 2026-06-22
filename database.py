@@ -585,6 +585,33 @@ def insertar_proveedor(nombre, contacto, telefono, email, direccion, notas):
         conn.commit()
         return True, "Proveedor agregado exitosamente."
 
+def actualizar_proveedor(proveedor_id, nombre, contacto, telefono, email, direccion, notas):
+    with sqlite3.connect(DB_NAME) as conn:
+        cursor = conn.cursor()
+        try:
+            cursor.execute("""
+                UPDATE proveedores 
+                SET nombre=?, contacto=?, telefono=?, email=?, direccion=?, notas=?
+                WHERE id=?
+            """, (nombre, contacto, telefono, email, direccion, notas, proveedor_id))
+            conn.commit()
+            return True, "Proveedor actualizado exitosamente."
+        except Exception as e:
+            return False, f"Error al actualizar: {str(e)}"
+
+def eliminar_proveedor(proveedor_id):
+    with sqlite3.connect(DB_NAME) as conn:
+        cursor = conn.cursor()
+        try:
+            # Limpiar referencia de proveedor en productos asociados
+            cursor.execute("UPDATE productos SET proveedor_id = NULL WHERE proveedor_id = ?", (proveedor_id,))
+            # Eliminar el proveedor
+            cursor.execute("DELETE FROM proveedores WHERE id = ?", (proveedor_id,))
+            conn.commit()
+            return True, "Proveedor eliminado exitosamente."
+        except Exception as e:
+            return False, f"Error al eliminar: {str(e)}"
+
 def registrar_compra(proveedor_id, usuario_id, total, notas, detalle_productos):
     # detalle_productos es una lista de diccionarios: {"id", "cantidad", "precio_unitario"}
     with sqlite3.connect(DB_NAME) as conn:

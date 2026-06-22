@@ -78,14 +78,10 @@ def mostrar_configuracion_inicial(app):
     combo_pais.pack(fill=tk.X, padx=15, pady=1)
     combo_pais.set("Otro / Ninguno (Solo local)")
 
-    # Campos Supabase
-    ctk.CTkLabel(frame_form, text="Supabase URL (Nube - Opcional)", font=("Segoe UI", 9, "bold"), text_color="#475569").pack(anchor=tk.W, padx=15, pady=(8, 1))
-    entry_sb_url = ctk.CTkEntry(frame_form, font=("Segoe UI", 10), fg_color="#F8FAFC", text_color="#0F172A", border_color="#D1D5DB", height=32, corner_radius=6, placeholder_text="https://xyz.supabase.co")
-    entry_sb_url.pack(fill=tk.X, padx=15, pady=1)
-
-    ctk.CTkLabel(frame_form, text="Supabase Anon Key (Nube - Opcional)", font=("Segoe UI", 9, "bold"), text_color="#475569").pack(anchor=tk.W, padx=15, pady=(5, 1))
-    entry_sb_key = ctk.CTkEntry(frame_form, font=("Segoe UI", 10), fg_color="#F8FAFC", text_color="#0F172A", border_color="#D1D5DB", height=32, corner_radius=6, placeholder_text="eyJhbGciOi...", show="*")
-    entry_sb_key.pack(fill=tk.X, padx=15, pady=1)
+    # Control Sincronización Nube (Simplificado para el usuario)
+    switch_nube = ctk.CTkSwitch(frame_form, text="☁️ Activar sincronización con Panel Web (Nube)", font=("Segoe UI", 10, "bold"), text_color="#1E293B", progress_color="#4F46E5")
+    switch_nube.pack(anchor=tk.W, padx=15, pady=15)
+    switch_nube.select()  # Activado por defecto
 
     def guardar():
         nombre = entries["nombre"].get().strip()
@@ -101,17 +97,19 @@ def mostrar_configuracion_inicial(app):
         if impresora == "Ninguna":
             impresora = ""
         pais = combo_pais.get()
-        sb_url = entry_sb_url.get().strip()
-        sb_key = entry_sb_key.get().strip()
+        
+        if switch_nube.get() == 1:
+            sb_url = "https://msfiyykybzxpurdwvlwv.supabase.co"
+            sb_key = "sb_publishable_b-4AotJYxuqfOOFlrFb3mA_FDKN4eVy"
+        else:
+            sb_url = ""
+            sb_key = ""
 
-        # Probar conexión Supabase si se ingresaron credenciales
-        if sb_url or sb_key:
-            if not sb_url or not sb_key:
-                messagebox.showwarning("Atención", "Para activar la nube debes ingresar tanto la URL como la clave API de Supabase.", parent=setup_win)
-                return
+        # Probar conexión Supabase si está activada
+        if sb_url:
             exito_sb, msg_sb = probar_conexion_supabase(sb_url, sb_key)
             if not exito_sb:
-                confirmar_error = messagebox.askyesno("Error de conexión a la nube", f"{msg_sb}\n\n¿Deseas guardar la configuración de todas formas?", parent=setup_win)
+                confirmar_error = messagebox.askyesno("Error de conexión a la nube", "No se pudo conectar a la nube. ¿Deseas activar la sincronización de todas formas (se sincronizará cuando recuperes conexión)?", parent=setup_win)
                 if not confirmar_error:
                     return
 
@@ -341,27 +339,29 @@ def mostrar_editar_configuracion(app):
     pais_actual = app.config.get("pais_operacion", "Otro / Ninguno (Solo local)")
     combo_pais.set(pais_actual)
 
-    # Credenciales de Supabase
-    ctk.CTkLabel(frame_form, text="Supabase URL (Nube)", font=("Segoe UI", 9, "bold"), text_color="#475569").pack(anchor=tk.W, padx=15, pady=(8, 1))
-    entry_sb_url = ctk.CTkEntry(frame_form, font=("Segoe UI", 10), fg_color="#F8FAFC", text_color="#0F172A", border_color="#D1D5DB", height=32, corner_radius=6, placeholder_text="https://xyz.supabase.co")
-    entry_sb_url.pack(fill=tk.X, padx=15, pady=1)
-    entry_sb_url.insert(0, app.config.get("supabase_url", ""))
-
-    ctk.CTkLabel(frame_form, text="Supabase Anon Key (Nube)", font=("Segoe UI", 9, "bold"), text_color="#475569").pack(anchor=tk.W, padx=15, pady=(5, 1))
-    entry_sb_key = ctk.CTkEntry(frame_form, font=("Segoe UI", 10), fg_color="#F8FAFC", text_color="#0F172A", border_color="#D1D5DB", height=32, corner_radius=6, placeholder_text="eyJhbGciOi...", show="*")
-    entry_sb_key.pack(fill=tk.X, padx=15, pady=1)
-    entry_sb_key.insert(0, app.config.get("supabase_key", ""))
+    # Control Sincronización Nube (Simplificado para el usuario)
+    switch_nube = ctk.CTkSwitch(frame_form, text="☁️ Activar sincronización con Panel Web (Nube)", font=("Segoe UI", 10, "bold"), text_color="#1E293B", progress_color="#4F46E5")
+    switch_nube.pack(anchor=tk.W, padx=15, pady=15)
+    
+    # Comprobar si ya tiene configurado el URL para dejarlo activo
+    tiene_nube = bool(app.config.get("supabase_url"))
+    if tiene_nube:
+        switch_nube.select()
+    else:
+        switch_nube.deselect()
 
     # Botón Probar Supabase
     def probar_nube():
-        url = entry_sb_url.get().strip()
-        key = entry_sb_key.get().strip()
-        if not url or not key:
-            messagebox.showwarning("Atención", "Ingresa la URL y la clave API de Supabase para poder probar la conexión.", parent=edit_win)
+        if switch_nube.get() == 1:
+            url = "https://msfiyykybzxpurdwvlwv.supabase.co"
+            key = "sb_publishable_b-4AotJYxuqfOOFlrFb3mA_FDKN4eVy"
+        else:
+            messagebox.showwarning("Atención", "Activa la casilla de la nube primero para probar la conexión.", parent=edit_win)
             return
+        
         exito_sb, msg_sb = probar_conexion_supabase(url, key)
         if exito_sb:
-            messagebox.showinfo("Conexión en la Nube", msg_sb, parent=edit_win)
+            messagebox.showinfo("Conexión en la Nube", "Conexión a la nube exitosa.", parent=edit_win)
         else:
             messagebox.showerror("Error en la Nube", msg_sb, parent=edit_win)
 
@@ -382,16 +382,18 @@ def mostrar_editar_configuracion(app):
         if impresora == "Ninguna":
             impresora = ""
         pais = combo_pais.get()
-        sb_url = entry_sb_url.get().strip()
-        sb_key = entry_sb_key.get().strip()
+        
+        if switch_nube.get() == 1:
+            sb_url = "https://msfiyykybzxpurdwvlwv.supabase.co"
+            sb_key = "sb_publishable_b-4AotJYxuqfOOFlrFb3mA_FDKN4eVy"
+        else:
+            sb_url = ""
+            sb_key = ""
 
-        if sb_url or sb_key:
-            if not sb_url or not sb_key:
-                messagebox.showwarning("Atención", "Para activar la nube debes ingresar tanto la URL como la clave API de Supabase.", parent=edit_win)
-                return
+        if sb_url:
             exito_sb, msg_sb = probar_conexion_supabase(sb_url, sb_key)
             if not exito_sb:
-                confirmar_error = messagebox.askyesno("Error en la nube", f"{msg_sb}\n\n¿Deseas guardar la configuración de todas formas?", parent=edit_win)
+                confirmar_error = messagebox.askyesno("Error en la nube", "No se pudo conectar a la nube. ¿Deseas activar la sincronización de todas formas (se sincronizará cuando recuperes conexión)?", parent=edit_win)
                 if not confirmar_error:
                     return
 

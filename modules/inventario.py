@@ -31,7 +31,7 @@ class InventarioTab:
             ("Referencia *", "codigo", 0, 0),
             ("Nombre *", "nombre", 0, 1),
             ("Categoría", "categoria", 1, 0),
-            ("Proveedor ID", "proveedor_id", 1, 1),
+            ("Proveedor", "proveedor_id", 1, 1),
             ("Precio Costo", "costo", 2, 0),
             ("Precio Venta", "venta", 2, 1),
             ("Stock Inicial", "stock", 3, 0),
@@ -47,7 +47,7 @@ class InventarioTab:
             ctk.CTkLabel(cell, text=label_text, font=("Segoe UI", 8, "bold"), text_color="#64748B").pack(anchor=tk.W, pady=(0, 1))
             
             if key in ["categoria", "proveedor_id", "unidad_medida"]:
-                combo = ctk.CTkComboBox(cell, font=("Segoe UI", 9), height=28, corner_radius=5)
+                combo = ctk.CTkComboBox(cell, font=("Segoe UI", 9), height=28, corner_radius=5, state="readonly")
                 combo.pack(fill=tk.X, pady=1)
                 self.inputs[key] = combo
             else:
@@ -58,6 +58,8 @@ class InventarioTab:
         self.inputs["min_stock"].insert(0, "3")
         self.inputs["unidad_medida"].configure(values=["Unidad", "Kg", "Litro", "Metro", "Caja"])
         self.inputs["unidad_medida"].set("Unidad")
+        self.inputs["categoria"].set("Seleccionar...")
+        self.inputs["proveedor_id"].set("Seleccionar...")
         self.actualizar_combos()
 
         # Campo para Imagen (No obligatorio)
@@ -155,7 +157,7 @@ class InventarioTab:
                     categorias_nombres.append(row[0])
                     
         self.inputs["categoria"].configure(values=sorted(categorias_nombres))
-        self.inputs["proveedor_id"].configure(values=[f"{p[0]} - {p[1]}" for p in prov])
+        self.inputs["proveedor_id"].configure(values=[f"{p[0]} - {p[1]}" for p in prov] if prov else ["Sin proveedores"])
 
     def pos_seleccionar_imagen(self):
         ruta = filedialog.askopenfilename(
@@ -228,6 +230,8 @@ class InventarioTab:
         codigo = self.inputs["codigo"].get().strip()
         nombre = self.inputs["nombre"].get().strip()
         categoria = self.inputs["categoria"].get().strip()
+        if categoria == "Seleccionar...":
+            categoria = ""
         proveedor_sel = self.inputs["proveedor_id"].get().strip()
         unidad_medida = self.inputs["unidad_medida"].get().strip()
 
@@ -264,13 +268,15 @@ class InventarioTab:
         exito = database.insertar_producto(codigo, nombre, categoria, costo, venta, stock, min_stock, imagen_destino, unidad_medida, proveedor_id)
         if exito:
             self.cargar_datos(self.entry_buscar.get())
-            for entry in self.inputs.values():
+            for key, entry in self.inputs.items():
                 if not isinstance(entry, ctk.CTkComboBox):
                     entry.delete(0, tk.END)
                 else:
-                    entry.set("")
+                    if key == "unidad_medida":
+                        entry.set("Unidad")
+                    else:
+                        entry.set("Seleccionar...")
             self.inputs["min_stock"].insert(0, "3")
-            self.inputs["unidad_medida"].set("Unidad")
             self.app.imagen_ruta_form = ""
             self.lbl_img_path.configure(text="Sin foto", text_color="#94A3B8")
             self.lbl_img_preview.config(image="", text="Sin vista previa")

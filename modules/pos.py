@@ -181,7 +181,7 @@ class PosTab:
         ctk.CTkLabel(frame_total_botones, text="Pago:", font=("Segoe UI", 9, "bold"), text_color="#475569").pack(side=tk.RIGHT, padx=(5, 2))
         metodos = ["Efectivo", "Transferencia", "Tarjeta Débito", "Tarjeta Crédito", "Billetera Virtual", "Mixto"]
         
-        self.combo_pago = ctk.CTkComboBox(frame_total_botones, values=metodos, font=("Segoe UI", 9), height=28, width=110, corner_radius=6)
+        self.combo_pago = ctk.CTkComboBox(frame_total_botones, values=metodos, font=("Segoe UI", 9), height=28, width=110, corner_radius=6, command=self.on_metodo_pago_changed)
         self.combo_pago.pack(side=tk.RIGHT, padx=2)
         self.combo_pago.set("Efectivo")
 
@@ -193,10 +193,30 @@ class PosTab:
         elif estado == "Sincronizando...":
             self.lbl_estado_nube.configure(text="☁️ Sincronizando...", text_color="#F59E0B")
         elif estado == "Error de conexión":
-            self.lbl_estado_nube.configure(text="☁️ Error Nube", text_color="#EF4444")
+            self.lbl_estado_nube.configure(text="🔴 Error Nube", text_color="#EF4444")
+            # Permitir ver detalles del error al hacer clic
+            self.lbl_estado_nube.bind("<Button-1>", lambda e: messagebox.showwarning(
+                "Error de Sincronización en la Nube",
+                f"La sincronización con Supabase falló.\n\n"
+                f"Último intento: {sync.ultimo_intento}\n"
+                f"Detalle: {sync.ultimo_error or 'Sin detalles disponibles'}\n\n"
+                "Verifica:\n"
+                "• Que tu URL y Key de Supabase estén correctas en la configuración\n"
+                "• Que las tablas 'productos' y 'ventas' existan en Supabase\n"
+                "• Tu conexión a Internet",
+                parent=self.tab
+            ))
         else:
             self.lbl_estado_nube.configure(text="☁️ Nube deshabilitada", text_color="#94A3B8")
         self.app.root.after(5000, self.actualizar_estado_nube)
+
+    def on_metodo_pago_changed(self, seleccion):
+        if seleccion == "Mixto":
+            total = self.pos_actualizar_tabla_carrito()
+            if total <= 0:
+                messagebox.showinfo("Pago Mixto", "Agrega productos al carrito primero.\n\nAl presionar 'Registrar' se abrirá la ventana para distribuir el pago entre varios métodos.", parent=self.tab)
+            else:
+                messagebox.showinfo("Pago Mixto", f"Total actual: ${total:,.0f}\n\nAl presionar 'Registrar' se abrirá la ventana para distribuir el pago entre varios métodos (Efectivo, Transferencia, Tarjeta, etc.).", parent=self.tab)
 
     def pos_actualizar_lista_productos(self, filtro=""):
         for item in self.tabla_pos_prod.get_children():
