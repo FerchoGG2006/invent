@@ -210,6 +210,19 @@ def init_db():
                 fecha_registro TIMESTAMP DEFAULT (datetime('now', 'localtime'))
             )
         """)
+        # --- TABLAS FASE 6: CITAS (AGENDA) ---
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS citas (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                cliente_nombre TEXT NOT NULL,
+                cliente_telefono TEXT,
+                fecha_cita TIMESTAMP NOT NULL,
+                barbero TEXT,
+                servicio TEXT,
+                estado TEXT DEFAULT 'Pendiente',
+                fecha_registro TIMESTAMP DEFAULT (datetime('now', 'localtime'))
+            )
+        """)
 
         # --- MIGRACIONES (ALTER TABLE PARA TABLAS EXISTENTES) ---
         

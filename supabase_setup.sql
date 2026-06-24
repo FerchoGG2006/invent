@@ -43,3 +43,47 @@ ALTER TABLE public.ventas DISABLE ROW LEVEL SECURITY;
 -- ALTER TABLE public.ventas ENABLE ROW LEVEL SECURITY;
 -- CREATE POLICY "Permitir todo a Anon" ON public.productos FOR ALL TO anon USING (true) WITH CHECK (true);
 -- CREATE POLICY "Permitir todo a Anon" ON public.ventas FOR ALL TO anon USING (true) WITH CHECK (true);
+
+-- 4. Tabla de Clientes (CRM)
+CREATE TABLE IF NOT EXISTS public.clientes (
+    id BIGINT PRIMARY KEY,
+    nombre TEXT NOT NULL,
+    telefono TEXT,
+    email TEXT,
+    puntos INTEGER DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- 5. Tabla de Citas (Agenda)
+CREATE TABLE IF NOT EXISTS public.citas (
+    id BIGINT PRIMARY KEY,
+    cliente_nombre TEXT NOT NULL,
+    cliente_telefono TEXT,
+    fecha_cita TIMESTAMP WITH TIME ZONE NOT NULL,
+    barbero TEXT,
+    servicio TEXT,
+    estado TEXT DEFAULT 'Pendiente', -- Pendiente, Completada, Cancelada
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- 6. Tabla de Turnos de Caja (Cierre)
+CREATE TABLE IF NOT EXISTS public.turnos_caja (
+    id BIGINT PRIMARY KEY,
+    caja_id BIGINT,
+    usuario_id BIGINT,
+    fecha_apertura TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()),
+    fecha_cierre TIMESTAMP WITH TIME ZONE,
+    monto_apertura NUMERIC DEFAULT 0.0,
+    monto_cierre_esperado NUMERIC DEFAULT 0.0,
+    monto_cierre_real NUMERIC DEFAULT 0.0,
+    diferencia NUMERIC DEFAULT 0.0,
+    estado TEXT DEFAULT 'Abierto',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- Deshabilitar RLS temporalmente para las nuevas tablas
+ALTER TABLE public.clientes DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.citas DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.turnos_caja DISABLE ROW LEVEL SECURITY;
