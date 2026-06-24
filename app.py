@@ -19,6 +19,7 @@ from modules.pos import PosTab
 from modules.reportes import ReportesTab
 from modules.proveedores import ProveedoresTab
 from modules.caja import CajaTab
+from modules.creditos import CreditosTab
 
 
 class InventarioApp:
@@ -261,6 +262,7 @@ class InventarioApp:
         # Crear y registrar pestañas
         self.notebook.add(" 📦 Inventario ")
         self.notebook.add(" 🛒 Punto de Venta ")
+        self.notebook.add(" 📓 Créditos ")
         self.notebook.add(" 📊 Historial de Ventas ")
         self.notebook.add(" 🚚 Proveedores ")
         self.notebook.add(" 💰 Caja y Turnos ")
@@ -269,6 +271,7 @@ class InventarioApp:
         # Guardar referencias de los frames de cada pestaña
         self.tab_inventario = self.notebook.tab(" 📦 Inventario ")
         self.tab_pos = self.notebook.tab(" 🛒 Punto de Venta ")
+        self.tab_creditos = self.notebook.tab(" 📓 Créditos ")
         self.tab_reportes = self.notebook.tab(" 📊 Historial de Ventas ")
         self.tab_proveedores = self.notebook.tab(" 🚚 Proveedores ")
         self.tab_caja = self.notebook.tab(" 💰 Caja y Turnos ")
@@ -277,6 +280,7 @@ class InventarioApp:
         # Inicializar controladores de cada pestaña
         self.inventario_controller = InventarioTab(self)
         self.pos_controller = PosTab(self)
+        self.creditos_controller = CreditosTab(self)
         self.reportes_controller = ReportesTab(self)
         self.proveedores_controller = ProveedoresTab(self)
         self.caja_controller = CajaTab(self)

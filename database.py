@@ -224,6 +224,42 @@ def init_db():
             )
         """)
 
+        # --- TABLAS FASE 7: POS ADVANCED (FIADOS Y COMBOS) ---
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS cuentas_cobrar (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                cliente_nombre TEXT NOT NULL,
+                venta_id INTEGER,
+                monto_total REAL NOT NULL,
+                saldo_pendiente REAL NOT NULL,
+                estado TEXT DEFAULT 'Pendiente',
+                fecha_registro TIMESTAMP DEFAULT (datetime('now', 'localtime')),
+                FOREIGN KEY (venta_id) REFERENCES ventas(id)
+            )
+        """)
+        
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS abonos (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                cuenta_id INTEGER NOT NULL,
+                monto REAL NOT NULL,
+                metodo_pago TEXT NOT NULL,
+                fecha TIMESTAMP DEFAULT (datetime('now', 'localtime')),
+                FOREIGN KEY (cuenta_id) REFERENCES cuentas_cobrar(id) ON DELETE CASCADE
+            )
+        """)
+        
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS combos_detalle (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                combo_id INTEGER NOT NULL, -- Hace referencia a productos(id) donde es_combo=1
+                producto_id INTEGER NOT NULL, -- Producto individual físico
+                cantidad INTEGER NOT NULL DEFAULT 1,
+                FOREIGN KEY (combo_id) REFERENCES productos(id) ON DELETE CASCADE,
+                FOREIGN KEY (producto_id) REFERENCES productos(id)
+            )
+        """)
+
         # --- MIGRACIONES (ALTER TABLE PARA TABLAS EXISTENTES) ---
         
         # Migraciones Configuracion
@@ -236,6 +272,16 @@ def init_db():
         for col_name, col_type in columnas_config:
             try:
                 cursor.execute(f"ALTER TABLE configuracion ADD COLUMN {col_name} {col_type};")
+            except sqlite3.OperationalError:
+                pass
+        
+        columnas_productos = [
+            ("imagen_ruta", "TEXT"),
+            ("es_combo", "INTEGER DEFAULT 0")
+        ]
+        for col_name, col_type in columnas_productos:
+            try:
+                cursor.execute(f"ALTER TABLE productos ADD COLUMN {col_name} {col_type};")
             except sqlite3.OperationalError:
                 pass
 

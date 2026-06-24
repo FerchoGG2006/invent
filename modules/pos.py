@@ -183,7 +183,7 @@ class PosTab:
 
         # Selector de Método de Pago
         ctk.CTkLabel(frame_total_botones, text="Pago:", font=("Segoe UI", 9, "bold"), text_color=("#475569", "#CBD5E1")).pack(side=tk.RIGHT, padx=(5, 2))
-        metodos = ["Efectivo", "Transferencia", "Tarjeta Débito", "Tarjeta Crédito", "Billetera Virtual", "Mixto"]
+        metodos = ["Efectivo", "Transferencia", "Tarjeta Débito", "Tarjeta Crédito", "Billetera Virtual", "Mixto", "Fiado"]
         
         self.combo_pago = ctk.CTkComboBox(frame_total_botones, values=metodos, font=("Segoe UI", 9), height=28, width=110, corner_radius=6, command=self.on_metodo_pago_changed)
         self.combo_pago.pack(side=tk.RIGHT, padx=2)
@@ -430,6 +430,11 @@ class PosTab:
         metodo_pago = self.combo_pago.get()
         pagos_mixtos = []
 
+        if metodo_pago == "Fiado" and not self.app.entry_cliente_nombre.get().strip():
+            messagebox.showerror("Falta Cliente", "Para procesar un 'Fiado' (A crédito), DEBES ingresar el nombre del cliente.")
+            self.app.entry_cliente_nombre.focus()
+            return
+
         if metodo_pago == "Mixto":
             win_mixto = ctk.CTkToplevel(self.app.root)
             win_mixto.title("Pago Mixto")
@@ -528,12 +533,30 @@ class PosTab:
                             monto_item = monto * proporcion
                             cursor.execute("INSERT INTO ventas_pagos (venta_id, metodo_pago, monto) VALUES (?, ?, ?)", (venta_id, mpago, monto_item))
 
-                    cursor.execute("UPDATE productos SET stock = stock - ? WHERE id = ?", (item["cantidad"], item["id"]))
+                    cursor.execute("SELECT es_combo FROM productos WHERE id = ?", (item["id"],))
+                    res_combo = cursor.fetchone()
+                    es_combo = res_combo[0] if res_combo else 0
+                    
+                    if es_combo == 1:
+                        # Si es un combo, deducir el stock de sus componentes físicos
+                        cursor.execute("SELECT producto_id, cantidad FROM combos_detalle WHERE combo_id = ?", (item["id"],))
+                        componentes = cursor.fetchall()
+                        for comp_id, comp_cant in componentes:
+                            cant_total_deducir = comp_cant * item["cantidad"]
+                            cursor.execute("UPDATE productos SET stock = stock - ? WHERE id = ?", (cant_total_deducir, comp_id))
+                    else:
+                        # Producto normal
+                        cursor.execute("UPDATE productos SET stock = stock - ? WHERE id = ?", (item["cantidad"], item["id"]))
 
                 except Exception as e:
                     errores.append(f"{item['nombre']}: {str(e)}")
 
             if not errores:
+                if metodo_pago == "Fiado":
+                    cursor.execute("""
+                        INSERT INTO cuentas_cobrar (cliente_nombre, monto_total, saldo_pendiente, estado)
+                        VALUES (?, ?, ?, 'Pendiente')
+                    """, (cliente_nombre, total_final, total_final))
                 conn.commit()
 
         if errores:
@@ -608,12 +631,10 @@ class PosTab:
         self.pos_agregar_al_carrito()
 
     def pos_generar_ticket(self, carrito_copia, metodo_pago, cliente_nombre, cliente_identificacion, iva_calculado, codigo_fiscal, fiscal_qr_url):
-        impresora = self.app.config.get("impresora_ticket", "")
-        if not impresora:
-            return
-
         import datetime
         from utils.printer import enviar_impresion_directa
+        import urllib.parse
+        import webbrowser
         
         texto_ticket = "==============================\n"
         texto_ticket += "        TICKET DE VENTA       \n"
@@ -650,7 +671,43 @@ class PosTab:
         texto_ticket += "\n    ¡Gracias por su compra!   \n"
         texto_ticket += "==============================\n"
 
-        enviar_impresion_directa(impresora, texto_ticket)
+        # Preguntar qué hacer con el ticket
+        from tkinter import Toplevel
+        import customtkinter as ctk
+
+        win = Toplevel(self.app.root)
+        win.title("Opciones de Ticket")
+        win.geometry("350x200")
+        win.grab_set()
+
+        ctk.CTkLabel(win, text="¿Qué deseas hacer con el ticket?", font=("Segoe UI", 14, "bold")).pack(pady=20)
+        
+        def imprimir():
+            impresora = self.app.config.get("impresora_ticket", "")
+            if not impresora:
+                messagebox.showwarning("Impresora", "No hay impresora térmica configurada en los Ajustes.", parent=win)
+            else:
+                enviar_impresion_directa(impresora, texto_ticket)
+            win.destroy()
+
+        def whatsapp():
+            import tkinter.simpledialog as simpledialog
+            tel = simpledialog.askstring("WhatsApp", "Ingresa el número de WhatsApp (con código de país, ej: +57300...):", parent=win)
+            if tel:
+                # Limpiar número
+                tel = "".join(c for c in tel if c.isdigit() or c == "+")
+                if not tel.startswith("+"):
+                    tel = "+57" + tel # Asumir Colombia por defecto si no ponen código
+                mensaje_codificado = urllib.parse.quote(texto_ticket)
+                url = f"https://wa.me/{tel}?text={mensaje_codificado}"
+                webbrowser.open(url)
+            win.destroy()
+
+        frame_btns = ctk.CTkFrame(win, fg_color="transparent")
+        frame_btns.pack(fill=tk.X, pady=10)
+        
+        ctk.CTkButton(frame_btns, text="🖨️ Imprimir", width=120, fg_color="#4F46E5", command=imprimir).pack(side=tk.LEFT, padx=15)
+        ctk.CTkButton(frame_btns, text="📱 WhatsApp", width=120, fg_color="#10B981", hover_color="#059669", command=whatsapp).pack(side=tk.RIGHT, padx=15)
 
         self.entry_busca_pos.delete(0, tk.END)
         self.pos_actualizar_lista_productos("")

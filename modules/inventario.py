@@ -81,7 +81,10 @@ class InventarioTab:
         self.lbl_img_preview.pack(expand=True, fill=tk.BOTH)
 
         btn_guardar = ctk.CTkButton(frame_form, text="Guardar Producto", font=("Segoe UI", 10, "bold"), fg_color="#4F46E5", hover_color="#4338CA", text_color="white", height=35, corner_radius=8, command=self.guardar_producto)
-        btn_guardar.pack(fill=tk.X, padx=25, pady=(5, 10))
+        btn_guardar.pack(fill=tk.X, padx=25, pady=(5, 5))
+
+        btn_combo = ctk.CTkButton(frame_form, text="📦 Crear Combo", font=("Segoe UI", 10, "bold"), fg_color="#10B981", hover_color="#059669", text_color="white", height=35, corner_radius=8, command=self.modal_nuevo_combo)
+        btn_combo.pack(fill=tk.X, padx=25, pady=(0, 10))
 
         # Panel Derecho (Tabla y Buscador)
         frame_grid = ctk.CTkFrame(self.tab, fg_color="transparent")
@@ -101,6 +104,9 @@ class InventarioTab:
 
         btn_merma = ctk.CTkButton(frame_busca, text="Registrar Merma", font=("Segoe UI", 9, "bold"), fg_color="#F59E0B", hover_color="#D97706", text_color="white", height=32, width=110, corner_radius=6, command=self.registrar_merma)
         btn_merma.pack(side=tk.RIGHT, padx=5)
+
+        btn_etiqueta = ctk.CTkButton(frame_busca, text="🏷️ Imprimir Etiqueta", font=("Segoe UI", 9, "bold"), fg_color="#4F46E5", hover_color="#4338CA", text_color="white", height=32, width=120, corner_radius=6, command=self.imprimir_etiqueta)
+        btn_etiqueta.pack(side=tk.RIGHT, padx=5)
 
         # Botones de ajuste de stock
         frame_botones = ctk.CTkFrame(frame_grid, fg_color="transparent")
@@ -472,3 +478,137 @@ class InventarioTab:
         producto_id = self.tabla.item(seleccion[0])["values"][0]
         database.modificar_stock(producto_id, cantidad)
         self.cargar_datos(self.entry_buscar.get())
+
+    def modal_nuevo_combo(self):
+        win = ctk.CTkToplevel(self.app.root)
+        win.title("Nuevo Combo / Paquete")
+        win.geometry("500x500")
+        win.grab_set()
+
+        ctk.CTkLabel(win, text="📦 Crear Nuevo Combo", font=("Segoe UI", 16, "bold")).pack(pady=(15, 5))
+        ctk.CTkLabel(win, text="El combo se venderá como un producto único,\npero descontará stock de los productos que selecciones.", font=("Segoe UI", 10), text_color="#64748B").pack(pady=(0, 15))
+
+        frame_top = ctk.CTkFrame(win, fg_color="transparent")
+        frame_top.pack(fill=tk.X, padx=20)
+
+        ctk.CTkLabel(frame_top, text="Nombre del Combo:").grid(row=0, column=0, sticky="w", pady=5)
+        entry_nombre = ctk.CTkEntry(frame_top, width=200)
+        entry_nombre.grid(row=0, column=1, sticky="w", padx=10, pady=5)
+
+        ctk.CTkLabel(frame_top, text="Precio de Venta ($):").grid(row=1, column=0, sticky="w", pady=5)
+        entry_precio = ctk.CTkEntry(frame_top, width=200)
+        entry_precio.grid(row=1, column=1, sticky="w", padx=10, pady=5)
+
+        ctk.CTkLabel(win, text="Productos Incluidos:", font=("Segoe UI", 12, "bold")).pack(anchor=tk.W, padx=20, pady=(15, 5))
+
+        frame_prods = ctk.CTkScrollableFrame(win, height=200)
+        frame_prods.pack(fill=tk.BOTH, expand=True, padx=20, pady=5)
+
+        productos = database.obtener_productos("")
+        vars_productos = {}
+        for p in productos:
+            if not p[11]: # No mostrar otros combos (p[11] = es_combo)
+                var = tk.IntVar(value=0)
+                vars_productos[p[0]] = var
+                check = ctk.CTkCheckBox(frame_prods, text=f"{p[2]} (${p[5]:,.0f})", variable=var)
+                check.pack(anchor=tk.W, pady=2)
+
+        def guardar_combo():
+            nombre = entry_nombre.get().strip()
+            if not nombre:
+                messagebox.showerror("Error", "Nombre obligatorio.", parent=win)
+                return
+            try:
+                precio = float(entry_precio.get())
+            except ValueError:
+                messagebox.showerror("Error", "Precio inválido.", parent=win)
+                return
+
+            seleccionados = [pid for pid, var in vars_productos.items() if var.get() == 1]
+            if not seleccionados:
+                messagebox.showerror("Error", "Selecciona al menos un producto.", parent=win)
+                return
+
+            import sqlite3
+            with sqlite3.connect(database.DB_NAME) as conn:
+                cursor = conn.cursor()
+                # Insertar como producto pero con es_combo = 1, stock infinito (9999), no tiene costo
+                codigo = f"C-{int(tk.Tcl().eval('clock seconds'))}"
+                cursor.execute("""
+                    INSERT INTO productos (codigo, nombre, categoria, precio_costo, precio_venta, stock, stock_minimo, unidad_medida, es_combo)
+                    VALUES (?, ?, 'Combos', 0, ?, 9999, 0, 'Servicio', 1)
+                """, (codigo, nombre, precio))
+                combo_id = cursor.lastrowid
+                
+                for pid in seleccionados:
+                    cursor.execute("INSERT INTO combos_detalle (combo_id, producto_id, cantidad) VALUES (?, ?, 1)", (combo_id, pid))
+                conn.commit()
+                
+            messagebox.showinfo("Éxito", "Combo creado con éxito.", parent=win)
+            self.cargar_datos(self.entry_buscar.get())
+            win.destroy()
+
+        ctk.CTkButton(win, text="Crear Combo", command=guardar_combo, fg_color="#4F46E5").pack(pady=15)
+
+    def imprimir_etiqueta(self):
+        seleccion = self.tabla.selection()
+        if not seleccion:
+            messagebox.showwarning("Atención", "Selecciona un producto para generar la etiqueta.")
+            return
+            
+        valores = self.tabla.item(seleccion[0])["values"]
+        codigo = valores[1]
+        nombre = valores[2]
+        precio = valores[5]
+        
+        if not codigo or codigo == "---":
+            # Autogenerar un código basado en el ID si no tiene
+            codigo = f"PROD-{valores[0]}"
+            database.modificar_codigo_producto(valores[0], codigo)
+            self.cargar_datos(self.entry_buscar.get())
+            
+        import tempfile
+        import webbrowser
+        
+        html_content = f'''<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Etiqueta - {nombre}</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <style>
+        body {{ font-family: 'Segoe UI', Arial, sans-serif; text-align: center; margin: 0; padding: 10px; background: #fff; }}
+        .label-container {{ display: inline-block; border: 1px dashed #ccc; padding: 15px; border-radius: 8px; width: 50mm; height: auto; }}
+        .nombre {{ font-size: 14px; font-weight: bold; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }}
+        .precio {{ font-size: 18px; font-weight: bold; margin-top: 5px; }}
+        svg {{ max-width: 100%; height: auto; }}
+        @media print {{
+            body {{ padding: 0; }}
+            .label-container {{ border: none; padding: 0; margin: 0; width: 100%; height: 100%; }}
+            @page {{ margin: 0; size: 58mm auto; }}
+        }}
+    </style>
+</head>
+<body onload="window.print()">
+    <div class="label-container">
+        <div class="nombre">{nombre}</div>
+        <svg id="barcode"></svg>
+        <div class="precio">{precio}</div>
+    </div>
+    <script>
+        JsBarcode("#barcode", "{codigo}", {{
+            format: "CODE128",
+            width: 2,
+            height: 50,
+            displayValue: true,
+            fontSize: 14
+        }});
+    </script>
+</body>
+</html>'''
+
+        fd, temp_path = tempfile.mkstemp(suffix=".html", text=True)
+        with os.fdopen(fd, 'w', encoding='utf-8') as f:
+            f.write(html_content)
+            
+        webbrowser.open('file://' + os.path.abspath(temp_path))
