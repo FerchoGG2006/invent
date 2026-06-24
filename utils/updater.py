@@ -60,10 +60,12 @@ def iniciar_actualizacion(app, url):
         return
 
     exe_path = sys.executable
-    exe_dir = os.path.dirname(exe_path)
     exe_name = os.path.basename(exe_path)
-    new_exe_path = os.path.join(exe_dir, f"new_{exe_name}")
-    bat_path = os.path.join(exe_dir, "updater.bat")
+    
+    # Usar el directorio temporal del sistema para evitar problemas de escritura en Archivos de Programa
+    temp_dir = os.environ.get('TEMP') or os.path.dirname(exe_path)
+    new_exe_path = os.path.join(temp_dir, f"new_{exe_name}")
+    bat_path = os.path.join(temp_dir, "updater.bat")
 
     # Mostrar progreso
     progress_win = app.root
@@ -77,17 +79,25 @@ def iniciar_actualizacion(app, url):
                 out_file.write(response.read())
 
             # Crear script batch para reemplazar
+            # Si el programa está instalado en C:\Program Files, requerirá elevación de privilegios (UAC)
             bat_script = f"""@echo off
-echo Actualizando el sistema, por favor espere...
-ping 127.0.0.1 -n 3 > nul
+title Actualizacion de InventarioPOS
+net session >nul 2>&1
+if %errorlevel% neq 0 (
+    echo Solicitando permisos de administrador para aplicar la actualizacion...
+    powershell -Command "Start-Process -FilePath '%~f0' -Verb RunAs"
+    exit /b
+)
+echo Reemplazando archivo ejecutable, por favor espere...
+ping 127.0.0.1 -n 4 > nul
 move /y "{new_exe_path}" "{exe_path}"
 start "" "{exe_path}"
 del "%~f0"
 """
-            with open(bat_path, "w") as f:
+            with open(bat_path, "w", encoding="utf-8") as f:
                 f.write(bat_script)
 
-            # Ejecutar el .bat oculto y cerrar la app actual
+            # Ejecutar el .bat y cerrar la app actual
             subprocess.Popen([bat_path], shell=True)
             app.root.after(100, app.root.destroy)
 

@@ -28,6 +28,9 @@ class InventarioApp:
         self.root.geometry("1200x750")
         self.root.configure(fg_color=("#F8FAFC", "#0F172A"))  # Slate 50
 
+        # Verificar y migrar datos de versiones anteriores antes de inicializar la base de datos
+        self.verificar_y_migrar_datos()
+
         database.init_db()
         self.config = database.obtener_configuracion()
         
@@ -92,12 +95,107 @@ class InventarioApp:
     # ==========================================
     def obtener_ruta_imagenes(self):
         if getattr(sys, 'frozen', False):
-            base_dir = os.path.dirname(sys.executable)
+            # En ejecutable compilado, guardamos en AppData para evitar problemas de permisos
+            appdata = os.environ.get('APPDATA')
+            if appdata:
+                base_dir = os.path.join(appdata, "InventarioPOS")
+            else:
+                base_dir = os.path.dirname(sys.executable)
         else:
             base_dir = os.path.dirname(os.path.abspath(__file__))
         img_dir = os.path.join(base_dir, "imagenes_productos")
         os.makedirs(img_dir, exist_ok=True)
         return img_dir
+
+    def verificar_y_migrar_datos(self):
+        """
+        Detecta si es la primera vez que se ejecuta la versión instalada y ofrece migrar
+        la base de datos y las imágenes de la versión portable antigua automáticamente
+        o de forma interactiva.
+        """
+        if not getattr(sys, 'frozen', False):
+            return
+
+        db_dest_path = database.DB_NAME
+        # Si la base de datos ya existe en AppData, no es necesario hacer ninguna migración
+        if os.path.exists(db_dest_path):
+            return
+
+        # 1. Intentar migración silenciosa si los archivos están al lado del ejecutable o en el directorio actual
+        exe_dir = os.path.dirname(sys.executable)
+        cwd_dir = os.getcwd()
+        
+        posibles_rutas_db = [
+            os.path.join(exe_dir, "inventario_barberia.db"),
+            os.path.join(cwd_dir, "inventario_barberia.db")
+        ]
+        
+        for ruta_origen in posibles_rutas_db:
+            if os.path.exists(ruta_origen) and os.path.abspath(ruta_origen) != os.path.abspath(db_dest_path):
+                try:
+                    os.makedirs(os.path.dirname(db_dest_path), exist_ok=True)
+                    shutil.copy2(ruta_origen, db_dest_path)
+                    
+                    # Copiar imágenes si existen en el origen
+                    dir_imagenes_origen = os.path.join(os.path.dirname(ruta_origen), "imagenes_productos")
+                    if os.path.exists(dir_imagenes_origen):
+                        dir_imagenes_dest = self.obtener_ruta_imagenes()
+                        for item in os.listdir(dir_imagenes_origen):
+                            src_item = os.path.join(dir_imagenes_origen, item)
+                            dst_item = os.path.join(dir_imagenes_dest, item)
+                            if os.path.isdir(src_item):
+                                shutil.copytree(src_item, dst_item, dirs_exist_ok=True)
+                            else:
+                                shutil.copy2(src_item, dst_item)
+                    return  # Migración silenciosa completada con éxito
+                except Exception as e:
+                    print(f"Error en migración silenciosa: {e}")
+
+        # 2. Si no se encontró de forma silenciosa, preguntar al usuario de forma interactiva
+        resp = messagebox.askyesno(
+            "Importar Datos de Versión Anterior",
+            "Detectamos que esta es una instalación nueva del sistema.\n\n"
+            "¿Deseas importar los productos y ventas de tu versión anterior?",
+            parent=self.root
+        )
+        if not resp:
+            return
+
+        # Solicitar selección de base de datos
+        ruta_seleccionada = filedialog.askopenfilename(
+            title="Selecciona el archivo inventario_barberia.db de tu versión anterior",
+            filetypes=[("Base de Datos SQLite", "inventario_barberia.db"), ("Todos los archivos de Base de Datos", "*.db")],
+            parent=self.root
+        )
+        
+        if ruta_seleccionada:
+            try:
+                os.makedirs(os.path.dirname(db_dest_path), exist_ok=True)
+                shutil.copy2(ruta_seleccionada, db_dest_path)
+                
+                # Copiar carpeta de imágenes si existe al lado de la base de datos seleccionada
+                dir_imagenes_origen = os.path.join(os.path.dirname(ruta_seleccionada), "imagenes_productos")
+                if os.path.exists(dir_imagenes_origen):
+                    dir_imagenes_dest = self.obtener_ruta_imagenes()
+                    for item in os.listdir(dir_imagenes_origen):
+                        src_item = os.path.join(dir_imagenes_origen, item)
+                        dst_item = os.path.join(dir_imagenes_dest, item)
+                        if os.path.isdir(src_item):
+                            shutil.copytree(src_item, dst_item, dirs_exist_ok=True)
+                        else:
+                            shutil.copy2(src_item, dst_item)
+                
+                messagebox.showinfo(
+                    "Importación Exitosa",
+                    "¡Tus datos han sido importados con éxito!\nEl sistema se iniciará ahora con tu información anterior.",
+                    parent=self.root
+                )
+            except Exception as e:
+                messagebox.showerror(
+                    "Error de Importación",
+                    f"No se pudieron importar los datos:\n{str(e)}",
+                    parent=self.root
+                )
 
     def verificar_conexion_async(self):
         def on_result(conectado):

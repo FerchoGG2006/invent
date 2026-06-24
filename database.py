@@ -5,11 +5,17 @@ import hashlib
 
 def obtener_ruta_db():
     if getattr(sys, 'frozen', False):
-        # Ejecutable compilado por PyInstaller
-        base_dir = os.path.dirname(sys.executable)
+        # Ejecutable compilado por PyInstaller - Guardar en AppData para compatibilidad de instalación
+        appdata = os.environ.get('APPDATA')
+        if appdata:
+            base_dir = os.path.join(appdata, "InventarioPOS")
+        else:
+            base_dir = os.path.dirname(sys.executable)
     else:
         # Script de Python estándar
         base_dir = os.path.dirname(os.path.abspath(__file__))
+    
+    os.makedirs(base_dir, exist_ok=True)
     return os.path.join(base_dir, "inventario_barberia.db")
 
 DB_NAME = obtener_ruta_db()
