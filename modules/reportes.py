@@ -96,9 +96,10 @@ class ReportesTab:
 
         # Selector de Fecha
         ctk.CTkLabel(frame_controles_rep, text="Filtrar:", font=("Segoe UI", 10, "bold"), text_color=rc(("#64748B", "#94A3B8"))).pack(side=tk.LEFT, padx=(20, 5))
-        self.combo_filtro_fecha = ctk.CTkComboBox(frame_controles_rep, values=["Todo", "Hoy", "Últimos 7 días", "Este Mes"], font=("Segoe UI", 10), height=28, width=120, command=lambda e: self.reporte_actualizar_datos())
+        self.combo_filtro_fecha = ctk.CTkComboBox(frame_controles_rep, values=["Todo", "Hoy", "Últimos 7 días", "Este Mes", "Elegir Día..."], font=("Segoe UI", 10), height=28, width=140, command=self._on_filtro_changed)
         self.combo_filtro_fecha.pack(side=tk.LEFT, padx=5)
         self.combo_filtro_fecha.set("Todo")
+        self._filtro_fecha_especifica = None  # Guarda la fecha seleccionada en formato YYYY-MM-DD
 
         # Botones de Acciones en Reportes
         btn_logout = ctk.CTkButton(frame_controles_rep, text="🚪 Cerrar Sesión", font=("Segoe UI", 10, "bold"), fg_color="#EF4444", hover_color="#DC2626", text_color="white", height=28, width=105, corner_radius=6, command=self.app.cerrar_sesion)
@@ -145,9 +146,78 @@ class ReportesTab:
 
         self.tabla_reporte.pack(fill=tk.BOTH, expand=True)
 
+    def _on_filtro_changed(self, seleccion):
+        """Maneja el cambio de filtro. Si es 'Elegir Día...' abre el selector de fecha."""
+        if seleccion == "Elegir Día...":
+            self._abrir_selector_fecha()
+        else:
+            self._filtro_fecha_especifica = None
+            self.reporte_actualizar_datos()
+
+    def _abrir_selector_fecha(self):
+        """Abre una ventana emergente para elegir un día específico."""
+        hoy = datetime.datetime.now()
+
+        win = ctk.CTkToplevel(self.app.root)
+        win.title("Seleccionar Fecha")
+        win.geometry("300x200")
+        win.configure(fg_color=("#F8FAFC", "#0F172A"))
+        win.resizable(False, False)
+        win.grab_set()
+
+        ctk.CTkLabel(win, text="📅 Elige un día", font=("Segoe UI", 14, "bold"), text_color=rc(("#0F172A", "#F8FAFC"))).pack(pady=(15, 10))
+
+        frame_fecha = ctk.CTkFrame(win, fg_color="transparent")
+        frame_fecha.pack(pady=5)
+
+        ctk.CTkLabel(frame_fecha, text="Día:", font=("Segoe UI", 10)).grid(row=0, column=0, padx=5)
+        spin_dia = tk.Spinbox(frame_fecha, from_=1, to=31, width=4, font=("Segoe UI", 11), justify=tk.CENTER)
+        spin_dia.grid(row=0, column=1, padx=3)
+        spin_dia.delete(0, tk.END)
+        spin_dia.insert(0, str(hoy.day))
+
+        ctk.CTkLabel(frame_fecha, text="Mes:", font=("Segoe UI", 10)).grid(row=0, column=2, padx=5)
+        spin_mes = tk.Spinbox(frame_fecha, from_=1, to=12, width=4, font=("Segoe UI", 11), justify=tk.CENTER)
+        spin_mes.grid(row=0, column=3, padx=3)
+        spin_mes.delete(0, tk.END)
+        spin_mes.insert(0, str(hoy.month))
+
+        ctk.CTkLabel(frame_fecha, text="Año:", font=("Segoe UI", 10)).grid(row=0, column=4, padx=5)
+        spin_anio = tk.Spinbox(frame_fecha, from_=2020, to=2030, width=5, font=("Segoe UI", 11), justify=tk.CENTER)
+        spin_anio.grid(row=0, column=5, padx=3)
+        spin_anio.delete(0, tk.END)
+        spin_anio.insert(0, str(hoy.year))
+
+        def confirmar():
+            try:
+                d = int(spin_dia.get())
+                m = int(spin_mes.get())
+                a = int(spin_anio.get())
+                fecha = datetime.date(a, m, d)
+                self._filtro_fecha_especifica = fecha.strftime("%Y-%m-%d")
+                self.combo_filtro_fecha.set(fecha.strftime("%d/%m/%Y"))
+                win.destroy()
+                self.reporte_actualizar_datos()
+            except ValueError:
+                messagebox.showerror("Fecha Inválida", "La fecha ingresada no es válida. Verifica el día, mes y año.", parent=win)
+
+        def cancelar():
+            self.combo_filtro_fecha.set("Todo")
+            self._filtro_fecha_especifica = None
+            win.destroy()
+
+        frame_btns = ctk.CTkFrame(win, fg_color="transparent")
+        frame_btns.pack(pady=15)
+
+        ctk.CTkButton(frame_btns, text="✅ Aplicar", font=("Segoe UI", 11, "bold"), fg_color="#10B981", hover_color="#059669", text_color="white", height=35, width=120, corner_radius=6, command=confirmar).pack(side=tk.LEFT, padx=5)
+        ctk.CTkButton(frame_btns, text="Cancelar", font=("Segoe UI", 11, "bold"), fg_color="#64748B", hover_color="#475569", text_color="white", height=35, width=100, corner_radius=6, command=cancelar).pack(side=tk.LEFT, padx=5)
+
+        win.protocol("WM_DELETE_WINDOW", cancelar)
+
     def reporte_actualizar_datos(self):
         filtro = self.combo_filtro_fecha.get()
-        resumen = database.obtener_resumen_ventas(filtro)
+        fecha_especifica = self._filtro_fecha_especifica
+        resumen = database.obtener_resumen_ventas(filtro, fecha_especifica=fecha_especifica)
 
         self.lbl_card_hoy_valor.configure(text=f"${resumen['total']:,.0f}")
         self.lbl_card_hoy_sub.configure(text=f"{resumen['cant']} transacciones")
@@ -162,7 +232,7 @@ class ReportesTab:
         else:
             self.lbl_card_ut_valor.configure(text_color="#EF4444")
 
-        top_prods = database.obtener_top_productos(filtro)
+        top_prods = database.obtener_top_productos(filtro, fecha_especifica=fecha_especifica)
         if top_prods:
             top_texto = "\n".join([f"{i+1}. {p[0]} ({p[1]} uds)" for i, p in enumerate(top_prods)])
             self.lbl_card_top_valor.configure(text=top_texto)
@@ -172,7 +242,7 @@ class ReportesTab:
         for item in self.tabla_reporte.get_children():
             self.tabla_reporte.delete(item)
 
-        self.ventas_data = database.obtener_ventas_reporte(filtro)
+        self.ventas_data = database.obtener_ventas_reporte(filtro, fecha_especifica=fecha_especifica)
         for v in self.ventas_data:
             precio_f = f"${v[4]:,.0f}"
             desc_f = f"${v[8]:,.0f}" if v[8] else "$0"

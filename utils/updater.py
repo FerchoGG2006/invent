@@ -54,9 +54,8 @@ def iniciar_actualizacion(app, url):
     """
     Descarga el nuevo ejecutable y crea un script BATCH temporal para reemplazar el archivo actual en ejecución.
     """
-    # Si estamos en modo desarrollo (py app.py), no actualizar el exe.
+    # Si estamos en modo desarrollo (py app.py), no intentar actualizar.
     if not getattr(sys, 'frozen', False):
-        messagebox.showinfo("Desarrollo", "Estás ejecutando el código fuente. La actualización automática solo funciona en el archivo .exe compilado.")
         return
 
     exe_path = sys.executable

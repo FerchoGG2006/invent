@@ -448,12 +448,16 @@ def registrar_venta(producto_id, cantidad, precio_unitario, metodo_pago, cliente
             conn.rollback()
             return False, f"Error: {str(e)}"
 
-def obtener_ventas_reporte(filtro_fecha="Todo"):
+def obtener_ventas_reporte(filtro_fecha="Todo", fecha_especifica=None):
     with sqlite3.connect(DB_NAME) as conn:
         cursor = conn.cursor()
         
         condicion = ""
-        if filtro_fecha == "Hoy":
+        params = []
+        if fecha_especifica:
+            condicion = "WHERE date(v.fecha) = ?"
+            params = [fecha_especifica]
+        elif filtro_fecha == "Hoy":
             condicion = "WHERE date(v.fecha) = date('now', 'localtime')"
         elif filtro_fecha == "Últimos 7 días":
             condicion = "WHERE date(v.fecha) >= date('now', 'localtime', '-7 days')"
@@ -467,15 +471,19 @@ def obtener_ventas_reporte(filtro_fecha="Todo"):
             {condicion}
             ORDER BY v.fecha DESC
         """
-        cursor.execute(query)
+        cursor.execute(query, params)
         return cursor.fetchall()
 
-def obtener_resumen_ventas(filtro_fecha="Todo"):
+def obtener_resumen_ventas(filtro_fecha="Todo", fecha_especifica=None):
     with sqlite3.connect(DB_NAME) as conn:
         cursor = conn.cursor()
         
         condicion = ""
-        if filtro_fecha == "Hoy":
+        params = []
+        if fecha_especifica:
+            condicion = "WHERE date(fecha) = ?"
+            params = [fecha_especifica]
+        elif filtro_fecha == "Hoy":
             condicion = "WHERE date(fecha) = date('now', 'localtime')"
         elif filtro_fecha == "Últimos 7 días":
             condicion = "WHERE date(fecha) >= date('now', 'localtime', '-7 days')"
@@ -492,7 +500,7 @@ def obtener_resumen_ventas(filtro_fecha="Todo"):
             FROM ventas
             {condicion}
         """
-        cursor.execute(query)
+        cursor.execute(query, params)
         res = cursor.fetchone()
         return {
             "total": res[0], "cant": res[1], "efe": res[2], "tra": res[3], "utilidad": res[4]
@@ -504,12 +512,16 @@ def obtener_alertas_stock():
         cursor.execute("SELECT COUNT(*) FROM productos WHERE stock <= stock_minimo")
         return cursor.fetchone()[0]
 
-def obtener_top_productos(filtro_fecha="Todo"):
+def obtener_top_productos(filtro_fecha="Todo", fecha_especifica=None):
     with sqlite3.connect(DB_NAME) as conn:
         cursor = conn.cursor()
         
         condicion = ""
-        if filtro_fecha == "Hoy":
+        params = []
+        if fecha_especifica:
+            condicion = "WHERE date(v.fecha) = ?"
+            params = [fecha_especifica]
+        elif filtro_fecha == "Hoy":
             condicion = "WHERE date(v.fecha) = date('now', 'localtime')"
         elif filtro_fecha == "Últimos 7 días":
             condicion = "WHERE date(v.fecha) >= date('now', 'localtime', '-7 days')"
@@ -525,7 +537,7 @@ def obtener_top_productos(filtro_fecha="Todo"):
             ORDER BY total_vendido DESC
             LIMIT 3
         """
-        cursor.execute(query)
+        cursor.execute(query, params)
         return cursor.fetchall()
 
 def anular_venta(venta_id):
@@ -551,12 +563,16 @@ def anular_venta(venta_id):
             conn.rollback()
             return False, f"Error al anular: {str(e)}"
 
-def obtener_top_productos(filtro_fecha="Todo"):
+def obtener_top_productos(filtro_fecha="Todo", fecha_especifica=None):
     with sqlite3.connect(DB_NAME) as conn:
         cursor = conn.cursor()
         
         condicion = ""
-        if filtro_fecha == "Hoy":
+        params = []
+        if fecha_especifica:
+            condicion = "WHERE date(v.fecha) = ?"
+            params = [fecha_especifica]
+        elif filtro_fecha == "Hoy":
             condicion = "WHERE date(v.fecha) = date('now', 'localtime')"
         elif filtro_fecha == "Últimos 7 días":
             condicion = "WHERE date(v.fecha) >= date('now', 'localtime', '-7 days')"
@@ -572,7 +588,7 @@ def obtener_top_productos(filtro_fecha="Todo"):
             ORDER BY total_vendido DESC
             LIMIT 3
         """
-        cursor.execute(query)
+        cursor.execute(query, params)
         return cursor.fetchall()
 
 def obtener_configuracion():
