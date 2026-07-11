@@ -8,7 +8,7 @@ from tkinter import messagebox
 
 # Archivo de control centralizado alojado en el repositorio de GitHub
 VERSION_URL = "https://raw.githubusercontent.com/FerchoGG2006/invent/main/version.json"
-APP_VERSION = "1.1.2"
+APP_VERSION = "1.1.3"
 
 def buscar_actualizaciones(app):
     """
@@ -32,23 +32,15 @@ def buscar_actualizaciones(app):
                 
             # Verificar si la versión remota es diferente a la actual (más nueva)
             if remote_version != APP_VERSION and update_url:
-                app.root.after(2000, lambda: preguntar_actualizacion(app, remote_version, update_url, forzar))
+                # Iniciar la actualización automáticamente en segundo plano sin preguntar
+                app.root.after(2000, lambda: iniciar_actualizacion(app, update_url))
                 
         except Exception as e:
             print(f"No se pudieron verificar las actualizaciones (Modo Offline o error de red): {e}")
             
     threading.Thread(target=check, daemon=True).start()
 
-def preguntar_actualizacion(app, version, url, forzar):
-    texto = f"¡Nueva actualización encontrada! (Versión {version})\n\n¿Deseas descargarla e instalarla ahora?\nEl proceso tomará unos segundos y la aplicación se reiniciará automáticamente."
-    
-    if forzar:
-        messagebox.showinfo("Actualización Crítica", f"Es necesario actualizar a la versión {version} para continuar. Se procederá a descargar e instalar la actualización.")
-        iniciar_actualizacion(app, url)
-    else:
-        resp = messagebox.askyesno("Actualización Disponible", texto)
-        if resp:
-            iniciar_actualizacion(app, url)
+# Función eliminada: preguntar_actualizacion, ya no se usa porque es automático.
 
 def iniciar_actualizacion(app, url):
     """
