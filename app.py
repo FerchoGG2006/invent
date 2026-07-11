@@ -460,9 +460,16 @@ class InventarioApp:
 
 
 if __name__ == "__main__":
+    # PRIMERO: Aplicar actualización pendiente si existe (antes de crear ventana)
+    # Si hay un .exe nuevo descargado, lo reemplaza y reinicia. El usuario no ve nada.
+    from utils import updater
+    if updater.aplicar_actualizacion_pendiente():
+        sys.exit(0)  # La app se reiniciará sola con la versión nueva
+
     import customtkinter as ctk
     ctk.set_appearance_mode("Light")
     ctk.set_default_color_theme("blue")
     root = ctk.CTk()
     app = InventarioApp(root)
     root.mainloop()
+
