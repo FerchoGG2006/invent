@@ -105,6 +105,9 @@ class InventarioTab:
         btn_merma = ctk.CTkButton(frame_busca, text="Registrar Merma", font=("Segoe UI", 9, "bold"), fg_color="#F59E0B", hover_color="#D97706", text_color="white", height=32, width=110, corner_radius=6, command=self.registrar_merma)
         btn_merma.pack(side=tk.RIGHT, padx=5)
 
+        btn_kardex = ctk.CTkButton(frame_busca, text="📊 Ver Kardex", font=("Segoe UI", 9, "bold"), fg_color="#10B981", hover_color="#059669", text_color="white", height=32, width=110, corner_radius=6, command=self.mostrar_kardex_seleccionado)
+        btn_kardex.pack(side=tk.RIGHT, padx=5)
+
         btn_etiqueta = ctk.CTkButton(frame_busca, text="🏷️ Imprimir Etiqueta", font=("Segoe UI", 9, "bold"), fg_color="#4F46E5", hover_color="#4338CA", text_color="white", height=32, width=120, corner_radius=6, command=self.imprimir_etiqueta)
         btn_etiqueta.pack(side=tk.RIGHT, padx=5)
 
@@ -469,6 +472,19 @@ class InventarioTab:
                 else:
                     messagebox.showerror("Error", msg)
 
+    def mostrar_kardex_seleccionado(self):
+        seleccion = self.tabla.selection()
+        if not seleccion:
+            messagebox.showwarning("Atención", "Selecciona un producto de la tabla primero.")
+            return
+            
+        valores = self.tabla.item(seleccion[0])["values"]
+        p_id = int(valores[0])
+        p_ref = valores[1]
+        p_nombre = valores[2]
+        
+        KardexDialog(self.app.root, p_id, p_nombre, p_ref)
+
     def ajustar_stock(self, cantidad):
         seleccion = self.tabla.selection()
         if not seleccion:
@@ -612,3 +628,92 @@ class InventarioTab:
             f.write(html_content)
             
         webbrowser.open('file://' + os.path.abspath(temp_path))
+
+
+class KardexDialog(ctk.CTkToplevel):
+    def __init__(self, parent, producto_id, producto_nombre, producto_codigo):
+        super().__init__(parent)
+        self.producto_id = producto_id
+        self.producto_nombre = producto_nombre
+        self.producto_codigo = producto_codigo
+        
+        self.title(f"Kardex: {self.producto_nombre} ({self.producto_codigo})")
+        self.geometry("800x480")
+        self.grab_set()
+        
+        # Intentar centrar la ventana
+        self.update_idletasks()
+        width = 800
+        height = 480
+        x = (self.winfo_screenwidth() // 2) - (width // 2)
+        y = (self.winfo_screenheight() // 2) - (height // 2)
+        self.geometry(f'{width}x{height}+{x}+{y}')
+        
+        self.crear_interfaz()
+        self.cargar_datos()
+
+    def crear_interfaz(self):
+        # Cabecera
+        frame_header = ctk.CTkFrame(self, fg_color="transparent")
+        frame_header.pack(fill=tk.X, padx=20, pady=(15, 10))
+        
+        ctk.CTkLabel(frame_header, text=f"📊 KARDEX DE MOVIMIENTOS", font=("Segoe UI", 14, "bold"), text_color=database.rc(("#0F172A", "#F8FAFC"))).pack(anchor=tk.W)
+        self.lbl_subtitulo = ctk.CTkLabel(frame_header, text=f"Producto: {self.producto_nombre} | Código: {self.producto_codigo}", font=("Segoe UI", 10), text_color="#64748B")
+        self.lbl_subtitulo.pack(anchor=tk.W, pady=(2, 0))
+
+        # Contenedor Tabla
+        frame_tabla = ctk.CTkFrame(self, fg_color="transparent")
+        frame_tabla.pack(fill=tk.BOTH, expand=True, padx=20, pady=(5, 15))
+        
+        columnas = ("fecha", "tipo", "cantidad", "stock_anterior", "stock_nuevo", "motivo", "usuario")
+        self.tabla = ttk.Treeview(frame_tabla, columns=columnas, show="headings")
+        
+        headers = [
+            ("Fecha / Hora", 140),
+            ("Tipo", 80),
+            ("Cantidad", 70),
+            ("Stock Ant.", 80),
+            ("Stock Nuevo", 85),
+            ("Detalle / Motivo", 230),
+            ("Usuario", 90)
+        ]
+        
+        for col, (texto, ancho) in zip(columnas, headers):
+            self.tabla.heading(col, text=texto)
+            self.tabla.column(col, width=ancho, anchor=tk.CENTER if col in ["tipo", "cantidad", "stock_anterior", "stock_nuevo", "usuario"] else tk.W)
+            
+        self.tabla.pack(fill=tk.BOTH, expand=True, side=tk.LEFT)
+        
+        # Scrollbar
+        scrollbar = ttk.Scrollbar(frame_tabla, orient=tk.VERTICAL, command=self.tabla.yview)
+        self.tabla.configure(yscrollcommand=scrollbar.set)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        
+        # Configurar colores para filas alternas / tipos de movimientos
+        self.tabla.tag_configure("entrada", background=database.rc(("#F0FDF4", "#064E3B")), foreground=database.rc(("#166534", "#6EE7B7")))
+        self.tabla.tag_configure("salida", background=database.rc(("#FEF2F2", "#4C0519")), foreground=database.rc(("#991B1B", "#FCA5A5")))
+        self.tabla.tag_configure("ajuste", background=database.rc(("#F0F9FF", "#0C4A6E")), foreground=database.rc(("#075985", "#7DD3FC")))
+
+    def cargar_datos(self):
+        # Limpiar tabla
+        for item in self.tabla.get_children():
+            self.tabla.delete(item)
+            
+        movs = database.obtener_kardex_producto(self.producto_id)
+        
+        for m in movs:
+            fecha, tipo, cant, stock_ant, stock_nue, motivo, usuario = m
+            
+            # Formatear cantidad con signo
+            cant_str = f"+{cant}" if cant > 0 else f"{cant}"
+            
+            # Asignar tag para color
+            if "Ajuste" in motivo or "Migración" in motivo or "Inicial" in motivo:
+                tag = "ajuste"
+            elif tipo == "Entrada":
+                tag = "entrada"
+            else:
+                tag = "salida"
+                
+            self.tabla.insert("", tk.END, values=(fecha, tipo, cant_str, stock_ant, stock_nue, motivo, usuario), tags=(tag,))
+

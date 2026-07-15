@@ -159,6 +159,22 @@ def init_db():
                 FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
             )
         """)
+        
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS movimientos_inventario (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                producto_id INTEGER NOT NULL,
+                tipo TEXT NOT NULL, -- 'Entrada', 'Salida'
+                cantidad INTEGER NOT NULL,
+                motivo TEXT NOT NULL,
+                stock_anterior INTEGER NOT NULL,
+                stock_nuevo INTEGER NOT NULL,
+                fecha TIMESTAMP DEFAULT (datetime('now', 'localtime')),
+                usuario_id INTEGER,
+                FOREIGN KEY (producto_id) REFERENCES productos(id) ON DELETE CASCADE,
+                FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+            )
+        """)
 
         # --- TABLAS FASE 4: CAJA ---
         cursor.execute("""
@@ -335,6 +351,19 @@ def init_db():
         except sqlite3.OperationalError:
             pass
 
+        # Forzar inicialización de Kardex para productos existentes (una sola vez)
+        try:
+            cursor.execute("ALTER TABLE configuracion ADD COLUMN resync_kardex_118 INTEGER DEFAULT 0;")
+            # Si se agrega la columna con éxito, poblamos movimientos_inventario con el stock actual
+            cursor.execute("""
+                INSERT INTO movimientos_inventario (producto_id, tipo, cantidad, motivo, stock_anterior, stock_nuevo)
+                SELECT id, 'Entrada', stock, 'Inventario Inicial (Migración)', 0, stock
+                FROM productos;
+            """)
+            cursor.execute("UPDATE configuracion SET resync_kardex_118 = 1 WHERE id = 1;")
+        except sqlite3.OperationalError:
+            pass
+
         conn.commit()
 
 
@@ -375,6 +404,11 @@ def insertar_producto(codigo, nombre, categoria, costo, venta, stock, min_stock,
                 INSERT INTO productos (codigo, nombre, categoria, precio_costo, precio_venta, stock, stock_minimo, imagen_ruta, unidad_medida, proveedor_id, margen_utilidad) 
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (codigo, nombre, categoria, costo, venta, stock, min_stock, img_ruta, unidad_medida, proveedor_id, ((venta-costo)/costo*100) if costo>0 else 0))
+            
+            p_id = cursor.lastrowid
+            # Registrar inventario inicial en el Kardex
+            registrar_movimiento_inventario(cursor, p_id, 'Entrada', stock, 'Inventario Inicial', 0, stock)
+            
             conn.commit()
             return True
         except sqlite3.IntegrityError:
@@ -394,6 +428,11 @@ def actualizar_producto_completo(p_id, codigo, nombre, categoria, costo, venta, 
     with sqlite3.connect(DB_NAME) as conn:
         cursor = conn.cursor()
         try:
+            # Obtener stock anterior
+            cursor.execute("SELECT stock FROM productos WHERE id = ?", (p_id,))
+            res = cursor.fetchone()
+            stock_anterior = res[0] if res else 0
+            
             margen = ((venta-costo)/costo*100) if costo>0 else 0
             if img_ruta is not None:
                 cursor.execute("""
@@ -410,6 +449,13 @@ def actualizar_producto_completo(p_id, codigo, nombre, categoria, costo, venta, 
                         stock=?, stock_minimo=?, unidad_medida=?, proveedor_id=?, margen_utilidad=?
                     WHERE id=?
                 """, (codigo, nombre, categoria, costo, venta, stock, min_stock, unidad_medida, proveedor_id, margen, p_id))
+            
+            # Si el stock cambió, registrar en el Kardex
+            if stock != stock_anterior:
+                diff = stock - stock_anterior
+                tipo_mov = 'Entrada' if diff >= 0 else 'Salida'
+                registrar_movimiento_inventario(cursor, p_id, tipo_mov, diff, 'Ajuste Manual', stock_anterior, stock)
+                
             conn.commit()
             return True, "Producto actualizado correctamente."
         except sqlite3.IntegrityError:
@@ -418,7 +464,18 @@ def actualizar_producto_completo(p_id, codigo, nombre, categoria, costo, venta, 
 def modificar_stock(producto_id, cantidad):
     with sqlite3.connect(DB_NAME) as conn:
         cursor = conn.cursor()
-        cursor.execute("UPDATE productos SET stock = MAX(0, stock + ?) WHERE id = ?", (cantidad, producto_id))
+        cursor.execute("SELECT stock FROM productos WHERE id = ?", (producto_id,))
+        res = cursor.fetchone()
+        if res:
+            stock_anterior = res[0]
+            stock_nuevo = max(0, stock_anterior + cantidad)
+            diff = stock_nuevo - stock_anterior
+            
+            cursor.execute("UPDATE productos SET stock = ? WHERE id = ?", (stock_nuevo, producto_id))
+            
+            tipo_mov = 'Entrada' if diff >= 0 else 'Salida'
+            registrar_movimiento_inventario(cursor, producto_id, tipo_mov, diff, 'Ajuste Manual', stock_anterior, stock_nuevo)
+            
         conn.commit()
 
 def registrar_venta(producto_id, cantidad, precio_unitario, metodo_pago, cliente_nombre="", cliente_identificacion="", impuestos=0.0, codigo_fiscal="", fiscal_qr_url=""):
@@ -449,6 +506,9 @@ def registrar_venta(producto_id, cantidad, precio_unitario, metodo_pago, cliente
                 SET stock = stock - ? 
                 WHERE id = ?
             """, (cantidad, producto_id))
+            
+            # Registrar salida en el Kardex
+            registrar_movimiento_inventario(cursor, producto_id, 'Salida', -cantidad, 'Venta', stock_actual, stock_actual - cantidad)
             
             conn.commit()
             return True, "Venta registrada exitosamente."
@@ -559,11 +619,20 @@ def anular_venta(venta_id):
                 return False, "Registro de venta no encontrado."
             producto_id, cantidad = res
             
+            # Obtener stock anterior
+            cursor.execute("SELECT stock FROM productos WHERE id = ?", (producto_id,))
+            res_stock = cursor.fetchone()
+            stock_anterior = res_stock[0] if res_stock else 0
+            stock_nuevo = stock_anterior + cantidad
+            
             # Devolver el stock del producto
-            cursor.execute("UPDATE productos SET stock = stock + ? WHERE id = ?", (cantidad, producto_id))
+            cursor.execute("UPDATE productos SET stock = ? WHERE id = ?", (stock_nuevo, producto_id))
             
             # Eliminar el registro de venta
             cursor.execute("DELETE FROM ventas WHERE id = ?", (venta_id,))
+            
+            # Registrar movimiento
+            registrar_movimiento_inventario(cursor, producto_id, 'Entrada', cantidad, 'Anulación Venta', stock_anterior, stock_nuevo)
             
             conn.commit()
             return True, "Venta anulada con éxito. Unidades devueltas al inventario."
@@ -773,9 +842,18 @@ def registrar_compra(proveedor_id, usuario_id, total, notas, detalle_productos):
                     VALUES (?, ?, ?, ?, ?)
                 """, (compra_id, item["id"], item["cantidad"], item["precio_unitario"], subtotal))
                 
-                # Actualizar stock y precio de costo del producto (Promedio ponderado opcional, aquí solo reemplazamos o conservamos lógica de negocio. Por simplicidad, actualizamos stock y dejamos precio costo si el usuario lo editó antes, o se podría actualizar).
-                cursor.execute("UPDATE productos SET stock = stock + ?, precio_costo = ? WHERE id = ?", 
-                               (item["cantidad"], item["precio_unitario"], item["id"]))
+                # Obtener stock anterior
+                cursor.execute("SELECT stock FROM productos WHERE id = ?", (item["id"],))
+                res_stock = cursor.fetchone()
+                stock_anterior = res_stock[0] if res_stock else 0
+                stock_nuevo = stock_anterior + item["cantidad"]
+                
+                # Actualizar stock y precio de costo del producto
+                cursor.execute("UPDATE productos SET stock = ?, precio_costo = ? WHERE id = ?", 
+                               (stock_nuevo, item["precio_unitario"], item["id"]))
+                
+                # Registrar movimiento de entrada
+                registrar_movimiento_inventario(cursor, item["id"], 'Entrada', item["cantidad"], 'Compra', stock_anterior, stock_nuevo, usuario_id)
                 
             conn.commit()
             return True, "Compra registrada exitosamente y stock actualizado."
@@ -792,9 +870,16 @@ def registrar_merma(producto_id, cantidad, motivo, usuario_id):
             if not res or res[0] < cantidad:
                 return False, "Stock insuficiente para registrar esta merma."
             
+            stock_anterior = res[0]
+            stock_nuevo = stock_anterior - cantidad
+            
             cursor.execute("INSERT INTO mermas (producto_id, cantidad, motivo, usuario_id) VALUES (?, ?, ?, ?)",
                            (producto_id, cantidad, motivo, usuario_id))
-            cursor.execute("UPDATE productos SET stock = stock - ? WHERE id = ?", (cantidad, producto_id))
+            cursor.execute("UPDATE productos SET stock = ? WHERE id = ?", (stock_nuevo, producto_id))
+            
+            # Registrar movimiento de salida
+            registrar_movimiento_inventario(cursor, producto_id, 'Salida', -cantidad, f"Merma: {motivo}", stock_anterior, stock_nuevo, usuario_id)
+            
             conn.commit()
             return True, "Merma registrada y stock descontado."
         except Exception as e:
@@ -832,6 +917,11 @@ def actualizar_producto(p_id, codigo, nombre, categoria, costo, venta, stock, mi
     with sqlite3.connect(DB_NAME) as conn:
         cursor = conn.cursor()
         try:
+            # Obtener stock anterior
+            cursor.execute("SELECT stock FROM productos WHERE id = ?", (p_id,))
+            res = cursor.fetchone()
+            stock_anterior = res[0] if res else 0
+            
             margen = 0.0
             if costo > 0:
                 margen = ((venta - costo) / costo) * 100
@@ -841,6 +931,13 @@ def actualizar_producto(p_id, codigo, nombre, categoria, costo, venta, stock, mi
                 SET codigo=?, nombre=?, categoria=?, precio_costo=?, precio_venta=?, stock=?, stock_minimo=?, proveedor_id=?, unidad_medida=?, margen_utilidad=?
                 WHERE id=?
             """, (codigo, nombre, categoria, costo, venta, stock, min_stock, proveedor_id, unidad_medida, margen, p_id))
+            
+            # Si el stock cambió, registrar en el Kardex
+            if stock != stock_anterior:
+                diff = stock - stock_anterior
+                tipo_mov = 'Entrada' if diff >= 0 else 'Salida'
+                registrar_movimiento_inventario(cursor, p_id, tipo_mov, diff, 'Ajuste Manual', stock_anterior, stock)
+                
             conn.commit()
             return True, "Producto actualizado exitosamente."
         except sqlite3.IntegrityError:
@@ -1118,6 +1215,12 @@ def devolucion_parcial(venta_id, cantidad_devolver):
             if cantidad_devolver <= 0:
                 return False, "La cantidad a devolver debe ser mayor a 0."
             
+            # Obtener stock anterior
+            cursor.execute("SELECT stock FROM productos WHERE id = ?", (producto_id,))
+            res_stock = cursor.fetchone()
+            stock_anterior = res_stock[0] if res_stock else 0
+            stock_nuevo = stock_anterior + cantidad_devolver
+            
             # Actualizar la venta con la nueva cantidad
             nueva_cantidad = cant_original - cantidad_devolver
             nuevo_total = nueva_cantidad * precio_unit
@@ -1127,7 +1230,10 @@ def devolucion_parcial(venta_id, cantidad_devolver):
             """, (nueva_cantidad, nuevo_total, venta_id))
             
             # Devolver stock
-            cursor.execute("UPDATE productos SET stock = stock + ? WHERE id = ?", (cantidad_devolver, producto_id))
+            cursor.execute("UPDATE productos SET stock = ? WHERE id = ?", (stock_nuevo, producto_id))
+            
+            # Registrar movimiento
+            registrar_movimiento_inventario(cursor, producto_id, 'Entrada', cantidad_devolver, 'Devolución Parcial', stock_anterior, stock_nuevo)
             
             conn.commit()
             return True, f"Devolución parcial exitosa: {cantidad_devolver} unidades devueltas al inventario."
@@ -1167,3 +1273,27 @@ def buscar_cliente_por_identificacion(identificacion):
         cursor = conn.cursor()
         cursor.execute("SELECT id, nombre, identificacion, telefono, email, direccion FROM clientes WHERE identificacion = ?", (identificacion,))
         return cursor.fetchone()
+
+
+# --- KARDEX DE INVENTARIO ---
+
+def registrar_movimiento_inventario(cursor, producto_id, tipo, cantidad, motivo, stock_anterior, stock_nuevo, usuario_id=1):
+    """Inserta un registro de movimiento de stock en la tabla de auditoría movimientos_inventario."""
+    cursor.execute("""
+        INSERT INTO movimientos_inventario (producto_id, tipo, cantidad, motivo, stock_anterior, stock_nuevo, usuario_id)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    """, (producto_id, tipo, cantidad, motivo, stock_anterior, stock_nuevo, usuario_id))
+
+
+def obtener_kardex_producto(producto_id):
+    """Consulta el historial cronológico completo de movimientos de inventario para un producto."""
+    with sqlite3.connect(DB_NAME) as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT m.fecha, m.tipo, m.cantidad, m.stock_anterior, m.stock_nuevo, m.motivo, COALESCE(u.usuario, 'Sistema')
+            FROM movimientos_inventario m
+            LEFT JOIN usuarios u ON m.usuario_id = u.id
+            WHERE m.producto_id = ?
+            ORDER BY m.fecha DESC, m.id DESC
+        """, (producto_id,))
+        return cursor.fetchall()

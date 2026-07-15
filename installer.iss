@@ -5,14 +5,14 @@
 ; Información de la aplicación
 AppId={{D37E6F22-A109-4E64-A8DC-58DE17A167EE}
 AppName=InventarioPOS
-AppVersion=1.1.8
+AppVersion=1.1.9
 AppPublisher=Desarrollador
 DefaultDirName={autopf}\InventarioPOS
 DefaultGroupName=InventarioPOS
 DisableProgramGroupPage=yes
 ; Directorio de salida del instalador compilado y nombre del archivo
 OutputDir=dist
-OutputBaseFilename=setup_inventariopos_1.1.8
+OutputBaseFilename=setup_inventariopos_1.1.9
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
