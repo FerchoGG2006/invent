@@ -68,24 +68,29 @@ class CalendarDialog(ctk.CTkToplevel):
                                      hover_color=("#CBD5E1", "#334155"), corner_radius=6, command=self.mes_siguiente)
         self.btn_next.pack(side=tk.RIGHT)
         
-        # Días de la semana
-        self.frame_semana = ctk.CTkFrame(self, fg_color="transparent")
-        self.frame_semana.pack(fill=tk.X, padx=15)
+        # Frame único para cuerpo (Días de semana + Botones de días) para alineación matemática exacta
+        self.frame_cuerpo = ctk.CTkFrame(self, fg_color="transparent")
+        self.frame_cuerpo.pack(fill=tk.BOTH, expand=True, padx=20, pady=(5, 15))
         
+        # Configurar columnas con peso idéntico para que estén perfectamente alineadas
+        for i in range(7):
+            self.frame_cuerpo.grid_columnconfigure(i, weight=1, uniform="calendar_cols")
+            
+        # Dibujar headers de la semana en la fila 0
         dias = ["Lu", "Ma", "Mi", "Ju", "Vi", "Sá", "Do"]
         for i, dia in enumerate(dias):
             color = "#EF4444" if i in [5, 6] else ("#475569", "#CBD5E1")
-            lbl = ctk.CTkLabel(self.frame_semana, text=dia, font=("Segoe UI", 10, "bold"), text_color=color, width=40)
-            lbl.grid(row=0, column=i, padx=2, pady=2)
+            lbl = ctk.CTkLabel(self.frame_cuerpo, text=dia, font=("Segoe UI", 11, "bold"), text_color=color)
+            lbl.grid(row=0, column=i, pady=(0, 10), sticky="nsew")
             
-        # Grid del Calendario
-        self.frame_dias = ctk.CTkFrame(self, fg_color="transparent")
-        self.frame_dias.pack(fill=tk.BOTH, expand=True, padx=15, pady=(5, 10))
+        self.day_widgets = []
         
     def dibujar_calendario(self):
-        for widget in self.frame_dias.winfo_children():
-            widget.destroy()
-            
+        # Destruir solo los widgets de los días anteriores
+        for w in self.day_widgets:
+            w.destroy()
+        self.day_widgets.clear()
+        
         meses_nombres = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", 
                          "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
         self.lbl_mes_anio.configure(text=f"{meses_nombres[self.month-1]} {self.year}")
@@ -93,29 +98,33 @@ class CalendarDialog(ctk.CTkToplevel):
         cal = calendar.monthcalendar(self.year, self.month)
         
         for r_idx, week in enumerate(cal):
+            # Configurar fila uniforme
+            self.frame_cuerpo.grid_rowconfigure(r_idx + 1, weight=1, uniform="rows")
             for c_idx, day in enumerate(week):
                 if day == 0:
-                    lbl = ctk.CTkLabel(self.frame_dias, text="", width=40, height=32)
-                    lbl.grid(row=r_idx, column=c_idx, padx=2, pady=2)
+                    continue
+                
+                es_hoy = (self.year == self.hoy.year and self.month == self.hoy.month and day == self.hoy.day)
+                
+                if es_hoy:
+                    fg = "#4F46E5"
+                    hover = "#3730A3"
+                    text_col = "white"
                 else:
-                    es_hoy = (self.year == self.hoy.year and self.month == self.hoy.month and day == self.hoy.day)
+                    fg = ("#FFFFFF", "#1E293B")
+                    hover = ("#F1F5F9", "#334155")
+                    text_col = ("#0F172A", "#F8FAFC")
                     
-                    if es_hoy:
-                        fg = "#4F46E5"
-                        hover = "#3730A3"
-                        text_col = "white"
-                    else:
-                        fg = ("#FFFFFF", "#1E293B")
-                        hover = ("#F1F5F9", "#334155")
-                        text_col = ("#0F172A", "#F8FAFC")
-                        
-                    btn = ctk.CTkButton(self.frame_dias, text=str(day), width=40, height=32,
-                                       fg_color=fg, text_color=text_col, hover_color=hover,
-                                       corner_radius=6, font=("Segoe UI", 10, "bold"),
-                                       border_color=("#E2E8F0", "#334155") if not es_hoy else None,
-                                       border_width=1 if not es_hoy else 0,
-                                       command=lambda d=day: self.seleccionar_dia(d))
-                    btn.grid(row=r_idx, column=c_idx, padx=2, pady=2)
+                # Botón circular (width y height iguales, corner_radius la mitad de la dimensión)
+                btn = ctk.CTkButton(self.frame_cuerpo, text=str(day), width=32, height=32,
+                                   fg_color=fg, text_color=text_col, hover_color=hover,
+                                   corner_radius=16, font=("Segoe UI", 10, "bold"),
+                                   border_color=("#E2E8F0", "#334155") if not es_hoy else None,
+                                   border_width=1 if not es_hoy else 0,
+                                   command=lambda d=day: self.seleccionar_dia(d))
+                # Sin sticky para mantener el aspecto circular
+                btn.grid(row=r_idx + 1, column=c_idx, padx=2, pady=2)
+                self.day_widgets.append(btn)
                     
     def mes_anterior(self):
         self.month -= 1
