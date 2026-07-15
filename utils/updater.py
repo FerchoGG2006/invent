@@ -8,7 +8,7 @@ from tkinter import messagebox
 
 # Archivo de control centralizado alojado en el repositorio de GitHub
 VERSION_URL = "https://raw.githubusercontent.com/FerchoGG2006/invent/main/version.json"
-APP_VERSION = "1.1.7"
+APP_VERSION = "1.1.8"
 
 # Marcador para evitar bucle infinito de reinicios
 _UPDATED_FLAG = "--just-updated"

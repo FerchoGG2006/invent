@@ -56,16 +56,16 @@ class CalendarDialog(ctk.CTkToplevel):
         self.frame_header.pack(fill=tk.X, padx=15, pady=(15, 10))
         
         self.btn_prev = ctk.CTkButton(self.frame_header, text="◀", width=30, height=30, 
-                                     fg_color=("#E2E8F0", "#1E293B"), text_color=("#0F172A", "#F8FAFC"),
-                                     hover_color=("#CBD5E1", "#334155"), corner_radius=6, command=self.mes_anterior)
+                                     fg_color=rc(("#E2E8F0", "#1E293B")), text_color=rc(("#0F172A", "#F8FAFC")),
+                                     hover_color=rc(("#CBD5E1", "#334155")), corner_radius=6, command=self.mes_anterior)
         self.btn_prev.pack(side=tk.LEFT)
         
-        self.lbl_mes_anio = ctk.CTkLabel(self.frame_header, text="", font=("Segoe UI", 12, "bold"), text_color=("#0F172A", "#F8FAFC"))
+        self.lbl_mes_anio = ctk.CTkLabel(self.frame_header, text="", font=("Segoe UI", 12, "bold"), text_color=rc(("#0F172A", "#F8FAFC")))
         self.lbl_mes_anio.pack(side=tk.LEFT, fill=tk.X, expand=True)
         
         self.btn_next = ctk.CTkButton(self.frame_header, text="▶", width=30, height=30, 
-                                     fg_color=("#E2E8F0", "#1E293B"), text_color=("#0F172A", "#F8FAFC"),
-                                     hover_color=("#CBD5E1", "#334155"), corner_radius=6, command=self.mes_siguiente)
+                                     fg_color=rc(("#E2E8F0", "#1E293B")), text_color=rc(("#0F172A", "#F8FAFC")),
+                                     hover_color=rc(("#CBD5E1", "#334155")), corner_radius=6, command=self.mes_siguiente)
         self.btn_next.pack(side=tk.RIGHT)
         
         # Frame único para cuerpo (Días de semana + Botones de días) para alineación matemática exacta
@@ -79,7 +79,7 @@ class CalendarDialog(ctk.CTkToplevel):
         # Dibujar headers de la semana en la fila 0
         dias = ["Lu", "Ma", "Mi", "Ju", "Vi", "Sá", "Do"]
         for i, dia in enumerate(dias):
-            color = "#EF4444" if i in [5, 6] else ("#475569", "#CBD5E1")
+            color = "#EF4444" if i in [5, 6] else rc(("#475569", "#CBD5E1"))
             lbl = ctk.CTkLabel(self.frame_cuerpo, text=dia, font=("Segoe UI", 11, "bold"), text_color=color)
             lbl.grid(row=0, column=i, pady=(0, 10), sticky="nsew")
             
@@ -110,17 +110,20 @@ class CalendarDialog(ctk.CTkToplevel):
                     fg = "#4F46E5"
                     hover = "#3730A3"
                     text_col = "white"
+                    border_col = None
+                    border_w = 0
                 else:
-                    fg = ("#FFFFFF", "#1E293B")
-                    hover = ("#F1F5F9", "#334155")
-                    text_col = ("#0F172A", "#F8FAFC")
+                    fg = rc(("#FFFFFF", "#1E293B"))
+                    hover = rc(("#F1F5F9", "#334155"))
+                    text_col = rc(("#0F172A", "#F8FAFC"))
+                    border_col = rc(("#E2E8F0", "#334155"))
+                    border_w = 1
                     
                 # Botón circular (width y height iguales, corner_radius la mitad de la dimensión)
                 btn = ctk.CTkButton(self.frame_cuerpo, text=str(day), width=32, height=32,
                                    fg_color=fg, text_color=text_col, hover_color=hover,
                                    corner_radius=16, font=("Segoe UI", 10, "bold"),
-                                   border_color=("#E2E8F0", "#334155") if not es_hoy else None,
-                                   border_width=1 if not es_hoy else 0,
+                                   border_color=border_col, border_width=border_w,
                                    command=lambda d=day: self.seleccionar_dia(d))
                 # Sin sticky para mantener el aspecto circular
                 btn.grid(row=r_idx + 1, column=c_idx, padx=2, pady=2)
