@@ -4,6 +4,7 @@ import customtkinter as ctk
 import database
 import csv
 import datetime
+import calendar
 
 # Importar Matplotlib para los gráficos
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -18,6 +19,126 @@ def rc(color_val):
         except Exception:
             return color_val[0]
     return color_val
+
+
+class CalendarDialog(ctk.CTkToplevel):
+    def __init__(self, parent, callback, cancel_callback):
+        super().__init__(parent)
+        self.title("Seleccionar Fecha")
+        self.geometry("320x350")
+        self.configure(fg_color=("#F8FAFC", "#0F172A"))
+        self.resizable(False, False)
+        self.transient(parent)
+        self.grab_set()
+        
+        # Centrar ventana
+        self.update_idletasks()
+        width = 320
+        height = 350
+        x = (self.winfo_screenwidth() // 2) - (width // 2)
+        y = (self.winfo_screenheight() // 2) - (height // 2)
+        self.geometry(f"+{x}+{y}")
+        
+        self.callback = callback
+        self.cancel_callback = cancel_callback
+        self.hoy = datetime.datetime.now()
+        self.year = self.hoy.year
+        self.month = self.hoy.month
+        
+        self.protocol("WM_DELETE_WINDOW", self.cancelar)
+        
+        self.crear_interfaz()
+        self.dibujar_calendario()
+        
+    def crear_interfaz(self):
+        # Header (Mes y Año con flechas)
+        self.frame_header = ctk.CTkFrame(self, fg_color="transparent")
+        self.frame_header.pack(fill=tk.X, padx=15, pady=(15, 10))
+        
+        self.btn_prev = ctk.CTkButton(self.frame_header, text="◀", width=30, height=30, 
+                                     fg_color=("#E2E8F0", "#1E293B"), text_color=("#0F172A", "#F8FAFC"),
+                                     hover_color=("#CBD5E1", "#334155"), corner_radius=6, command=self.mes_anterior)
+        self.btn_prev.pack(side=tk.LEFT)
+        
+        self.lbl_mes_anio = ctk.CTkLabel(self.frame_header, text="", font=("Segoe UI", 12, "bold"), text_color=("#0F172A", "#F8FAFC"))
+        self.lbl_mes_anio.pack(side=tk.LEFT, fill=tk.X, expand=True)
+        
+        self.btn_next = ctk.CTkButton(self.frame_header, text="▶", width=30, height=30, 
+                                     fg_color=("#E2E8F0", "#1E293B"), text_color=("#0F172A", "#F8FAFC"),
+                                     hover_color=("#CBD5E1", "#334155"), corner_radius=6, command=self.mes_siguiente)
+        self.btn_next.pack(side=tk.RIGHT)
+        
+        # Días de la semana
+        self.frame_semana = ctk.CTkFrame(self, fg_color="transparent")
+        self.frame_semana.pack(fill=tk.X, padx=15)
+        
+        dias = ["Lu", "Ma", "Mi", "Ju", "Vi", "Sá", "Do"]
+        for i, dia in enumerate(dias):
+            color = "#EF4444" if i in [5, 6] else ("#475569", "#CBD5E1")
+            lbl = ctk.CTkLabel(self.frame_semana, text=dia, font=("Segoe UI", 10, "bold"), text_color=color, width=40)
+            lbl.grid(row=0, column=i, padx=2, pady=2)
+            
+        # Grid del Calendario
+        self.frame_dias = ctk.CTkFrame(self, fg_color="transparent")
+        self.frame_dias.pack(fill=tk.BOTH, expand=True, padx=15, pady=(5, 10))
+        
+    def dibujar_calendario(self):
+        for widget in self.frame_dias.winfo_children():
+            widget.destroy()
+            
+        meses_nombres = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", 
+                         "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
+        self.lbl_mes_anio.configure(text=f"{meses_nombres[self.month-1]} {self.year}")
+        
+        cal = calendar.monthcalendar(self.year, self.month)
+        
+        for r_idx, week in enumerate(cal):
+            for c_idx, day in enumerate(week):
+                if day == 0:
+                    lbl = ctk.CTkLabel(self.frame_dias, text="", width=40, height=32)
+                    lbl.grid(row=r_idx, column=c_idx, padx=2, pady=2)
+                else:
+                    es_hoy = (self.year == self.hoy.year and self.month == self.hoy.month and day == self.hoy.day)
+                    
+                    if es_hoy:
+                        fg = "#4F46E5"
+                        hover = "#3730A3"
+                        text_col = "white"
+                    else:
+                        fg = ("#FFFFFF", "#1E293B")
+                        hover = ("#F1F5F9", "#334155")
+                        text_col = ("#0F172A", "#F8FAFC")
+                        
+                    btn = ctk.CTkButton(self.frame_dias, text=str(day), width=40, height=32,
+                                       fg_color=fg, text_color=text_col, hover_color=hover,
+                                       corner_radius=6, font=("Segoe UI", 10, "bold"),
+                                       border_color=("#E2E8F0", "#334155") if not es_hoy else None,
+                                       border_width=1 if not es_hoy else 0,
+                                       command=lambda d=day: self.seleccionar_dia(d))
+                    btn.grid(row=r_idx, column=c_idx, padx=2, pady=2)
+                    
+    def mes_anterior(self):
+        self.month -= 1
+        if self.month < 1:
+            self.month = 12
+            self.year -= 1
+        self.dibujar_calendario()
+        
+    def mes_siguiente(self):
+        self.month += 1
+        if self.month > 12:
+            self.month = 1
+            self.year += 1
+        self.dibujar_calendario()
+        
+    def seleccionar_dia(self, dia):
+        fecha = datetime.date(self.year, self.month, dia)
+        self.callback(fecha)
+        self.destroy()
+        
+    def cancelar(self):
+        self.cancel_callback()
+        self.destroy()
 
 class ReportesTab:
     def __init__(self, app):
@@ -155,64 +276,18 @@ class ReportesTab:
             self.reporte_actualizar_datos()
 
     def _abrir_selector_fecha(self):
-        """Abre una ventana emergente para elegir un día específico."""
-        hoy = datetime.datetime.now()
-
-        win = ctk.CTkToplevel(self.app.root)
-        win.title("Seleccionar Fecha")
-        win.geometry("300x200")
-        win.configure(fg_color=("#F8FAFC", "#0F172A"))
-        win.resizable(False, False)
-        win.grab_set()
-
-        ctk.CTkLabel(win, text="📅 Elige un día", font=("Segoe UI", 14, "bold"), text_color=rc(("#0F172A", "#F8FAFC"))).pack(pady=(15, 10))
-
-        frame_fecha = ctk.CTkFrame(win, fg_color="transparent")
-        frame_fecha.pack(pady=5)
-
-        ctk.CTkLabel(frame_fecha, text="Día:", font=("Segoe UI", 10)).grid(row=0, column=0, padx=5)
-        spin_dia = tk.Spinbox(frame_fecha, from_=1, to=31, width=4, font=("Segoe UI", 11), justify=tk.CENTER)
-        spin_dia.grid(row=0, column=1, padx=3)
-        spin_dia.delete(0, tk.END)
-        spin_dia.insert(0, str(hoy.day))
-
-        ctk.CTkLabel(frame_fecha, text="Mes:", font=("Segoe UI", 10)).grid(row=0, column=2, padx=5)
-        spin_mes = tk.Spinbox(frame_fecha, from_=1, to=12, width=4, font=("Segoe UI", 11), justify=tk.CENTER)
-        spin_mes.grid(row=0, column=3, padx=3)
-        spin_mes.delete(0, tk.END)
-        spin_mes.insert(0, str(hoy.month))
-
-        ctk.CTkLabel(frame_fecha, text="Año:", font=("Segoe UI", 10)).grid(row=0, column=4, padx=5)
-        spin_anio = tk.Spinbox(frame_fecha, from_=2020, to=2030, width=5, font=("Segoe UI", 11), justify=tk.CENTER)
-        spin_anio.grid(row=0, column=5, padx=3)
-        spin_anio.delete(0, tk.END)
-        spin_anio.insert(0, str(hoy.year))
-
-        def confirmar():
-            try:
-                d = int(spin_dia.get())
-                m = int(spin_mes.get())
-                a = int(spin_anio.get())
-                fecha = datetime.date(a, m, d)
-                self._filtro_fecha_especifica = fecha.strftime("%Y-%m-%d")
-                self.combo_filtro_fecha.set(fecha.strftime("%d/%m/%Y"))
-                win.destroy()
-                self.reporte_actualizar_datos()
-            except ValueError:
-                messagebox.showerror("Fecha Inválida", "La fecha ingresada no es válida. Verifica el día, mes y año.", parent=win)
+        """Abre un calendario moderno interactivo para elegir un día específico."""
+        def callback(fecha):
+            self._filtro_fecha_especifica = fecha.strftime("%Y-%m-%d")
+            self.combo_filtro_fecha.set(fecha.strftime("%d/%m/%Y"))
+            self.reporte_actualizar_datos()
 
         def cancelar():
             self.combo_filtro_fecha.set("Todo")
             self._filtro_fecha_especifica = None
-            win.destroy()
+            self.reporte_actualizar_datos()
 
-        frame_btns = ctk.CTkFrame(win, fg_color="transparent")
-        frame_btns.pack(pady=15)
-
-        ctk.CTkButton(frame_btns, text="✅ Aplicar", font=("Segoe UI", 11, "bold"), fg_color="#10B981", hover_color="#059669", text_color="white", height=35, width=120, corner_radius=6, command=confirmar).pack(side=tk.LEFT, padx=5)
-        ctk.CTkButton(frame_btns, text="Cancelar", font=("Segoe UI", 11, "bold"), fg_color="#64748B", hover_color="#475569", text_color="white", height=35, width=100, corner_radius=6, command=cancelar).pack(side=tk.LEFT, padx=5)
-
-        win.protocol("WM_DELETE_WINDOW", cancelar)
+        CalendarDialog(self.app.root, callback, cancelar)
 
     def reporte_actualizar_datos(self):
         filtro = self.combo_filtro_fecha.get()
