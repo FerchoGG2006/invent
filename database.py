@@ -327,6 +327,14 @@ def init_db():
         except sqlite3.OperationalError:
             pass
 
+        # Forzar resincronización de ventas de una sola vez para poblar el nuevo proyecto de Supabase
+        try:
+            cursor.execute("ALTER TABLE configuracion ADD COLUMN resync_ventas_114 INTEGER DEFAULT 0;")
+            cursor.execute("UPDATE ventas SET sincronizado = 0;")
+            cursor.execute("UPDATE configuracion SET resync_ventas_114 = 1 WHERE id = 1;")
+        except sqlite3.OperationalError:
+            pass
+
         conn.commit()
 
 
