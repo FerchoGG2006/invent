@@ -5,6 +5,14 @@ import database
 import os
 import shutil
 
+def rc(color_val):
+    if isinstance(color_val, tuple):
+        try:
+            return color_val[1] if ctk.get_appearance_mode() == "Dark" else color_val[0]
+        except Exception:
+            return color_val[0]
+    return color_val
+
 class InventarioTab:
     def __init__(self, app):
         self.app = app
@@ -657,7 +665,7 @@ class KardexDialog(ctk.CTkToplevel):
         frame_header = ctk.CTkFrame(self, fg_color="transparent")
         frame_header.pack(fill=tk.X, padx=20, pady=(15, 10))
         
-        ctk.CTkLabel(frame_header, text=f"📊 KARDEX DE MOVIMIENTOS", font=("Segoe UI", 14, "bold"), text_color=database.rc(("#0F172A", "#F8FAFC"))).pack(anchor=tk.W)
+        ctk.CTkLabel(frame_header, text=f"📊 KARDEX DE MOVIMIENTOS", font=("Segoe UI", 14, "bold"), text_color=rc(("#0F172A", "#F8FAFC"))).pack(anchor=tk.W)
         self.lbl_subtitulo = ctk.CTkLabel(frame_header, text=f"Producto: {self.producto_nombre} | Código: {self.producto_codigo}", font=("Segoe UI", 10), text_color="#64748B")
         self.lbl_subtitulo.pack(anchor=tk.W, pady=(2, 0))
 
@@ -690,9 +698,9 @@ class KardexDialog(ctk.CTkToplevel):
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         
         # Configurar colores para filas alternas / tipos de movimientos
-        self.tabla.tag_configure("entrada", background=database.rc(("#F0FDF4", "#064E3B")), foreground=database.rc(("#166534", "#6EE7B7")))
-        self.tabla.tag_configure("salida", background=database.rc(("#FEF2F2", "#4C0519")), foreground=database.rc(("#991B1B", "#FCA5A5")))
-        self.tabla.tag_configure("ajuste", background=database.rc(("#F0F9FF", "#0C4A6E")), foreground=database.rc(("#075985", "#7DD3FC")))
+        self.tabla.tag_configure("entrada", background=rc(("#F0FDF4", "#064E3B")), foreground=rc(("#166534", "#6EE7B7")))
+        self.tabla.tag_configure("salida", background=rc(("#FEF2F2", "#4C0519")), foreground=rc(("#991B1B", "#FCA5A5")))
+        self.tabla.tag_configure("ajuste", background=rc(("#F0F9FF", "#0C4A6E")), foreground=rc(("#075985", "#7DD3FC")))
 
     def cargar_datos(self):
         # Limpiar tabla
