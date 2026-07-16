@@ -85,7 +85,7 @@ class CreditosTab:
         try:
             monto = float(monto_str)
             if monto <= 0: raise ValueError
-        except:
+        except ValueError:
             messagebox.showerror("Error", "Monto inválido.")
             return
             

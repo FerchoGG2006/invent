@@ -29,7 +29,7 @@ class CajaTab:
 
         # Controles
         ctk.CTkLabel(frame_control, text="Monto Base de Apertura ($)", font=("Segoe UI", 10, "bold"), text_color=("#64748B", "#94A3B8")).pack(anchor=tk.W, padx=20, pady=(15, 5))
-        self.entry_apertura = ctk.CTkEntry(frame_control, font=("Segoe UI", 14), height=40, corner_radius=6, justify="center")
+        self.entry_apertura = ctk.CTkEntry(frame_control, font=("Segoe UI", 12), height=40, corner_radius=6, justify="center")
         self.entry_apertura.pack(fill=tk.X, padx=20)
         self.entry_apertura.insert(0, "0")
 
@@ -52,7 +52,7 @@ class CajaTab:
         frame_grid = ctk.CTkFrame(self.tab, fg_color=("#FFFFFF", "#1E293B"), border_color=("#E2E8F0", "#334155"), border_width=1, corner_radius=8)
         frame_grid.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=(10, 20), pady=20)
 
-        ctk.CTkLabel(frame_grid, text="Movimientos del Turno", font=("Segoe UI", 14, "bold"), text_color=("#0F172A", "#F8FAFC")).pack(anchor=tk.W, padx=20, pady=(15, 10))
+        ctk.CTkLabel(frame_grid, text="Movimientos del Turno", font=("Segoe UI", 12, "bold"), text_color=("#0F172A", "#F8FAFC")).pack(anchor=tk.W, padx=20, pady=(15, 10))
 
         # Tabla
         columnas = ("id", "fecha", "tipo", "monto", "descripcion")

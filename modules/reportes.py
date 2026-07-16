@@ -25,19 +25,18 @@ class CalendarDialog(ctk.CTkToplevel):
     def __init__(self, parent, callback, cancel_callback):
         super().__init__(parent)
         self.title("Seleccionar Fecha")
-        self.geometry("320x350")
         self.configure(fg_color=("#F8FAFC", "#0F172A"))
         self.resizable(False, False)
         self.transient(parent)
         self.grab_set()
         
-        # Centrar ventana
+        # Centrar ventana — tamaño más amplio
+        width = 400
+        height = 430
         self.update_idletasks()
-        width = 320
-        height = 350
         x = (self.winfo_screenwidth() // 2) - (width // 2)
         y = (self.winfo_screenheight() // 2) - (height // 2)
-        self.geometry(f"+{x}+{y}")
+        self.geometry(f"{width}x{height}+{x}+{y}")
         
         self.callback = callback
         self.cancel_callback = cancel_callback
@@ -53,40 +52,40 @@ class CalendarDialog(ctk.CTkToplevel):
     def crear_interfaz(self):
         # Header (Mes y Año con flechas)
         self.frame_header = ctk.CTkFrame(self, fg_color="transparent")
-        self.frame_header.pack(fill=tk.X, padx=15, pady=(15, 10))
+        self.frame_header.pack(fill=tk.X, padx=20, pady=(20, 10))
         
-        self.btn_prev = ctk.CTkButton(self.frame_header, text="◀", width=30, height=30, 
+        self.btn_prev = ctk.CTkButton(self.frame_header, text="◀", width=36, height=36, 
                                      fg_color=rc(("#E2E8F0", "#1E293B")), text_color=rc(("#0F172A", "#F8FAFC")),
-                                     hover_color=rc(("#CBD5E1", "#334155")), corner_radius=6, command=self.mes_anterior)
+                                     hover_color=rc(("#CBD5E1", "#334155")), corner_radius=6,
+                                     font=("Segoe UI", 10, "bold"), command=self.mes_anterior)
         self.btn_prev.pack(side=tk.LEFT)
         
         self.lbl_mes_anio = ctk.CTkLabel(self.frame_header, text="", font=("Segoe UI", 12, "bold"), text_color=rc(("#0F172A", "#F8FAFC")))
         self.lbl_mes_anio.pack(side=tk.LEFT, fill=tk.X, expand=True)
         
-        self.btn_next = ctk.CTkButton(self.frame_header, text="▶", width=30, height=30, 
+        self.btn_next = ctk.CTkButton(self.frame_header, text="▶", width=36, height=36, 
                                      fg_color=rc(("#E2E8F0", "#1E293B")), text_color=rc(("#0F172A", "#F8FAFC")),
-                                     hover_color=rc(("#CBD5E1", "#334155")), corner_radius=6, command=self.mes_siguiente)
+                                     hover_color=rc(("#CBD5E1", "#334155")), corner_radius=6,
+                                     font=("Segoe UI", 10, "bold"), command=self.mes_siguiente)
         self.btn_next.pack(side=tk.RIGHT)
         
-        # Frame único para cuerpo (Días de semana + Botones de días) para alineación matemática exacta
+        # Frame único para cuerpo (Días de semana + Botones de días)
         self.frame_cuerpo = ctk.CTkFrame(self, fg_color="transparent")
-        self.frame_cuerpo.pack(fill=tk.BOTH, expand=True, padx=20, pady=(5, 15))
+        self.frame_cuerpo.pack(fill=tk.BOTH, expand=True, padx=20, pady=(5, 20))
         
-        # Configurar columnas con peso idéntico para que estén perfectamente alineadas
         for i in range(7):
             self.frame_cuerpo.grid_columnconfigure(i, weight=1, uniform="calendar_cols")
             
-        # Dibujar headers de la semana en la fila 0
+        # Headers de la semana
         dias = ["Lu", "Ma", "Mi", "Ju", "Vi", "Sá", "Do"]
         for i, dia in enumerate(dias):
             color = "#EF4444" if i in [5, 6] else rc(("#475569", "#CBD5E1"))
-            lbl = ctk.CTkLabel(self.frame_cuerpo, text=dia, font=("Segoe UI", 11, "bold"), text_color=color)
+            lbl = ctk.CTkLabel(self.frame_cuerpo, text=dia, font=("Segoe UI", 10, "bold"), text_color=color)
             lbl.grid(row=0, column=i, pady=(0, 10), sticky="nsew")
             
         self.day_widgets = []
         
     def dibujar_calendario(self):
-        # Destruir solo los widgets de los días anteriores
         for w in self.day_widgets:
             w.destroy()
         self.day_widgets.clear()
@@ -98,7 +97,6 @@ class CalendarDialog(ctk.CTkToplevel):
         cal = calendar.monthcalendar(self.year, self.month)
         
         for r_idx, week in enumerate(cal):
-            # Configurar fila uniforme
             self.frame_cuerpo.grid_rowconfigure(r_idx + 1, weight=1, uniform="rows")
             for c_idx, day in enumerate(week):
                 if day == 0:
@@ -119,14 +117,12 @@ class CalendarDialog(ctk.CTkToplevel):
                     border_col = rc(("#E2E8F0", "#334155"))
                     border_w = 1
                     
-                # Botón circular (width y height iguales, corner_radius la mitad de la dimensión)
-                btn = ctk.CTkButton(self.frame_cuerpo, text=str(day), width=32, height=32,
+                btn = ctk.CTkButton(self.frame_cuerpo, text=str(day), width=42, height=42,
                                    fg_color=fg, text_color=text_col, hover_color=hover,
-                                   corner_radius=16, font=("Segoe UI", 10, "bold"),
+                                   corner_radius=8, font=("Segoe UI", 10, "bold"),
                                    border_color=border_col, border_width=border_w,
                                    command=lambda d=day: self.seleccionar_dia(d))
-                # Sin sticky para mantener el aspecto circular
-                btn.grid(row=r_idx + 1, column=c_idx, padx=2, pady=2)
+                btn.grid(row=r_idx + 1, column=c_idx, padx=3, pady=3)
                 self.day_widgets.append(btn)
                     
     def mes_anterior(self):
@@ -183,7 +179,7 @@ class ReportesTab:
         self.lbl_card_hoy_titulo.pack(anchor=tk.W, padx=15, pady=(10, 0))
         self.lbl_card_hoy_valor = ctk.CTkLabel(self.card_hoy, text="$0", font=("Segoe UI", 18, "bold"), text_color="#4F46E5")
         self.lbl_card_hoy_valor.pack(anchor=tk.W, padx=15, pady=(2, 0))
-        self.lbl_card_hoy_sub = ctk.CTkLabel(self.card_hoy, text="0 transacciones", font=("Segoe UI", 9), text_color="#94A3B8")
+        self.lbl_card_hoy_sub = ctk.CTkLabel(self.card_hoy, text="0 transacciones", font=("Segoe UI", 10), text_color="#94A3B8")
         self.lbl_card_hoy_sub.pack(anchor=tk.W, padx=15, pady=(0, 10))
 
         # Tarjeta 2: Ingresos por Tipo de Pago
@@ -205,7 +201,7 @@ class ReportesTab:
         self.lbl_card_ut_titulo.pack(anchor=tk.W, padx=15, pady=(10, 0))
         self.lbl_card_ut_valor = ctk.CTkLabel(self.card_utilidad, text="$0", font=("Segoe UI", 18, "bold"), text_color="#10B981")
         self.lbl_card_ut_valor.pack(anchor=tk.W, padx=15, pady=(2, 0))
-        self.lbl_card_ut_sub = ctk.CTkLabel(self.card_utilidad, text="Ingreso - Costo Adquisición", font=("Segoe UI", 9), text_color="#059669")
+        self.lbl_card_ut_sub = ctk.CTkLabel(self.card_utilidad, text="Ingreso - Costo Adquisición", font=("Segoe UI", 10), text_color="#059669")
         self.lbl_card_ut_sub.pack(anchor=tk.W, padx=15, pady=(0, 10))
 
         # Tarjeta 4: Top 3 Más Vendidos
@@ -225,7 +221,7 @@ class ReportesTab:
         frame_controles_rep = ctk.CTkFrame(frame_reporte_grid, fg_color="transparent")
         frame_controles_rep.pack(fill=tk.X, padx=15, pady=15)
 
-        ctk.CTkLabel(frame_controles_rep, text="TRANSACCIONES REGISTRADAS", font=("Segoe UI", 11, "bold"), text_color=rc(("#0F172A", "#F8FAFC"))).pack(side=tk.LEFT)
+        ctk.CTkLabel(frame_controles_rep, text="TRANSACCIONES REGISTRADAS", font=("Segoe UI", 10, "bold"), text_color=rc(("#0F172A", "#F8FAFC"))).pack(side=tk.LEFT)
 
         # Selector de Fecha
         ctk.CTkLabel(frame_controles_rep, text="Filtrar:", font=("Segoe UI", 10, "bold"), text_color=rc(("#64748B", "#94A3B8"))).pack(side=tk.LEFT, padx=(20, 5))
@@ -416,7 +412,7 @@ class ReportesTab:
             else:
                 messagebox.showerror("Error de Impresión", msg, parent=win)
 
-        btn_imprimir = ctk.CTkButton(win, text="🖨️ Imprimir Copia", font=("Segoe UI", 11, "bold"), fg_color="#10B981", hover_color="#059669", text_color="white", height=38, corner_radius=6, command=imprimir)
+        btn_imprimir = ctk.CTkButton(win, text="🖨️ Imprimir Copia", font=("Segoe UI", 10, "bold"), fg_color="#10B981", hover_color="#059669", text_color="white", height=38, corner_radius=6, command=imprimir)
         btn_imprimir.pack(fill=tk.X, padx=15, pady=10)
 
     def anular_venta_seleccionada(self):

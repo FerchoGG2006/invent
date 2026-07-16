@@ -22,7 +22,7 @@ def mostrar_gestion_usuarios(app):
 
     frame_header = ctk.CTkFrame(win, fg_color="#4F46E5", corner_radius=0, height=65)
     frame_header.pack(fill=tk.X)
-    ctk.CTkLabel(frame_header, text="👥 GESTIÓN DE USUARIOS", font=("Segoe UI", 13, "bold"), text_color="white").pack(pady=18)
+    ctk.CTkLabel(frame_header, text="👥 GESTIÓN DE USUARIOS", font=("Segoe UI", 12, "bold"), text_color="white").pack(pady=18)
 
     # Contenedor principal
     frame_content = ctk.CTkFrame(win, fg_color=("#FFFFFF", "#1E293B"), border_color=("#E2E8F0", "#334155"), border_width=1, corner_radius=12)
@@ -69,19 +69,19 @@ def mostrar_gestion_usuarios(app):
         frame_form = ctk.CTkFrame(win_nuevo, fg_color="transparent")
         frame_form.pack(fill=tk.BOTH, expand=True, padx=20)
 
-        ctk.CTkLabel(frame_form, text="Nombre Completo:", font=("Segoe UI", 9, "bold")).pack(anchor="w")
+        ctk.CTkLabel(frame_form, text="Nombre Completo:", font=("Segoe UI", 10, "bold")).pack(anchor="w")
         ent_nombre = ctk.CTkEntry(frame_form)
         ent_nombre.pack(fill=tk.X, pady=(0, 10))
 
-        ctk.CTkLabel(frame_form, text="Usuario (Login):", font=("Segoe UI", 9, "bold")).pack(anchor="w")
+        ctk.CTkLabel(frame_form, text="Usuario (Login):", font=("Segoe UI", 10, "bold")).pack(anchor="w")
         ent_usuario = ctk.CTkEntry(frame_form)
         ent_usuario.pack(fill=tk.X, pady=(0, 10))
 
-        ctk.CTkLabel(frame_form, text="Contraseña:", font=("Segoe UI", 9, "bold")).pack(anchor="w")
+        ctk.CTkLabel(frame_form, text="Contraseña:", font=("Segoe UI", 10, "bold")).pack(anchor="w")
         ent_pass = ctk.CTkEntry(frame_form, show="*")
         ent_pass.pack(fill=tk.X, pady=(0, 10))
 
-        ctk.CTkLabel(frame_form, text="Rol:", font=("Segoe UI", 9, "bold")).pack(anchor="w")
+        ctk.CTkLabel(frame_form, text="Rol:", font=("Segoe UI", 10, "bold")).pack(anchor="w")
         combo_rol = ctk.CTkComboBox(frame_form, values=["Cajero", "Administrador"])
         combo_rol.pack(fill=tk.X, pady=(0, 20))
         combo_rol.set("Cajero")

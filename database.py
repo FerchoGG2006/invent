@@ -1297,3 +1297,11 @@ def obtener_kardex_producto(producto_id):
             ORDER BY m.fecha DESC, m.id DESC
         """, (producto_id,))
         return cursor.fetchall()
+
+def modificar_codigo_producto(producto_id, nuevo_codigo):
+    """Modifica el código de un producto en la base de datos."""
+    with sqlite3.connect(DB_NAME) as conn:
+        cursor = conn.cursor()
+        cursor.execute("UPDATE productos SET codigo = ? WHERE id = ?", (nuevo_codigo, producto_id))
+        conn.commit()
+

@@ -52,14 +52,14 @@ class InventarioTab:
             cell = ctk.CTkFrame(grid_inputs, fg_color="transparent")
             cell.grid(row=row, column=col, padx=4, pady=3, sticky="nsew")
 
-            ctk.CTkLabel(cell, text=label_text, font=("Segoe UI", 8, "bold"), text_color=("#64748B", "#94A3B8")).pack(anchor=tk.W, pady=(0, 1))
+            ctk.CTkLabel(cell, text=label_text, font=("Segoe UI", 10, "bold"), text_color=("#64748B", "#94A3B8")).pack(anchor=tk.W, pady=(0, 1))
             
             if key in ["categoria", "proveedor_id", "unidad_medida"]:
-                combo = ctk.CTkComboBox(cell, font=("Segoe UI", 9), height=28, corner_radius=5, state="readonly")
+                combo = ctk.CTkComboBox(cell, font=("Segoe UI", 10), height=32, corner_radius=5, state="readonly")
                 combo.pack(fill=tk.X, pady=1)
                 self.inputs[key] = combo
             else:
-                entry = ctk.CTkEntry(cell, font=("Segoe UI", 10), fg_color=("#F8FAFC", "#0F172A"), text_color=("#0F172A", "#F8FAFC"), border_color=("#D1D5DB", "#475569"), height=28, corner_radius=5)
+                entry = ctk.CTkEntry(cell, font=("Segoe UI", 10), fg_color=("#F8FAFC", "#0F172A"), text_color=("#0F172A", "#F8FAFC"), border_color=("#D1D5DB", "#475569"), height=32, corner_radius=5)
                 entry.pack(fill=tk.X, pady=1)
                 self.inputs[key] = entry
 
@@ -71,27 +71,27 @@ class InventarioTab:
         self.actualizar_combos()
 
         # Campo para Imagen (No obligatorio)
-        ctk.CTkLabel(frame_form, text="Imagen del Producto", font=("Segoe UI", 8, "bold"), text_color=("#64748B", "#94A3B8")).pack(anchor=tk.W, padx=20, pady=(5, 1))
+        ctk.CTkLabel(frame_form, text="Imagen del Producto", font=("Segoe UI", 10, "bold"), text_color=("#64748B", "#94A3B8")).pack(anchor=tk.W, padx=20, pady=(5, 1))
         frame_img_sel = ctk.CTkFrame(frame_form, fg_color="transparent")
         frame_img_sel.pack(fill=tk.X, padx=20, pady=2)
 
-        self.btn_select_img = ctk.CTkButton(frame_img_sel, text="Seleccionar Foto", font=("Segoe UI", 8, "bold"), fg_color="#E5E7EB", hover_color=("#D1D5DB", "#475569"), text_color="#1F2937", height=26, width=110, corner_radius=5, command=self.pos_seleccionar_imagen)
+        self.btn_select_img = ctk.CTkButton(frame_img_sel, text="Seleccionar Foto", font=("Segoe UI", 10, "bold"), fg_color="#E5E7EB", hover_color=("#D1D5DB", "#475569"), text_color="#1F2937", height=30, width=120, corner_radius=5, command=self.pos_seleccionar_imagen)
         self.btn_select_img.pack(side=tk.LEFT)
 
-        self.lbl_img_path = ctk.CTkLabel(frame_img_sel, text="Sin foto", font=("Segoe UI", 8), text_color="#94A3B8", anchor=tk.W)
+        self.lbl_img_path = ctk.CTkLabel(frame_img_sel, text="Sin foto", font=("Segoe UI", 10), text_color="#94A3B8", anchor=tk.W)
         self.lbl_img_path.pack(side=tk.LEFT, padx=10, fill=tk.X, expand=True)
 
         # Recuadro Vista Previa Formulario
         frame_form_img_container = ctk.CTkFrame(frame_form, fg_color=("#F8FAFC", "#0F172A"), border_color=("#D1D5DB", "#475569"), border_width=1, height=90, corner_radius=6)
         frame_form_img_container.pack(pady=5, padx=20, fill=tk.X)
         frame_form_img_container.pack_propagate(False)
-        self.lbl_img_preview = tk.Label(frame_form_img_container, text="Sin vista previa", font=("Segoe UI", 8, "italic"), bg="#F8FAFC", fg="#94A3B8", compound="center")
+        self.lbl_img_preview = tk.Label(frame_form_img_container, text="Sin vista previa", font=("Segoe UI", 10, "italic"), bg="#F8FAFC", fg="#94A3B8", compound="center")
         self.lbl_img_preview.pack(expand=True, fill=tk.BOTH)
 
-        btn_guardar = ctk.CTkButton(frame_form, text="Guardar Producto", font=("Segoe UI", 10, "bold"), fg_color="#4F46E5", hover_color="#4338CA", text_color="white", height=35, corner_radius=8, command=self.guardar_producto)
+        btn_guardar = ctk.CTkButton(frame_form, text="Guardar Producto", font=("Segoe UI", 12, "bold"), fg_color="#4F46E5", hover_color="#4338CA", text_color="white", height=38, corner_radius=8, command=self.guardar_producto)
         btn_guardar.pack(fill=tk.X, padx=25, pady=(5, 5))
 
-        btn_combo = ctk.CTkButton(frame_form, text="📦 Crear Combo", font=("Segoe UI", 10, "bold"), fg_color="#10B981", hover_color="#059669", text_color="white", height=35, corner_radius=8, command=self.modal_nuevo_combo)
+        btn_combo = ctk.CTkButton(frame_form, text="📦 Crear Combo", font=("Segoe UI", 12, "bold"), fg_color="#10B981", hover_color="#059669", text_color="white", height=38, corner_radius=8, command=self.modal_nuevo_combo)
         btn_combo.pack(fill=tk.X, padx=25, pady=(0, 10))
 
         # Panel Derecho (Tabla y Buscador)
@@ -101,29 +101,29 @@ class InventarioTab:
         # Buscador y botones de acción
         frame_busca = ctk.CTkFrame(frame_grid, fg_color="transparent")
         frame_busca.pack(fill=tk.X, pady=(0, 10))
-        ctk.CTkLabel(frame_busca, text="Buscar:", font=("Segoe UI", 10, "bold"), text_color=("#475569", "#CBD5E1")).pack(side=tk.LEFT, padx=(5, 10))
+        ctk.CTkLabel(frame_busca, text="🔍 Buscar:", font=("Segoe UI", 12, "bold"), text_color=("#475569", "#CBD5E1")).pack(side=tk.LEFT, padx=(5, 10))
 
-        self.entry_buscar = ctk.CTkEntry(frame_busca, font=("Segoe UI", 10), fg_color=("#FFFFFF", "#1E293B"), text_color=("#0F172A", "#F8FAFC"), border_color=("#D1D5DB", "#475569"), height=32, corner_radius=6)
+        self.entry_buscar = ctk.CTkEntry(frame_busca, font=("Segoe UI", 12), fg_color=("#FFFFFF", "#1E293B"), text_color=("#0F172A", "#F8FAFC"), border_color=("#D1D5DB", "#475569"), height=36, corner_radius=6, placeholder_text="Nombre, código o categoría...")
         self.entry_buscar.pack(side=tk.LEFT, fill=tk.X, expand=True)
         self.entry_buscar.bind("<KeyRelease>", lambda e: self.cargar_datos(self.entry_buscar.get()))
 
-        btn_eliminar = ctk.CTkButton(frame_busca, text="Eliminar Producto", font=("Segoe UI", 9, "bold"), fg_color="#EF4444", hover_color="#DC2626", text_color="white", height=32, width=120, corner_radius=6, command=self.eliminar_producto)
+        btn_eliminar = ctk.CTkButton(frame_busca, text="Eliminar", font=("Segoe UI", 10, "bold"), fg_color="#EF4444", hover_color="#DC2626", text_color="white", height=36, width=100, corner_radius=6, command=self.eliminar_producto)
         btn_eliminar.pack(side=tk.RIGHT, padx=5)
 
-        btn_merma = ctk.CTkButton(frame_busca, text="Registrar Merma", font=("Segoe UI", 9, "bold"), fg_color="#F59E0B", hover_color="#D97706", text_color="white", height=32, width=110, corner_radius=6, command=self.registrar_merma)
+        btn_merma = ctk.CTkButton(frame_busca, text="Merma", font=("Segoe UI", 10, "bold"), fg_color="#F59E0B", hover_color="#D97706", text_color="white", height=36, width=85, corner_radius=6, command=self.registrar_merma)
         btn_merma.pack(side=tk.RIGHT, padx=5)
 
-        btn_kardex = ctk.CTkButton(frame_busca, text="📊 Ver Kardex", font=("Segoe UI", 9, "bold"), fg_color="#10B981", hover_color="#059669", text_color="white", height=32, width=110, corner_radius=6, command=self.mostrar_kardex_seleccionado)
+        btn_kardex = ctk.CTkButton(frame_busca, text="📊 Kardex", font=("Segoe UI", 10, "bold"), fg_color="#10B981", hover_color="#059669", text_color="white", height=36, width=95, corner_radius=6, command=self.mostrar_kardex_seleccionado)
         btn_kardex.pack(side=tk.RIGHT, padx=5)
 
-        btn_etiqueta = ctk.CTkButton(frame_busca, text="🏷️ Imprimir Etiqueta", font=("Segoe UI", 9, "bold"), fg_color="#4F46E5", hover_color="#4338CA", text_color="white", height=32, width=120, corner_radius=6, command=self.imprimir_etiqueta)
+        btn_etiqueta = ctk.CTkButton(frame_busca, text="🏷️ Etiqueta", font=("Segoe UI", 10, "bold"), fg_color="#4F46E5", hover_color="#4338CA", text_color="white", height=36, width=100, corner_radius=6, command=self.imprimir_etiqueta)
         btn_etiqueta.pack(side=tk.RIGHT, padx=5)
 
         # Botones de ajuste de stock
         frame_botones = ctk.CTkFrame(frame_grid, fg_color="transparent")
         frame_botones.pack(side=tk.RIGHT, fill=tk.Y, padx=(15, 0))
 
-        btn_mas = ctk.CTkButton(frame_botones, text="+", font=("Segoe UI", 14, "bold"), fg_color="#E5E7EB", hover_color=("#D1D5DB", "#475569"), text_color="#1E293B", width=40, height=40, corner_radius=6, command=lambda: self.ajustar_stock(1))
+        btn_mas = ctk.CTkButton(frame_botones, text="+", font=("Segoe UI", 12, "bold"), fg_color="#E5E7EB", hover_color=("#D1D5DB", "#475569"), text_color="#1E293B", width=40, height=40, corner_radius=6, command=lambda: self.ajustar_stock(1))
         btn_mas.pack(pady=5)
 
         # Tabla (Treeview dentro del frame)
@@ -144,17 +144,17 @@ class InventarioTab:
         self.tabla.bind("<<TreeviewSelect>>", self.inv_on_producto_select)
         self.tabla.bind("<Double-1>", self.inv_on_double_click)
         
-        btn_menos = ctk.CTkButton(frame_botones, text="-", font=("Segoe UI", 14, "bold"), fg_color="#E5E7EB", hover_color=("#D1D5DB", "#475569"), text_color="#1E293B", width=40, height=40, corner_radius=6, command=lambda: self.ajustar_stock(-1))
+        btn_menos = ctk.CTkButton(frame_botones, text="-", font=("Segoe UI", 12, "bold"), fg_color="#E5E7EB", hover_color=("#D1D5DB", "#475569"), text_color="#1E293B", width=40, height=40, corner_radius=6, command=lambda: self.ajustar_stock(-1))
         btn_menos.pack(pady=5)
 
         # Recuadro Imagen de Producto Seleccionado
-        ctk.CTkLabel(frame_botones, text="Foto:", font=("Segoe UI", 9, "bold"), text_color=("#64748B", "#94A3B8")).pack(pady=(15, 2))
+        ctk.CTkLabel(frame_botones, text="Foto:", font=("Segoe UI", 10, "bold"), text_color=("#64748B", "#94A3B8")).pack(pady=(15, 2))
         
         frame_inv_img_container = ctk.CTkFrame(frame_botones, fg_color=("#FFFFFF", "#1E293B"), border_color=("#D1D5DB", "#475569"), border_width=1, width=120, height=120, corner_radius=6)
         frame_inv_img_container.pack(pady=2, fill=tk.X)
         frame_inv_img_container.pack_propagate(False)
         
-        self.lbl_inv_foto_preview = tk.Label(frame_inv_img_container, text="Sin foto", font=("Segoe UI", 9, "italic"), bg="#FFFFFF", fg="#94A3B8", compound="center")
+        self.lbl_inv_foto_preview = tk.Label(frame_inv_img_container, text="Sin foto", font=("Segoe UI", 10, "italic"), bg="#FFFFFF", fg="#94A3B8", compound="center")
         self.lbl_inv_foto_preview.pack(expand=True, fill=tk.BOTH)
 
         for entry in self.inputs.values():
@@ -240,7 +240,7 @@ class InventarioTab:
         
         def add_entry(label_text, default_val):
             ctk.CTkLabel(frame, text=label_text, font=("Segoe UI", 10, "bold"), text_color=("#64748B", "#94A3B8")).pack(anchor=tk.W, pady=(5, 0))
-            entry = ctk.CTkEntry(frame, font=("Segoe UI", 11), height=30, corner_radius=6)
+            entry = ctk.CTkEntry(frame, font=("Segoe UI", 10), height=30, corner_radius=6)
             entry.pack(fill=tk.X, pady=(0, 5))
             entry.insert(0, str(default_val) if default_val is not None else "")
             return entry
@@ -250,14 +250,14 @@ class InventarioTab:
         
         # Categoría
         ctk.CTkLabel(frame, text="Categoría", font=("Segoe UI", 10, "bold"), text_color=("#64748B", "#94A3B8")).pack(anchor=tk.W, pady=(5, 0))
-        combo_cat = ctk.CTkComboBox(frame, values=self.inputs["categoria"].cget("values"), font=("Segoe UI", 11), height=30, corner_radius=6)
+        combo_cat = ctk.CTkComboBox(frame, values=self.inputs["categoria"].cget("values"), font=("Segoe UI", 10), height=30, corner_radius=6)
         combo_cat.pack(fill=tk.X, pady=(0, 5))
         combo_cat.set(producto[3] if producto[3] else "Seleccionar...")
         inputs["categoria"] = combo_cat
         
         # Proveedor
         ctk.CTkLabel(frame, text="Proveedor", font=("Segoe UI", 10, "bold"), text_color=("#64748B", "#94A3B8")).pack(anchor=tk.W, pady=(5, 0))
-        combo_prov = ctk.CTkComboBox(frame, values=self.inputs["proveedor_id"].cget("values"), font=("Segoe UI", 11), height=30, corner_radius=6)
+        combo_prov = ctk.CTkComboBox(frame, values=self.inputs["proveedor_id"].cget("values"), font=("Segoe UI", 10), height=30, corner_radius=6)
         combo_prov.pack(fill=tk.X, pady=(0, 5))
         
         prov_val = "Seleccionar..."
@@ -275,12 +275,12 @@ class InventarioTab:
         
         f1 = ctk.CTkFrame(frame_precios, fg_color="transparent"); f1.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 5))
         ctk.CTkLabel(f1, text="Costo ($)", font=("Segoe UI", 10, "bold"), text_color=("#64748B", "#94A3B8")).pack(anchor=tk.W)
-        inputs["costo"] = ctk.CTkEntry(f1, font=("Segoe UI", 11), height=30, corner_radius=6)
+        inputs["costo"] = ctk.CTkEntry(f1, font=("Segoe UI", 10), height=30, corner_radius=6)
         inputs["costo"].pack(fill=tk.X); inputs["costo"].insert(0, str(producto[4]))
         
         f2 = ctk.CTkFrame(frame_precios, fg_color="transparent"); f2.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
         ctk.CTkLabel(f2, text="Venta ($) *", font=("Segoe UI", 10, "bold"), text_color=("#64748B", "#94A3B8")).pack(anchor=tk.W)
-        inputs["venta"] = ctk.CTkEntry(f2, font=("Segoe UI", 11), height=30, corner_radius=6)
+        inputs["venta"] = ctk.CTkEntry(f2, font=("Segoe UI", 10), height=30, corner_radius=6)
         inputs["venta"].pack(fill=tk.X); inputs["venta"].insert(0, str(producto[5]))
         
         # Stock
@@ -289,17 +289,17 @@ class InventarioTab:
         
         f3 = ctk.CTkFrame(frame_stock, fg_color="transparent"); f3.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 5))
         ctk.CTkLabel(f3, text="Stock Actual", font=("Segoe UI", 10, "bold"), text_color=("#64748B", "#94A3B8")).pack(anchor=tk.W)
-        inputs["stock"] = ctk.CTkEntry(f3, font=("Segoe UI", 11), height=30, corner_radius=6)
+        inputs["stock"] = ctk.CTkEntry(f3, font=("Segoe UI", 10), height=30, corner_radius=6)
         inputs["stock"].pack(fill=tk.X); inputs["stock"].insert(0, str(producto[6]))
         
         f4 = ctk.CTkFrame(frame_stock, fg_color="transparent"); f4.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
         ctk.CTkLabel(f4, text="Stock Mín.", font=("Segoe UI", 10, "bold"), text_color=("#64748B", "#94A3B8")).pack(anchor=tk.W)
-        inputs["min_stock"] = ctk.CTkEntry(f4, font=("Segoe UI", 11), height=30, corner_radius=6)
+        inputs["min_stock"] = ctk.CTkEntry(f4, font=("Segoe UI", 10), height=30, corner_radius=6)
         inputs["min_stock"].pack(fill=tk.X); inputs["min_stock"].insert(0, str(producto[7]))
         
         # Unidad de medida
         ctk.CTkLabel(frame, text="Unidad de Medida", font=("Segoe UI", 10, "bold"), text_color=("#64748B", "#94A3B8")).pack(anchor=tk.W, pady=(5, 0))
-        combo_uni = ctk.CTkComboBox(frame, values=["Unidad", "Kg", "Litro", "Metro", "Caja", "Paquete", "Servicio"], font=("Segoe UI", 11), height=30, corner_radius=6)
+        combo_uni = ctk.CTkComboBox(frame, values=["Unidad", "Kg", "Litro", "Metro", "Caja", "Paquete", "Servicio"], font=("Segoe UI", 10), height=30, corner_radius=6)
         combo_uni.pack(fill=tk.X, pady=(0, 5))
         combo_uni.set(producto[9] if producto[9] else "Unidad")
         inputs["unidad"] = combo_uni
@@ -316,7 +316,7 @@ class InventarioTab:
         frame_img.pack(fill=tk.X, pady=(10, 20))
         btn_img = ctk.CTkButton(frame_img, text="🖼️ Cambiar Imagen", command=seleccionar_img_edit, fg_color="#F1F5F9", text_color=("#475569", "#CBD5E1"), hover_color=("#E2E8F0", "#334155"))
         btn_img.pack(side=tk.LEFT)
-        lbl_img_status = ctk.CTkLabel(frame_img, text="Mantener actual", font=("Segoe UI", 9), text_color="#94A3B8")
+        lbl_img_status = ctk.CTkLabel(frame_img, text="Mantener actual", font=("Segoe UI", 10), text_color="#94A3B8")
         lbl_img_status.pack(side=tk.LEFT, padx=10)
         
         def guardar_cambios():
@@ -366,7 +366,7 @@ class InventarioTab:
             else:
                 messagebox.showerror("Error", msg, parent=win)
                 
-        btn_guardar = ctk.CTkButton(frame, text="Guardar Cambios", font=("Segoe UI", 11, "bold"), fg_color="#10B981", hover_color="#059669", text_color="white", height=35, corner_radius=6, command=guardar_cambios)
+        btn_guardar = ctk.CTkButton(frame, text="Guardar Cambios", font=("Segoe UI", 10, "bold"), fg_color="#10B981", hover_color="#059669", text_color="white", height=35, corner_radius=6, command=guardar_cambios)
         btn_guardar.pack(fill=tk.X, pady=10)
 
     def cargar_datos(self, filtro=""):
@@ -646,82 +646,153 @@ class KardexDialog(ctk.CTkToplevel):
         self.producto_codigo = producto_codigo
         
         self.title(f"Kardex: {self.producto_nombre} ({self.producto_codigo})")
-        self.geometry("800x480")
         self.grab_set()
         
-        # Intentar centrar la ventana
+        # Ventana más grande y centrada
+        width = 1000
+        height = 600
         self.update_idletasks()
-        width = 800
-        height = 480
         x = (self.winfo_screenwidth() // 2) - (width // 2)
         y = (self.winfo_screenheight() // 2) - (height // 2)
         self.geometry(f'{width}x{height}+{x}+{y}')
+        self.minsize(800, 450)
         
+        self._configurar_estilo_kardex()
         self.crear_interfaz()
         self.cargar_datos()
 
+    def _configurar_estilo_kardex(self):
+        """Crea un estilo dedicado para el Treeview del Kardex."""
+        style = ttk.Style()
+        is_dark = ctk.get_appearance_mode() == "Dark"
+
+        if is_dark:
+            bg = "#1E293B"
+            fg = "#F1F5F9"
+            heading_bg = "#0F172A"
+            heading_fg = "#E2E8F0"
+            sel_bg = "#475569"
+            sel_fg = "#FFFFFF"
+        else:
+            bg = "#FFFFFF"
+            fg = "#1E293B"
+            heading_bg = "#F1F5F9"
+            heading_fg = "#334155"
+            sel_bg = "#E0E7FF"
+            sel_fg = "#312E81"
+
+        style.configure("Kardex.Treeview",
+                        background=bg,
+                        foreground=fg,
+                        fieldbackground=bg,
+                        font=("Segoe UI", 10),
+                        rowheight=30)
+        style.configure("Kardex.Treeview.Heading",
+                        background=heading_bg,
+                        foreground=heading_fg,
+                        font=("Segoe UI", 10, "bold"))
+        style.map("Kardex.Treeview",
+                  background=[('selected', sel_bg)],
+                  foreground=[('selected', sel_fg)])
+
     def crear_interfaz(self):
-        # Cabecera
-        frame_header = ctk.CTkFrame(self, fg_color="transparent")
-        frame_header.pack(fill=tk.X, padx=20, pady=(15, 10))
-        
-        ctk.CTkLabel(frame_header, text=f"📊 KARDEX DE MOVIMIENTOS", font=("Segoe UI", 14, "bold"), text_color=rc(("#0F172A", "#F8FAFC"))).pack(anchor=tk.W)
-        self.lbl_subtitulo = ctk.CTkLabel(frame_header, text=f"Producto: {self.producto_nombre} | Código: {self.producto_codigo}", font=("Segoe UI", 10), text_color="#64748B")
-        self.lbl_subtitulo.pack(anchor=tk.W, pady=(2, 0))
+        is_dark = ctk.get_appearance_mode() == "Dark"
+
+        # Cabecera con fondo de color
+        frame_header = ctk.CTkFrame(self, fg_color=("#EEF2FF", "#1E293B"), corner_radius=10)
+        frame_header.pack(fill=tk.X, padx=16, pady=(16, 8))
+
+        ctk.CTkLabel(
+            frame_header, text="📊  KARDEX DE MOVIMIENTOS",
+            font=("Segoe UI", 18, "bold"),
+            text_color=rc(("#1E293B", "#F8FAFC"))
+        ).pack(anchor=tk.W, padx=16, pady=(12, 2))
+
+        ctk.CTkLabel(
+            frame_header,
+            text=f"Producto: {self.producto_nombre}   |   Código: {self.producto_codigo}",
+            font=("Segoe UI", 12),
+            text_color=rc(("#475569", "#94A3B8"))
+        ).pack(anchor=tk.W, padx=16, pady=(0, 12))
+
+        # Barra de estadísticas rápidas
+        self.frame_stats = ctk.CTkFrame(self, fg_color="transparent", height=36)
+        self.frame_stats.pack(fill=tk.X, padx=16, pady=(0, 6))
+
+        self.lbl_total_movs = ctk.CTkLabel(self.frame_stats, text="", font=("Segoe UI", 10, "bold"), text_color=rc(("#475569", "#94A3B8")))
+        self.lbl_total_movs.pack(side=tk.LEFT, padx=(4, 16))
+
+        self.lbl_entradas = ctk.CTkLabel(self.frame_stats, text="", font=("Segoe UI", 10, "bold"), text_color="#16A34A")
+        self.lbl_entradas.pack(side=tk.LEFT, padx=(0, 16))
+
+        self.lbl_salidas = ctk.CTkLabel(self.frame_stats, text="", font=("Segoe UI", 10, "bold"), text_color="#DC2626")
+        self.lbl_salidas.pack(side=tk.LEFT, padx=(0, 16))
 
         # Contenedor Tabla
         frame_tabla = ctk.CTkFrame(self, fg_color="transparent")
-        frame_tabla.pack(fill=tk.BOTH, expand=True, padx=20, pady=(5, 15))
-        
+        frame_tabla.pack(fill=tk.BOTH, expand=True, padx=16, pady=(0, 16))
+
         columnas = ("fecha", "tipo", "cantidad", "stock_anterior", "stock_nuevo", "motivo", "usuario")
-        self.tabla = ttk.Treeview(frame_tabla, columns=columnas, show="headings")
-        
+        self.tabla = ttk.Treeview(frame_tabla, columns=columnas, show="headings", style="Kardex.Treeview")
+
         headers = [
-            ("Fecha / Hora", 140),
-            ("Tipo", 80),
-            ("Cantidad", 70),
-            ("Stock Ant.", 80),
-            ("Stock Nuevo", 85),
-            ("Detalle / Motivo", 230),
-            ("Usuario", 90)
+            ("Fecha / Hora", 160),
+            ("Tipo", 90),
+            ("Cantidad", 85),
+            ("Stock Ant.", 90),
+            ("Stock Nuevo", 95),
+            ("Detalle / Motivo", 300),
+            ("Usuario", 100)
         ]
-        
+
         for col, (texto, ancho) in zip(columnas, headers):
             self.tabla.heading(col, text=texto)
-            self.tabla.column(col, width=ancho, anchor=tk.CENTER if col in ["tipo", "cantidad", "stock_anterior", "stock_nuevo", "usuario"] else tk.W)
-            
+            self.tabla.column(col, width=ancho, minwidth=50, anchor=tk.CENTER if col in ["tipo", "cantidad", "stock_anterior", "stock_nuevo", "usuario"] else tk.W)
+
         self.tabla.pack(fill=tk.BOTH, expand=True, side=tk.LEFT)
-        
-        # Scrollbar
+
         scrollbar = ttk.Scrollbar(frame_tabla, orient=tk.VERTICAL, command=self.tabla.yview)
         self.tabla.configure(yscrollcommand=scrollbar.set)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-        
-        # Configurar colores para filas alternas / tipos de movimientos
-        self.tabla.tag_configure("entrada", background=rc(("#F0FDF4", "#064E3B")), foreground=rc(("#166534", "#6EE7B7")))
-        self.tabla.tag_configure("salida", background=rc(("#FEF2F2", "#4C0519")), foreground=rc(("#991B1B", "#FCA5A5")))
-        self.tabla.tag_configure("ajuste", background=rc(("#F0F9FF", "#0C4A6E")), foreground=rc(("#075985", "#7DD3FC")))
+
+        # Colores de tags (con contraste explícito según modo)
+        if is_dark:
+            self.tabla.tag_configure("entrada", background="#064E3B", foreground="#6EE7B7")
+            self.tabla.tag_configure("salida", background="#4C0519", foreground="#FCA5A5")
+            self.tabla.tag_configure("ajuste", background="#0C4A6E", foreground="#7DD3FC")
+        else:
+            self.tabla.tag_configure("entrada", background="#F0FDF4", foreground="#166534")
+            self.tabla.tag_configure("salida", background="#FEF2F2", foreground="#991B1B")
+            self.tabla.tag_configure("ajuste", background="#EFF6FF", foreground="#1E40AF")
 
     def cargar_datos(self):
-        # Limpiar tabla
         for item in self.tabla.get_children():
             self.tabla.delete(item)
-            
+
         movs = database.obtener_kardex_producto(self.producto_id)
-        
+
+        total_entradas = 0
+        total_salidas = 0
+
         for m in movs:
             fecha, tipo, cant, stock_ant, stock_nue, motivo, usuario = m
-            
-            # Formatear cantidad con signo
+
             cant_str = f"+{cant}" if cant > 0 else f"{cant}"
-            
-            # Asignar tag para color
+
             if "Ajuste" in motivo or "Migración" in motivo or "Inicial" in motivo:
                 tag = "ajuste"
             elif tipo == "Entrada":
                 tag = "entrada"
+                total_entradas += abs(cant)
             else:
                 tag = "salida"
-                
+                total_salidas += abs(cant)
+
             self.tabla.insert("", tk.END, values=(fecha, tipo, cant_str, stock_ant, stock_nue, motivo, usuario), tags=(tag,))
+
+        # Actualizar estadísticas
+        total = len(movs)
+        self.lbl_total_movs.configure(text=f"Total: {total} movimientos")
+        self.lbl_entradas.configure(text=f"▲ Entradas: {total_entradas} uds")
+        self.lbl_salidas.configure(text=f"▼ Salidas: {total_salidas} uds")
 

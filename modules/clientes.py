@@ -85,7 +85,7 @@ class ClientesTab:
         win.geometry("400x350")
         win.grab_set()
 
-        ctk.CTkLabel(win, text="Datos del Cliente", font=("Segoe UI", 14, "bold")).pack(pady=(15, 10))
+        ctk.CTkLabel(win, text="Datos del Cliente", font=("Segoe UI", 12, "bold")).pack(pady=(15, 10))
 
         frame_form = ctk.CTkFrame(win, fg_color="transparent")
         frame_form.pack(fill=tk.BOTH, expand=True, padx=20)

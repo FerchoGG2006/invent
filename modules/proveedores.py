@@ -35,7 +35,7 @@ class ProveedoresTab:
 
         self.inputs = {}
         for i, (label_text, key) in enumerate(campos):
-            ctk.CTkLabel(grid_inputs, text=label_text, font=("Segoe UI", 8, "bold"), text_color=("#64748B", "#94A3B8")).pack(anchor=tk.W, pady=(5, 1))
+            ctk.CTkLabel(grid_inputs, text=label_text, font=("Segoe UI", 10, "bold"), text_color=("#64748B", "#94A3B8")).pack(anchor=tk.W, pady=(5, 1))
             entry = ctk.CTkEntry(grid_inputs, font=("Segoe UI", 10), fg_color=("#F8FAFC", "#0F172A"), text_color=("#0F172A", "#F8FAFC"), border_color=("#D1D5DB", "#475569"), height=28, corner_radius=5)
             entry.pack(fill=tk.X, pady=1)
             self.inputs[key] = entry
@@ -47,7 +47,7 @@ class ProveedoresTab:
         self.btn_guardar = ctk.CTkButton(frame_btns_form, text="Guardar Proveedor", font=("Segoe UI", 10, "bold"), fg_color="#4F46E5", hover_color="#4338CA", text_color="white", height=35, corner_radius=8, command=self.guardar_proveedor)
         self.btn_guardar.pack(fill=tk.X, pady=(0, 5))
 
-        self.btn_cancelar_edicion = ctk.CTkButton(frame_btns_form, text="Cancelar Edición", font=("Segoe UI", 9, "bold"), fg_color="#94A3B8", hover_color=("#64748B", "#94A3B8"), text_color="white", height=30, corner_radius=8, command=self.cancelar_edicion)
+        self.btn_cancelar_edicion = ctk.CTkButton(frame_btns_form, text="Cancelar Edición", font=("Segoe UI", 10, "bold"), fg_color="#94A3B8", hover_color=("#64748B", "#94A3B8"), text_color="white", height=30, corner_radius=8, command=self.cancelar_edicion)
         self.btn_cancelar_edicion.pack(fill=tk.X)
         self.btn_cancelar_edicion.pack_forget()  # Ocultar inicialmente
 
@@ -64,16 +64,16 @@ class ProveedoresTab:
         self.entry_buscar.pack(side=tk.LEFT, fill=tk.X, expand=True)
         self.entry_buscar.bind("<KeyRelease>", lambda e: self.cargar_datos(self.entry_buscar.get()))
 
-        btn_eliminar = ctk.CTkButton(frame_busca, text="Eliminar", font=("Segoe UI", 9, "bold"), fg_color="#EF4444", hover_color="#DC2626", text_color="white", height=32, width=90, corner_radius=6, command=self.eliminar_proveedor)
+        btn_eliminar = ctk.CTkButton(frame_busca, text="Eliminar", font=("Segoe UI", 10, "bold"), fg_color="#EF4444", hover_color="#DC2626", text_color="white", height=32, width=90, corner_radius=6, command=self.eliminar_proveedor)
         btn_eliminar.pack(side=tk.RIGHT, padx=5)
 
-        btn_editar = ctk.CTkButton(frame_busca, text="Editar", font=("Segoe UI", 9, "bold"), fg_color="#F59E0B", hover_color="#D97706", text_color="white", height=32, width=80, corner_radius=6, command=self.editar_proveedor)
+        btn_editar = ctk.CTkButton(frame_busca, text="Editar", font=("Segoe UI", 10, "bold"), fg_color="#F59E0B", hover_color="#D97706", text_color="white", height=32, width=80, corner_radius=6, command=self.editar_proveedor)
         btn_editar.pack(side=tk.RIGHT, padx=5)
 
-        btn_registrar_compra = ctk.CTkButton(frame_busca, text="Registrar Compra", font=("Segoe UI", 9, "bold"), fg_color="#10B981", hover_color="#059669", text_color="white", height=32, width=130, corner_radius=6, command=self.registrar_compra)
+        btn_registrar_compra = ctk.CTkButton(frame_busca, text="Registrar Compra", font=("Segoe UI", 10, "bold"), fg_color="#10B981", hover_color="#059669", text_color="white", height=32, width=130, corner_radius=6, command=self.registrar_compra)
         btn_registrar_compra.pack(side=tk.RIGHT, padx=5)
 
-        btn_historial_compras = ctk.CTkButton(frame_busca, text="Historial Compras", font=("Segoe UI", 9, "bold"), fg_color="#8B5CF6", hover_color="#7C3AED", text_color="white", height=32, width=130, corner_radius=6, command=self.mostrar_historial_compras)
+        btn_historial_compras = ctk.CTkButton(frame_busca, text="Historial Compras", font=("Segoe UI", 10, "bold"), fg_color="#8B5CF6", hover_color="#7C3AED", text_color="white", height=32, width=130, corner_radius=6, command=self.mostrar_historial_compras)
         btn_historial_compras.pack(side=tk.RIGHT, padx=5)
 
         # Tabla Proveedores
@@ -234,21 +234,21 @@ class ProveedoresTab:
         win_compra.grab_set()
         win_compra.resizable(False, False)
 
-        ctk.CTkLabel(win_compra, text=f"Compra a: {prov_nombre}", font=("Segoe UI", 13, "bold"), text_color=("#0F172A", "#F8FAFC")).pack(pady=(15, 10))
+        ctk.CTkLabel(win_compra, text=f"Compra a: {prov_nombre}", font=("Segoe UI", 12, "bold"), text_color=("#0F172A", "#F8FAFC")).pack(pady=(15, 10))
 
         frame_campos = ctk.CTkFrame(win_compra, fg_color="transparent")
         frame_campos.pack(fill=tk.X, padx=25, pady=5)
 
-        ctk.CTkLabel(frame_campos, text="Producto:", font=("Segoe UI", 9, "bold"), text_color=("#64748B", "#94A3B8")).pack(anchor=tk.W, pady=(5, 2))
+        ctk.CTkLabel(frame_campos, text="Producto:", font=("Segoe UI", 10, "bold"), text_color=("#64748B", "#94A3B8")).pack(anchor=tk.W, pady=(5, 2))
         combo_prod = ctk.CTkComboBox(frame_campos, values=[f"{p[0]} - {p[2]}" for p in productos], state="readonly", font=("Segoe UI", 10), height=32, corner_radius=6)
         combo_prod.pack(fill=tk.X)
         combo_prod.set("Seleccionar producto...")
         
-        ctk.CTkLabel(frame_campos, text="Cantidad comprada:", font=("Segoe UI", 9, "bold"), text_color=("#64748B", "#94A3B8")).pack(anchor=tk.W, pady=(10, 2))
+        ctk.CTkLabel(frame_campos, text="Cantidad comprada:", font=("Segoe UI", 10, "bold"), text_color=("#64748B", "#94A3B8")).pack(anchor=tk.W, pady=(10, 2))
         ent_cant = ctk.CTkEntry(frame_campos, font=("Segoe UI", 10), fg_color=("#F8FAFC", "#0F172A"), text_color=("#0F172A", "#F8FAFC"), border_color=("#D1D5DB", "#475569"), height=32, corner_radius=6, placeholder_text="Ej: 50")
         ent_cant.pack(fill=tk.X)
         
-        ctk.CTkLabel(frame_campos, text="Costo unitario ($):", font=("Segoe UI", 9, "bold"), text_color=("#64748B", "#94A3B8")).pack(anchor=tk.W, pady=(10, 2))
+        ctk.CTkLabel(frame_campos, text="Costo unitario ($):", font=("Segoe UI", 10, "bold"), text_color=("#64748B", "#94A3B8")).pack(anchor=tk.W, pady=(10, 2))
         ent_costo = ctk.CTkEntry(frame_campos, font=("Segoe UI", 10), fg_color=("#F8FAFC", "#0F172A"), text_color=("#0F172A", "#F8FAFC"), border_color=("#D1D5DB", "#475569"), height=32, corner_radius=6, placeholder_text="Ej: 150.00")
         ent_costo.pack(fill=tk.X)
 

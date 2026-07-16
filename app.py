@@ -315,13 +315,13 @@ class InventarioApp:
                         background=bg_color,
                         foreground=fg_color,
                         fieldbackground=bg_color,
-                        font=("Segoe UI", 9),
+                        font=("Segoe UI", 10),
                         rowheight=30)
         
         style.configure("Treeview.Heading",
                         background=heading_bg,
                         foreground=heading_fg,
-                        font=("Segoe UI", 9, "bold"))
+                        font=("Segoe UI", 10, "bold"))
         
         style.map("Treeview",
                   background=[('selected', selected_bg)],

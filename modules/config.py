@@ -36,7 +36,7 @@ def mostrar_configuracion_inicial(app):
     # Header
     frame_header = ctk.CTkFrame(setup_win, fg_color="#4F46E5", corner_radius=0, height=70)
     frame_header.pack(fill=tk.X)
-    ctk.CTkLabel(frame_header, text="✨ CONFIGURACIÓN DE TU NEGOCIO ✨", font=("Segoe UI", 13, "bold"), text_color="white").pack(pady=20)
+    ctk.CTkLabel(frame_header, text="✨ CONFIGURACIÓN DE TU NEGOCIO ✨", font=("Segoe UI", 12, "bold"), text_color="white").pack(pady=20)
 
     ctk.CTkLabel(setup_win, text="¡Bienvenido! Personaliza el sistema POS con los datos\nde tu empresa. Estos datos aparecerán en tus tickets y reportes.",
                  font=("Segoe UI", 10, "italic"), text_color=("#64748B", "#94A3B8"), justify=tk.CENTER).pack(pady=10)
@@ -54,7 +54,7 @@ def mostrar_configuracion_inicial(app):
 
     entries = {}
     for label_text, key in campos:
-        ctk.CTkLabel(frame_form, text=label_text, font=("Segoe UI", 9, "bold"), text_color=("#475569", "#CBD5E1")).pack(anchor=tk.W, padx=15, pady=(5, 1))
+        ctk.CTkLabel(frame_form, text=label_text, font=("Segoe UI", 10, "bold"), text_color=("#475569", "#CBD5E1")).pack(anchor=tk.W, padx=15, pady=(5, 1))
         entry = ctk.CTkEntry(frame_form, font=("Segoe UI", 10), fg_color=("#F8FAFC", "#0F172A"), text_color=("#0F172A", "#F8FAFC"), border_color=("#D1D5DB", "#475569"), height=32, corner_radius=6)
         entry.pack(fill=tk.X, padx=15, pady=1)
         entries[key] = entry
@@ -62,7 +62,7 @@ def mostrar_configuracion_inicial(app):
     entries["mensaje"].insert(0, "¡Gracias por su compra!")
 
     # Selector de Impresora
-    ctk.CTkLabel(frame_form, text="Impresora Térmica (Opcional)", font=("Segoe UI", 9, "bold"), text_color=("#475569", "#CBD5E1")).pack(anchor=tk.W, padx=15, pady=(5, 1))
+    ctk.CTkLabel(frame_form, text="Impresora Térmica (Opcional)", font=("Segoe UI", 10, "bold"), text_color=("#475569", "#CBD5E1")).pack(anchor=tk.W, padx=15, pady=(5, 1))
     impresoras = obtener_impresoras_sistema()
     combo_impresora = ctk.CTkComboBox(frame_form, values=impresoras if impresoras else ["Ninguna"], font=("Segoe UI", 10), dropdown_font=("Segoe UI", 10), height=32, corner_radius=6)
     combo_impresora.pack(fill=tk.X, padx=15, pady=1)
@@ -72,7 +72,7 @@ def mostrar_configuracion_inicial(app):
         combo_impresora.set("Ninguna")
 
     # Selector de País
-    ctk.CTkLabel(frame_form, text="País de Operación", font=("Segoe UI", 9, "bold"), text_color=("#475569", "#CBD5E1")).pack(anchor=tk.W, padx=15, pady=(5, 1))
+    ctk.CTkLabel(frame_form, text="País de Operación", font=("Segoe UI", 10, "bold"), text_color=("#475569", "#CBD5E1")).pack(anchor=tk.W, padx=15, pady=(5, 1))
     paises = ["Chile", "Colombia", "México", "Argentina", "Otro / Ninguno (Solo local)"]
     combo_pais = ctk.CTkComboBox(frame_form, values=paises, font=("Segoe UI", 10), dropdown_font=("Segoe UI", 10), height=32, corner_radius=6)
     combo_pais.pack(fill=tk.X, padx=15, pady=1)
@@ -119,7 +119,7 @@ def mostrar_configuracion_inicial(app):
         setup_win.destroy()
         mostrar_registro_administrador(app)
 
-    btn_continuar = ctk.CTkButton(frame_form, text="Continuar →", font=("Segoe UI", 11, "bold"), fg_color="#4F46E5", hover_color="#4338CA", text_color="white", height=38, corner_radius=8, command=guardar)
+    btn_continuar = ctk.CTkButton(frame_form, text="Continuar →", font=("Segoe UI", 10, "bold"), fg_color="#4F46E5", hover_color="#4338CA", text_color="white", height=38, corner_radius=8, command=guardar)
     btn_continuar.pack(fill=tk.X, padx=15, pady=20)
 
 
@@ -179,7 +179,7 @@ def mostrar_registro_administrador(app):
         else:
             messagebox.showerror("Error", "No se pudo registrar el usuario. El nombre de usuario ya existe.", parent=reg_win)
 
-    btn_crear = ctk.CTkButton(frame_form, text="Crear Cuenta y Continuar", font=("Segoe UI", 11, "bold"), fg_color="#10B981", hover_color="#059669", text_color="white", height=38, corner_radius=8, command=guardar_usuario)
+    btn_crear = ctk.CTkButton(frame_form, text="Crear Cuenta y Continuar", font=("Segoe UI", 10, "bold"), fg_color="#10B981", hover_color="#059669", text_color="white", height=38, corner_radius=8, command=guardar_usuario)
     btn_crear.pack(fill=tk.X, padx=25, pady=30)
 
 
@@ -207,8 +207,8 @@ def mostrar_login(app):
     frame_header.pack(fill=tk.X)
 
     nombre_empresa = app.config["nombre_empresa"].upper() if app.config else "SISTEMA POS"
-    ctk.CTkLabel(frame_header, text=nombre_empresa, font=("Segoe UI", 13, "bold"), text_color=("#FFFFFF", "#1E293B")).pack(pady=(12, 1))
-    ctk.CTkLabel(frame_header, text="CONTROL DE ACCESO", font=("Segoe UI", 9, "bold"), text_color="#38BDF8").pack(pady=(0, 10))
+    ctk.CTkLabel(frame_header, text=nombre_empresa, font=("Segoe UI", 12, "bold"), text_color=("#FFFFFF", "#1E293B")).pack(pady=(12, 1))
+    ctk.CTkLabel(frame_header, text="CONTROL DE ACCESO", font=("Segoe UI", 10, "bold"), text_color="#38BDF8").pack(pady=(0, 10))
 
     ctk.CTkLabel(login_win, text="🔒", font=("Segoe UI", 36), text_color="#1E293B").pack(pady=15)
 
@@ -245,7 +245,7 @@ def mostrar_login(app):
     entry_user.bind("<Return>", lambda e: entry_pass.focus_set())
     entry_pass.bind("<Return>", intentar_login)
 
-    btn_login = ctk.CTkButton(frame_form, text="Iniciar Sesión", font=("Segoe UI", 11, "bold"), fg_color="#4F46E5", hover_color="#4338CA", text_color="white", height=38, corner_radius=8, command=intentar_login)
+    btn_login = ctk.CTkButton(frame_form, text="Iniciar Sesión", font=("Segoe UI", 10, "bold"), fg_color="#4F46E5", hover_color="#4338CA", text_color="white", height=38, corner_radius=8, command=intentar_login)
     btn_login.pack(fill=tk.X, padx=25, pady=25)
 
 
@@ -278,7 +278,7 @@ def mostrar_editar_configuracion(app):
 
     frame_header = ctk.CTkFrame(edit_win, fg_color="#4F46E5", corner_radius=0, height=65)
     frame_header.pack(fill=tk.X)
-    ctk.CTkLabel(frame_header, text="⚙️ CONFIGURACIÓN DEL NEGOCIO", font=("Segoe UI", 13, "bold"), text_color="white").pack(pady=18)
+    ctk.CTkLabel(frame_header, text="⚙️ CONFIGURACIÓN DEL NEGOCIO", font=("Segoe UI", 12, "bold"), text_color="white").pack(pady=18)
 
     ctk.CTkLabel(edit_win, text="Modifica los datos de tu empresa. Los cambios se reflejarán\nde inmediato en los nuevos tickets y reportes.",
                  font=("Segoe UI", 10, "italic"), text_color=("#64748B", "#94A3B8"), justify=tk.CENTER).pack(pady=10)
@@ -296,14 +296,14 @@ def mostrar_editar_configuracion(app):
 
     entries = {}
     for label_text, key, default_val in campos:
-        ctk.CTkLabel(frame_form, text=label_text, font=("Segoe UI", 9, "bold"), text_color=("#475569", "#CBD5E1")).pack(anchor=tk.W, padx=15, pady=(5, 1))
+        ctk.CTkLabel(frame_form, text=label_text, font=("Segoe UI", 10, "bold"), text_color=("#475569", "#CBD5E1")).pack(anchor=tk.W, padx=15, pady=(5, 1))
         entry = ctk.CTkEntry(frame_form, font=("Segoe UI", 10), fg_color=("#F8FAFC", "#0F172A"), text_color=("#0F172A", "#F8FAFC"), border_color=("#D1D5DB", "#475569"), height=32, corner_radius=6)
         entry.pack(fill=tk.X, padx=15, pady=1)
         entry.insert(0, default_val)
         entries[key] = entry
 
     # Selector de Impresora
-    ctk.CTkLabel(frame_form, text="Impresora Térmica", font=("Segoe UI", 9, "bold"), text_color=("#475569", "#CBD5E1")).pack(anchor=tk.W, padx=15, pady=(5, 1))
+    ctk.CTkLabel(frame_form, text="Impresora Térmica", font=("Segoe UI", 10, "bold"), text_color=("#475569", "#CBD5E1")).pack(anchor=tk.W, padx=15, pady=(5, 1))
     impresoras = obtener_impresoras_sistema()
     combo_impresora = ctk.CTkComboBox(frame_form, values=impresoras if impresoras else ["Ninguna"], font=("Segoe UI", 10), dropdown_font=("Segoe UI", 10), height=32, corner_radius=6)
     combo_impresora.pack(fill=tk.X, padx=15, pady=1)
@@ -328,11 +328,11 @@ def mostrar_editar_configuracion(app):
         else:
             messagebox.showerror("Error", f"No se pudo imprimir:\n{msg}", parent=edit_win)
 
-    btn_test = ctk.CTkButton(frame_form, text="🖨️ Probar Impresora", font=("Segoe UI", 9, "bold"), fg_color="#F3F4F6", hover_color="#E5E7EB", text_color="#1F2937", height=28, corner_radius=6, command=probar_impresora)
+    btn_test = ctk.CTkButton(frame_form, text="🖨️ Probar Impresora", font=("Segoe UI", 10, "bold"), fg_color="#F3F4F6", hover_color="#E5E7EB", text_color="#1F2937", height=28, corner_radius=6, command=probar_impresora)
     btn_test.pack(fill=tk.X, padx=15, pady=5)
 
     # Selector de País
-    ctk.CTkLabel(frame_form, text="País de Operación", font=("Segoe UI", 9, "bold"), text_color=("#475569", "#CBD5E1")).pack(anchor=tk.W, padx=15, pady=(5, 1))
+    ctk.CTkLabel(frame_form, text="País de Operación", font=("Segoe UI", 10, "bold"), text_color=("#475569", "#CBD5E1")).pack(anchor=tk.W, padx=15, pady=(5, 1))
     paises = ["Chile", "Colombia", "México", "Argentina", "Otro / Ninguno (Solo local)"]
     combo_pais = ctk.CTkComboBox(frame_form, values=paises, font=("Segoe UI", 10), dropdown_font=("Segoe UI", 10), height=32, corner_radius=6)
     combo_pais.pack(fill=tk.X, padx=15, pady=1)
@@ -344,7 +344,7 @@ def mostrar_editar_configuracion(app):
     switch_nube.pack(anchor=tk.W, padx=15, pady=(15, 5))
 
     # Control de Tema (Claro / Oscuro)
-    ctk.CTkLabel(frame_form, text="Tema (Claro / Oscuro)", font=("Segoe UI", 9, "bold"), text_color=("#475569", "#CBD5E1")).pack(anchor=tk.W, padx=15, pady=(10, 1))
+    ctk.CTkLabel(frame_form, text="Tema (Claro / Oscuro)", font=("Segoe UI", 10, "bold"), text_color=("#475569", "#CBD5E1")).pack(anchor=tk.W, padx=15, pady=(10, 1))
     combo_tema = ctk.CTkComboBox(frame_form, values=["System", "Light", "Dark"], font=("Segoe UI", 10), height=32, corner_radius=6)
     combo_tema.pack(fill=tk.X, padx=15, pady=1)
     
@@ -381,7 +381,7 @@ def mostrar_editar_configuracion(app):
         else:
             messagebox.showerror("Error en la Nube", msg_sb, parent=edit_win)
 
-    btn_test_sb = ctk.CTkButton(frame_form, text="☁️ Probar Conexión Nube", font=("Segoe UI", 9, "bold"), fg_color="#F3F4F6", hover_color="#E5E7EB", text_color="#1F2937", height=28, corner_radius=6, command=probar_nube)
+    btn_test_sb = ctk.CTkButton(frame_form, text="☁️ Probar Conexión Nube", font=("Segoe UI", 10, "bold"), fg_color="#F3F4F6", hover_color="#E5E7EB", text_color="#1F2937", height=28, corner_radius=6, command=probar_nube)
     btn_test_sb.pack(fill=tk.X, padx=15, pady=5)
 
     def guardar():
@@ -422,7 +422,7 @@ def mostrar_editar_configuracion(app):
         edit_win.destroy()
         messagebox.showinfo("Éxito", "Configuración actualizada correctamente.")
 
-    btn_guardar = ctk.CTkButton(frame_form, text="Guardar Cambios", font=("Segoe UI", 11, "bold"), fg_color="#10B981", hover_color="#059669", text_color="white", height=38, corner_radius=8, command=guardar)
+    btn_guardar = ctk.CTkButton(frame_form, text="Guardar Cambios", font=("Segoe UI", 10, "bold"), fg_color="#10B981", hover_color="#059669", text_color="white", height=38, corner_radius=8, command=guardar)
     btn_guardar.pack(fill=tk.X, padx=15, pady=20)
 
 
@@ -445,7 +445,7 @@ def mostrar_splash(app, config):
     frame_content = ctk.CTkFrame(splash, fg_color="#1E293B", corner_radius=0)
     frame_content.pack(expand=True, fill=tk.BOTH, padx=30, pady=30)
 
-    ctk.CTkLabel(frame_content, text="SISTEMA POS", font=("Segoe UI", 11, "bold"), text_color="#38BDF8").pack(pady=(15, 5))
+    ctk.CTkLabel(frame_content, text="SISTEMA POS", font=("Segoe UI", 10, "bold"), text_color="#38BDF8").pack(pady=(15, 5))
 
     divider = ctk.CTkFrame(frame_content, fg_color="#334155", height=2, corner_radius=0)
     divider.pack(fill=tk.X, pady=10)

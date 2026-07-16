@@ -36,7 +36,7 @@ class PosTab:
         frame_busca_pos.pack(fill=tk.X, padx=15, pady=(0, 5))
         ctk.CTkLabel(frame_busca_pos, text="Buscar:", font=("Segoe UI", 10, "bold"), text_color=("#475569", "#CBD5E1")).pack(side=tk.LEFT, padx=(5, 10))
 
-        self.entry_busca_pos = ctk.CTkEntry(frame_busca_pos, font=("Segoe UI", 11), fg_color=("#F8FAFC", "#0F172A"), text_color=("#0F172A", "#F8FAFC"), border_color=("#D1D5DB", "#475569"), height=32, corner_radius=6)
+        self.entry_busca_pos = ctk.CTkEntry(frame_busca_pos, font=("Segoe UI", 10), fg_color=("#F8FAFC", "#0F172A"), text_color=("#0F172A", "#F8FAFC"), border_color=("#D1D5DB", "#475569"), height=32, corner_radius=6)
         self.entry_busca_pos.pack(side=tk.LEFT, fill=tk.X, expand=True)
         self.entry_busca_pos.bind("<KeyRelease>", lambda e: self.pos_actualizar_lista_productos(self.entry_busca_pos.get()))
         self.entry_busca_pos.bind("<Return>", self.pos_on_busca_enter)
@@ -59,19 +59,19 @@ class PosTab:
         frame_control_add = ctk.CTkFrame(frame_pos_left, fg_color="transparent")
         frame_control_add.pack(fill=tk.X, padx=15, pady=10)
 
-        ctk.CTkLabel(frame_control_add, text="Cant:", font=("Segoe UI", 9, "bold"), text_color=("#475569", "#CBD5E1")).grid(row=0, column=0, padx=2, sticky=tk.W)
+        ctk.CTkLabel(frame_control_add, text="Cant:", font=("Segoe UI", 10, "bold"), text_color=("#475569", "#CBD5E1")).grid(row=0, column=0, padx=2, sticky=tk.W)
         self.entry_cant_pos = ctk.CTkEntry(frame_control_add, font=("Segoe UI", 10, "bold"), width=60, fg_color=("#F8FAFC", "#0F172A"), text_color=("#0F172A", "#F8FAFC"), border_color=("#D1D5DB", "#475569"), height=28, justify=tk.CENTER)
         self.entry_cant_pos.grid(row=0, column=1, padx=5, pady=2)
         self.entry_cant_pos.insert(0, "1")
         self.entry_cant_pos.bind("<Return>", self.pos_on_cant_enter)
 
-        ctk.CTkLabel(frame_control_add, text="Precio ($):", font=("Segoe UI", 9, "bold"), text_color=("#475569", "#CBD5E1")).grid(row=0, column=2, padx=2, sticky=tk.W)
+        ctk.CTkLabel(frame_control_add, text="Precio ($):", font=("Segoe UI", 10, "bold"), text_color=("#475569", "#CBD5E1")).grid(row=0, column=2, padx=2, sticky=tk.W)
         self.entry_precio_pos = ctk.CTkEntry(frame_control_add, font=("Segoe UI", 10, "bold"), width=90, fg_color=("#F8FAFC", "#0F172A"), text_color=("#0F172A", "#F8FAFC"), border_color=("#D1D5DB", "#475569"), height=28, justify=tk.CENTER)
         self.entry_precio_pos.grid(row=0, column=3, padx=5, pady=2)
         self.entry_precio_pos.bind("<Return>", self.pos_on_precio_enter)
         
-        ctk.CTkLabel(frame_control_add, text="Nota:", font=("Segoe UI", 9, "bold"), text_color=("#475569", "#CBD5E1")).grid(row=1, column=0, padx=2, sticky=tk.W)
-        self.entry_nota_pos = ctk.CTkEntry(frame_control_add, font=("Segoe UI", 9), fg_color=("#F8FAFC", "#0F172A"), text_color=("#0F172A", "#F8FAFC"), border_color=("#D1D5DB", "#475569"), height=28)
+        ctk.CTkLabel(frame_control_add, text="Nota:", font=("Segoe UI", 10, "bold"), text_color=("#475569", "#CBD5E1")).grid(row=1, column=0, padx=2, sticky=tk.W)
+        self.entry_nota_pos = ctk.CTkEntry(frame_control_add, font=("Segoe UI", 10), fg_color=("#F8FAFC", "#0F172A"), text_color=("#0F172A", "#F8FAFC"), border_color=("#D1D5DB", "#475569"), height=28)
         self.entry_nota_pos.grid(row=1, column=1, columnspan=3, sticky=tk.EW, padx=5, pady=2)
         self.entry_nota_pos.bind("<Return>", self.pos_on_precio_enter)
 
@@ -82,13 +82,13 @@ class PosTab:
         frame_pos_preview = ctk.CTkFrame(frame_pos_left, fg_color="transparent")
         frame_pos_preview.pack(fill=tk.X, padx=15, pady=(5, 15))
 
-        ctk.CTkLabel(frame_pos_preview, text="Imagen del Producto:", font=("Segoe UI", 9, "bold"), text_color=("#64748B", "#94A3B8")).pack(side=tk.LEFT, padx=5, anchor=tk.N)
+        ctk.CTkLabel(frame_pos_preview, text="Imagen del Producto:", font=("Segoe UI", 10, "bold"), text_color=("#64748B", "#94A3B8")).pack(side=tk.LEFT, padx=5, anchor=tk.N)
         
         frame_pos_img_container = ctk.CTkFrame(frame_pos_preview, fg_color=("#F8FAFC", "#0F172A"), border_color=("#D1D5DB", "#475569"), border_width=1, width=220, height=140, corner_radius=6)
         frame_pos_img_container.pack(side=tk.LEFT, padx=10)
         frame_pos_img_container.pack_propagate(False)
         
-        self.lbl_pos_foto_preview = tk.Label(frame_pos_img_container, text="Sin foto", font=("Segoe UI", 9, "italic"), bg="#F8FAFC", fg="#94A3B8", compound="center")
+        self.lbl_pos_foto_preview = tk.Label(frame_pos_img_container, text="Sin foto", font=("Segoe UI", 10, "italic"), bg="#F8FAFC", fg="#94A3B8", compound="center")
         self.lbl_pos_foto_preview.pack(expand=True, fill=tk.BOTH)
 
         # Panel Derecho (Carrito de Compra)
@@ -113,7 +113,7 @@ class PosTab:
         frame_cliente = ctk.CTkFrame(frame_pos_right, fg_color=("#FFFFFF", "#1E293B"), border_color=("#E2E8F0", "#334155"), border_width=1, corner_radius=8)
         frame_cliente.pack(fill=tk.X, padx=15, pady=5)
         
-        ctk.CTkLabel(frame_cliente, text="Datos del Cliente / Facturación (Opcional)", font=("Segoe UI", 9, "bold"), text_color="#4F46E5").pack(anchor=tk.W, padx=15, pady=(5, 2))
+        ctk.CTkLabel(frame_cliente, text="Datos del Cliente / Facturación (Opcional)", font=("Segoe UI", 10, "bold"), text_color="#4F46E5").pack(anchor=tk.W, padx=15, pady=(5, 2))
 
         frame_cliente_grid = ctk.CTkFrame(frame_cliente, fg_color="transparent")
         frame_cliente_grid.pack(fill=tk.X, pady=3, padx=10)
@@ -122,8 +122,8 @@ class PosTab:
 
         cell_name = ctk.CTkFrame(frame_cliente_grid, fg_color="transparent")
         cell_name.grid(row=0, column=0, padx=5, sticky="ew")
-        ctk.CTkLabel(cell_name, text="Nombre / Razón Social", font=("Segoe UI", 8, "bold"), text_color=("#64748B", "#94A3B8")).pack(anchor=tk.W)
-        self.app.entry_cliente_nombre = ctk.CTkEntry(cell_name, font=("Segoe UI", 9), fg_color=("#F8FAFC", "#0F172A"), text_color=("#0F172A", "#F8FAFC"), border_color=("#D1D5DB", "#475569"), height=28, corner_radius=5)
+        ctk.CTkLabel(cell_name, text="Nombre / Razón Social", font=("Segoe UI", 10, "bold"), text_color=("#64748B", "#94A3B8")).pack(anchor=tk.W)
+        self.app.entry_cliente_nombre = ctk.CTkEntry(cell_name, font=("Segoe UI", 10), fg_color=("#F8FAFC", "#0F172A"), text_color=("#0F172A", "#F8FAFC"), border_color=("#D1D5DB", "#475569"), height=28, corner_radius=5)
         self.app.entry_cliente_nombre.pack(fill=tk.X, pady=1)
 
         cell_id = ctk.CTkFrame(frame_cliente_grid, fg_color="transparent")
@@ -132,10 +132,10 @@ class PosTab:
         pais = self.app.config.get("pais_operacion", "Otro / Ninguno (Solo local)") if self.app.config else "Otro"
         lbl_id_text = obtener_label_id_fiscal(pais)
 
-        self.app.lbl_cliente_identificacion = ctk.CTkLabel(cell_id, text=lbl_id_text, font=("Segoe UI", 8, "bold"), text_color=("#64748B", "#94A3B8"))
+        self.app.lbl_cliente_identificacion = ctk.CTkLabel(cell_id, text=lbl_id_text, font=("Segoe UI", 10, "bold"), text_color=("#64748B", "#94A3B8"))
         self.app.lbl_cliente_identificacion.pack(anchor=tk.W)
 
-        self.app.entry_cliente_identificacion = ctk.CTkEntry(cell_id, font=("Segoe UI", 9), fg_color=("#F8FAFC", "#0F172A"), text_color=("#0F172A", "#F8FAFC"), border_color=("#D1D5DB", "#475569"), height=28, corner_radius=5)
+        self.app.entry_cliente_identificacion = ctk.CTkEntry(cell_id, font=("Segoe UI", 10), fg_color=("#F8FAFC", "#0F172A"), text_color=("#0F172A", "#F8FAFC"), border_color=("#D1D5DB", "#475569"), height=28, corner_radius=5)
         self.app.entry_cliente_identificacion.pack(fill=tk.X, pady=1)
         
         self.app.entry_cliente_identificacion.bind("<Return>", self.pos_buscar_cliente_por_id)
@@ -150,14 +150,14 @@ class PosTab:
         frame_extras = ctk.CTkFrame(frame_total, fg_color="transparent")
         frame_extras.pack(side=tk.TOP, fill=tk.X, pady=(0, 10))
         
-        ctk.CTkLabel(frame_extras, text="Descuento ($):", font=("Segoe UI", 9), text_color="#1E293B").pack(side=tk.LEFT)
-        self.entry_descuento = ctk.CTkEntry(frame_extras, width=70, font=("Segoe UI", 9), height=26, corner_radius=4)
+        ctk.CTkLabel(frame_extras, text="Descuento ($):", font=("Segoe UI", 10), text_color="#1E293B").pack(side=tk.LEFT)
+        self.entry_descuento = ctk.CTkEntry(frame_extras, width=70, font=("Segoe UI", 10), height=26, corner_radius=4)
         self.entry_descuento.pack(side=tk.LEFT, padx=5)
         self.entry_descuento.insert(0, "0")
         self.entry_descuento.bind("<KeyRelease>", lambda e: self.pos_actualizar_tabla_carrito())
 
-        ctk.CTkLabel(frame_extras, text="Propina ($):", font=("Segoe UI", 9), text_color="#1E293B").pack(side=tk.LEFT, padx=(10,0))
-        self.entry_propina = ctk.CTkEntry(frame_extras, width=70, font=("Segoe UI", 9), height=26, corner_radius=4)
+        ctk.CTkLabel(frame_extras, text="Propina ($):", font=("Segoe UI", 10), text_color="#1E293B").pack(side=tk.LEFT, padx=(10,0))
+        self.entry_propina = ctk.CTkEntry(frame_extras, width=70, font=("Segoe UI", 10), height=26, corner_radius=4)
         self.entry_propina.pack(side=tk.LEFT, padx=5)
         self.entry_propina.insert(0, "0")
         self.entry_propina.bind("<KeyRelease>", lambda e: self.pos_actualizar_tabla_carrito())
@@ -166,26 +166,26 @@ class PosTab:
         frame_total_botones = ctk.CTkFrame(frame_total, fg_color="transparent")
         frame_total_botones.pack(side=tk.TOP, fill=tk.X)
 
-        self.lbl_total_pos = ctk.CTkLabel(frame_total_botones, text="TOTAL: $0", font=("Segoe UI", 15, "bold"), text_color=("#0F172A", "#F8FAFC"))
+        self.lbl_total_pos = ctk.CTkLabel(frame_total_botones, text="TOTAL: $0", font=("Segoe UI", 16, "bold"), text_color=("#0F172A", "#F8FAFC"))
         self.lbl_total_pos.pack(side=tk.LEFT, padx=5)
 
-        btn_dividir = ctk.CTkButton(frame_total_botones, text="Dividir", font=("Segoe UI", 9, "bold"), fg_color="#38BDF8", hover_color="#0EA5E9", text_color="white", width=65, height=30, corner_radius=6, command=self.pos_dividir_cuenta)
+        btn_dividir = ctk.CTkButton(frame_total_botones, text="Dividir", font=("Segoe UI", 10, "bold"), fg_color="#38BDF8", hover_color="#0EA5E9", text_color="white", width=65, height=30, corner_radius=6, command=self.pos_dividir_cuenta)
         btn_dividir.pack(side=tk.LEFT, padx=8)
 
-        btn_cortesia = ctk.CTkButton(frame_total_botones, text="Cortesía", font=("Segoe UI", 9, "bold"), fg_color="#F59E0B", hover_color="#D97706", text_color="white", width=70, height=30, corner_radius=6, command=self.pos_registrar_cortesia)
+        btn_cortesia = ctk.CTkButton(frame_total_botones, text="Cortesía", font=("Segoe UI", 10, "bold"), fg_color="#F59E0B", hover_color="#D97706", text_color="white", width=70, height=30, corner_radius=6, command=self.pos_registrar_cortesia)
         btn_cortesia.pack(side=tk.LEFT, padx=5)
 
-        btn_quitar = ctk.CTkButton(frame_total_botones, text="Quitar", font=("Segoe UI", 9, "bold"), fg_color="#EF4444", hover_color="#DC2626", text_color="white", width=65, height=32, corner_radius=6, command=self.pos_quitar_del_carrito)
+        btn_quitar = ctk.CTkButton(frame_total_botones, text="Quitar", font=("Segoe UI", 10, "bold"), fg_color="#EF4444", hover_color="#DC2626", text_color="white", width=65, height=32, corner_radius=6, command=self.pos_quitar_del_carrito)
         btn_quitar.pack(side=tk.RIGHT, padx=5)
 
-        btn_registrar_venta = ctk.CTkButton(frame_total_botones, text="Registrar", font=("Segoe UI", 11, "bold"), fg_color="#10B981", hover_color="#059669", text_color="white", width=80, height=32, corner_radius=6, command=self.pos_procesar_venta)
+        btn_registrar_venta = ctk.CTkButton(frame_total_botones, text="Registrar", font=("Segoe UI", 10, "bold"), fg_color="#10B981", hover_color="#059669", text_color="white", width=80, height=32, corner_radius=6, command=self.pos_procesar_venta)
         btn_registrar_venta.pack(side=tk.RIGHT, padx=5)
 
         # Selector de Método de Pago
-        ctk.CTkLabel(frame_total_botones, text="Pago:", font=("Segoe UI", 9, "bold"), text_color=("#475569", "#CBD5E1")).pack(side=tk.RIGHT, padx=(5, 2))
+        ctk.CTkLabel(frame_total_botones, text="Pago:", font=("Segoe UI", 10, "bold"), text_color=("#475569", "#CBD5E1")).pack(side=tk.RIGHT, padx=(5, 2))
         metodos = ["Efectivo", "Transferencia", "Tarjeta Débito", "Tarjeta Crédito", "Billetera Virtual", "Mixto", "Fiado"]
         
-        self.combo_pago = ctk.CTkComboBox(frame_total_botones, values=metodos, font=("Segoe UI", 9), height=28, width=110, corner_radius=6, command=self.on_metodo_pago_changed)
+        self.combo_pago = ctk.CTkComboBox(frame_total_botones, values=metodos, font=("Segoe UI", 10), height=28, width=110, corner_radius=6, command=self.on_metodo_pago_changed)
         self.combo_pago.pack(side=tk.RIGHT, padx=2)
         self.combo_pago.set("Efectivo")
 
@@ -543,10 +543,30 @@ class PosTab:
                         componentes = cursor.fetchall()
                         for comp_id, comp_cant in componentes:
                             cant_total_deducir = comp_cant * item["cantidad"]
+                            
+                            # Obtener stock anterior del componente
+                            cursor.execute("SELECT stock FROM productos WHERE id = ?", (comp_id,))
+                            comp_res = cursor.fetchone()
+                            comp_stock_ant = comp_res[0] if comp_res else 0
+                            comp_stock_nuevo = comp_stock_ant - cant_total_deducir
+                            
                             cursor.execute("UPDATE productos SET stock = stock - ? WHERE id = ?", (cant_total_deducir, comp_id))
+                            
+                            # Registrar Kardex para el componente
+                            database.registrar_movimiento_inventario(
+                                cursor, comp_id, 'Salida', -cant_total_deducir, 
+                                f"Combo: {item['nombre']} (Venta)", comp_stock_ant, comp_stock_nuevo
+                            )
                     else:
                         # Producto normal
+                        stock_nuevo = stock_actual - item["cantidad"]
                         cursor.execute("UPDATE productos SET stock = stock - ? WHERE id = ?", (item["cantidad"], item["id"]))
+                        
+                        # Registrar Kardex para el producto
+                        database.registrar_movimiento_inventario(
+                            cursor, item["id"], 'Salida', -item["cantidad"], 
+                            'Venta', stock_actual, stock_nuevo
+                        )
 
                 except Exception as e:
                     errores.append(f"{item['nombre']}: {str(e)}")
@@ -680,7 +700,7 @@ class PosTab:
         win.geometry("350x200")
         win.grab_set()
 
-        ctk.CTkLabel(win, text="¿Qué deseas hacer con el ticket?", font=("Segoe UI", 14, "bold")).pack(pady=20)
+        ctk.CTkLabel(win, text="¿Qué deseas hacer con el ticket?", font=("Segoe UI", 12, "bold")).pack(pady=20)
         
         def imprimir():
             impresora = self.app.config.get("impresora_ticket", "")
